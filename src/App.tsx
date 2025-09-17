@@ -1,7 +1,15 @@
 import React from 'react';
+import { useState } from 'react';
 import { Dumbbell, Heart, Target } from 'lucide-react';
+import LoginPage from './components/LoginPage';
 
 function App() {
+  const [currentPage, setCurrentPage] = useState<'home' | 'login'>('home');
+
+  if (currentPage === 'login') {
+    return <LoginPage onBack={() => setCurrentPage('home')} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl mx-auto text-center space-y-12">
@@ -27,7 +35,10 @@ function App() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-lg mx-auto">
-          <button className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50">
+          <button 
+            onClick={() => setCurrentPage('login')}
+            className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50"
+          >
             Login
           </button>
           
