@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, LogOut, Dumbbell, Target, TrendingUp, Calendar, Settings } from 'lucide-react';
 import { signOut, getCurrentUser } from '../lib/supabase';
+import WellnessCalculator from './WellnessCalculator';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -9,6 +10,7 @@ interface DashboardProps {
 function Dashboard({ onLogout }: DashboardProps) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<'dashboard' | 'calculator'>('dashboard');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -50,6 +52,30 @@ function Dashboard({ onLogout }: DashboardProps) {
             </div>
             
             <div className="flex items-center gap-4">
+              <nav className="flex items-center gap-4">
+                <button
+                  onClick={() => setActiveView('dashboard')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    activeView === 'dashboard'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                  }`}
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => setActiveView('calculator')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    activeView === 'calculator'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                  }`}
+                >
+                  Wellness Calculator
+                </button>
+              </nav>
+              
+            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-gray-700">
                 <User className="w-5 h-5" />
                 <span className="font-medium">
@@ -68,6 +94,12 @@ function Dashboard({ onLogout }: DashboardProps) {
         </div>
       </header>
 
+      {/* Conditional Content */}
+      {activeView === 'calculator' ? (
+        <main className="py-8">
+          <WellnessCalculator />
+        </main>
+      ) : (
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
@@ -189,6 +221,7 @@ function Dashboard({ onLogout }: DashboardProps) {
           </div>
         </div>
       </main>
+      )}
     </div>
   );
 }
