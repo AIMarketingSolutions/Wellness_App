@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
-import { signIn } from '../lib/supabase';
+import { signIn, resendConfirmationEmail } from '../lib/supabase';
 
 interface LoginPageProps {
   onBack: () => void;
@@ -12,6 +12,9 @@ function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showResendButton, setShowResendButton] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +27,10 @@ function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
       if (error) {
         if (error.message.includes('Email not confirmed')) {
           setError('Please check your email inbox (including spam/junk folders) and click the confirmation link before logging in.');
+          setShowResendButton(true);
         } else {
           setError(error.message);
+          setShowResendButton(false);
         }
       } else if (data.user) {
         onLoginSuccess();
@@ -34,6 +39,31 @@ function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) {
+      setError('Please enter your email address first.');
+      return;
+    }
+
+    setResendLoading(true);
+    setResendMessage(null);
+
+    try {
+      const { error } = await resendConfirmationEmail(email);
+      
+      if (error) {
+        setError(`Failed to resend confirmation email: ${error.message}`);
+      } else {
+        setResendMessage('Confirmation email sent! Please check your inbox and spam folder.');
+        setError(null);
+      }
+    } catch (err) {
+      setError('An unexpected error occurred while resending the confirmation email.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -68,6 +98,16 @@ function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
               <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl">
                 <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
                 <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
+            {/* Resend Confirmation Message */}
+            {resendMessage && (
+              <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-2xl">
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+                <p className="text-sm text-green-700">{resendMessage}</p>
               </div>
             )}
 
@@ -132,6 +172,27 @@ function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
                 )}
               </button>
             </div>
+
+            {/* Resend Confirmation Button */}
+            {showResendButton && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={handleResendConfirmation}
+                  disabled={resendLoading || !email}
+                  className="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-medium text-base rounded-2xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none transition-all duration-200 ease-out focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-opacity-50 flex items-center justify-center gap-2"
+                >
+                  {resendLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Resend Confirmation Email'
+                  )}
+                </button>
+              </div>
+            )}
           </form>
 
           {/* Additional Links */}
