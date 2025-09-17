@@ -90,6 +90,7 @@ function Dashboard({ onLogout }: DashboardProps) {
                 <span className="font-medium">Logout</span>
               </button>
             </div>
+            </div>
           </div>
         </div>
       </header>
