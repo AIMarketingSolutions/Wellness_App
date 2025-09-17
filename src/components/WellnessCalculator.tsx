@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, User, Activity, Target, Utensils, Droplets, Dumbbell, Pill } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import MealPlanning from './MealPlanning';
 
 interface UserProfile {
   id?: string;
@@ -494,8 +495,28 @@ function WellnessCalculator() {
       {/* Placeholder tabs */}
       {activeTab === 'meal-planning' && (
         <div className="bg-white rounded-2xl shadow-sm p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Meal Planning</h2>
-          <p className="text-gray-600">Meal planning functionality will be implemented here.</p>
+          {results ? (
+            <MealPlanning
+              userProfile={profile}
+              teeCalories={results.tee}
+              proteinPercentage={results.proteinPercentage}
+              carbPercentage={results.carbPercentage}
+              fatPercentage={results.fatPercentage}
+            />
+          ) : (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Complete Your Profile First</h2>
+              <p className="text-gray-600 mb-6">
+                Please complete your profile setup and calculations before accessing meal planning.
+              </p>
+              <button
+                onClick={() => setActiveTab('profile')}
+                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                Go to Profile Setup
+              </button>
+            </div>
+          )}
         </div>
       )}
 
