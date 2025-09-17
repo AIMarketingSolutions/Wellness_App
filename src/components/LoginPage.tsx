@@ -1,18 +1,36 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Mail, Lock } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { signIn } from '../lib/supabase';
 
 interface LoginPageProps {
   onBack: () => void;
+  onLoginSuccess: () => void;
 }
 
-function LoginPage({ onBack }: LoginPageProps) {
+function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt:', { email, password });
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { data, error } = await signIn(email, password);
+      
+      if (error) {
+        setError(error.message);
+      } else if (data.user) {
+        onLoginSuccess();
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,6 +59,14 @@ function LoginPage({ onBack }: LoginPageProps) {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Error Message */}
+            {error && (
+              <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
             {/* Email Field */}
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -57,6 +83,7 @@ function LoginPage({ onBack }: LoginPageProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
                   placeholder="Enter your email address"
+                  disabled={loading}
                   required
                 />
               </div>
@@ -78,6 +105,7 @@ function LoginPage({ onBack }: LoginPageProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
                   placeholder="Enter your password"
+                  disabled={loading}
                   required
                 />
               </div>
@@ -87,9 +115,17 @@ function LoginPage({ onBack }: LoginPageProps) {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50"
+                disabled={loading}
+                className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50 flex items-center justify-center gap-2"
               >
-                Login
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Login'
+                )}
               </button>
             </div>
           </form>

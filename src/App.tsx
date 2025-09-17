@@ -1,18 +1,76 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dumbbell, Heart, Target } from 'lucide-react';
 import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignupPage';
+import Dashboard from './components/Dashboard';
+import { supabase } from './lib/supabase';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'dashboard'>('home');
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      if (user) {
+        setCurrentPage('dashboard');
+      }
+      setLoading(false);
+    };
+
+    checkUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        setCurrentPage('dashboard');
+      } else {
+        setCurrentPage('home');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLoginSuccess = () => {
+    setCurrentPage('dashboard');
+  };
+
+  const handleSignupSuccess = () => {
+    setCurrentPage('dashboard');
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setCurrentPage('home');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (currentPage === 'login') {
-    return <LoginPage onBack={() => setCurrentPage('home')} />;
+    return <LoginPage onBack={() => setCurrentPage('home')} onLoginSuccess={handleLoginSuccess} />;
   }
 
   if (currentPage === 'signup') {
-    return <SignupPage onBack={() => setCurrentPage('home')} />;
+    return <SignupPage onBack={() => setCurrentPage('home')} onSignupSuccess={handleSignupSuccess} />;
+  }
+
+  if (currentPage === 'dashboard') {
+    return <Dashboard onLogout={handleLogout} />;
   }
 
   return (
