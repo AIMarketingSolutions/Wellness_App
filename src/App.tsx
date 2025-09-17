@@ -2,12 +2,17 @@ import React from 'react';
 import { useState } from 'react';
 import { Dumbbell, Heart, Target } from 'lucide-react';
 import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignupPage';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup'>('home');
 
   if (currentPage === 'login') {
     return <LoginPage onBack={() => setCurrentPage('home')} />;
+  }
+
+  if (currentPage === 'signup') {
+    return <SignupPage onBack={() => setCurrentPage('home')} />;
   }
 
   return (
@@ -42,7 +47,9 @@ function App() {
             Login
           </button>
           
-          <button className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-opacity-50">
+          <button 
+            onClick={() => setCurrentPage('signup')}
+            className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-opacity-50">
             Signup
           </button>
         </div>
