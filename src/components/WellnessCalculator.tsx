@@ -376,10 +376,10 @@ function WellnessCalculator() {
           <div className="mt-8">
             <button
               onClick={saveProfile}
-              disabled={loading}
+              disabled={loading || !user?.id}
               className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Saving...' : 'Save Profile & Calculate'}
+              {loading ? 'Saving...' : !user?.id ? 'Please log in to save profile' : 'Save Profile & Calculate'}
             </button>
           </div>
         </div>

@@ -25,7 +25,11 @@ function SignupPage({ onBack, onSignupSuccess }: SignupPageProps) {
       const { data, error } = await signUp(email, password, name);
       
       if (error) {
-        setError(error.message);
+        if (error.message.includes('Email not confirmed')) {
+          setError('Please check your email inbox (including spam/junk folders) and click the confirmation link to activate your account.');
+        } else {
+          setError(error.message);
+        }
       } else if (data.user) {
         setSuccess(true);
         // Auto-login after successful signup

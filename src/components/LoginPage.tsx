@@ -22,7 +22,11 @@ function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
       const { data, error } = await signIn(email, password);
       
       if (error) {
-        setError(error.message);
+        if (error.message.includes('Email not confirmed')) {
+          setError('Please check your email inbox (including spam/junk folders) and click the confirmation link before logging in.');
+        } else {
+          setError(error.message);
+        }
       } else if (data.user) {
         onLoginSuccess();
       }
