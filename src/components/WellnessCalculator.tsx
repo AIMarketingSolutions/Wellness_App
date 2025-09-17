@@ -68,11 +68,22 @@ function WellnessCalculator() {
   };
 
   const saveProfile = async () => {
+    if (!user?.id) {
+      console.error('No authenticated user found');
+      return;
+    }
+
     setLoading(true);
     try {
+      // Ensure user_id is set to the authenticated user's ID
+      const profileToSave = {
+        ...profile,
+        user_id: user.id
+      };
+
       const { data, error } = await supabase
         .from('user_profiles')
-        .upsert(profile, { onConflict: 'user_id' })
+        .upsert(profileToSave, { onConflict: 'user_id' })
         .select()
         .single();
 
