@@ -92,7 +92,7 @@ function App() {
           </h1>
           
           <p className="text-lg md:text-xl text-gray-600 max-w-xl mx-auto leading-relaxed">
-            Transform your health journey with personalized nutrition and fitness coaching — complete with custom meal plans, tailored exercise routines, and expert guidance designed to deliver lasting results.
+            Transform your health journey with personalized nutrition and fitness coaching, featuring customized meal plans, tailored exercise routines, and expert guidance designed to deliver lasting results.
           </p>
         </div>
 
