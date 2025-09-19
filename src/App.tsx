@@ -134,7 +134,7 @@ function App() {
             </div>
             <h3 className="text-xl font-semibold text-gray-800">Expert Guidance</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              Work with certified nutritionists and fitness professionals to achieve optimal results.
+              Work with a Registered Nutritional Consulting Practitioner and certified fitness professionals to achieve optimal results.
             </p>
           </div>
 
