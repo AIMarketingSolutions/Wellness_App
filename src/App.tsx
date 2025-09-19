@@ -122,7 +122,7 @@ function App() {
             </div>
             <h3 className="text-xl font-semibold text-gray-800">Personalized Plans</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              Customized nutrition and fitness programs tailored to your unique goals and lifestyle.
+              Personalized nutrition and fitness plans designed just for you, aligning with your individual goals and lifestyle needs!
             </p>
           </div>
 
@@ -146,7 +146,7 @@ function App() {
             </div>
             <h3 className="text-xl font-semibold text-gray-800">Proven Results</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              Join thousands of satisfied clients who have transformed their health and fitness.
+              Transform your health and fitness like thousands before you—join a community of success and reach your goals today!
             </p>
           </div>
         </div>
