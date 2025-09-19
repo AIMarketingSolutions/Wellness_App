@@ -146,7 +146,7 @@ function App() {
             </div>
             <h3 className="text-xl font-semibold text-gray-800">Proven Results</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              Transform your health and fitness like thousands before you—join a community of success and reach your goals today!
+              Transform your health and fitness like thousands before you—join a community of success and achieve your lifestyle goals today!
             </p>
           </div>
         </div>
