@@ -20,6 +20,9 @@ interface UserProfile {
   custom_protein_percentage?: number;
   custom_carb_percentage?: number;
   custom_fat_percentage?: number;
+  weight_loss_goal?: 'maintain' | 'lose_0_5' | 'lose_1' | 'lose_1_5' | 'lose_2';
+  deficit_method?: 'diet_only' | 'exercise_only' | 'combined';
+  target_weight?: number;
 }
 
 interface BodyFatInputs {
@@ -38,6 +41,9 @@ interface CalculationResults {
   proteinPercentage: number;
   carbPercentage: number;
   fatPercentage: number;
+  dailyCalorieTarget: number;
+  weeklyDeficit: number;
+  dailyDeficit: number;
 }
 
 function WellnessCalculator() {
@@ -53,7 +59,10 @@ function WellnessCalculator() {
     hip_inches: 36,
     activity_level: 'moderately_active',
     blood_type: 'O',
-    metabolic_profile: 'medium_oxidizer'
+    metabolic_profile: 'medium_oxidizer',
+    weight_loss_goal: 'maintain',
+    deficit_method: 'combined',
+    target_weight: 154
   });
   const [bodyFatInputs, setBodyFatInputs] = useState<BodyFatInputs>({
     gender: 'male',
@@ -166,6 +175,24 @@ function WellnessCalculator() {
       bodyFatPercentage = 1.20 * bmi + 0.23 * profileData.age - 5.4;
     }
 
+    // Calculate weight loss targets
+    const weightLossDeficits = {
+      maintain: 0,
+      lose_0_5: 1750, // 0.5 lbs/week = 1,750 cal/week
+      lose_1: 3500,   // 1 lb/week = 3,500 cal/week
+      lose_1_5: 5250, // 1.5 lbs/week = 5,250 cal/week
+      lose_2: 7000    // 2 lbs/week = 7,000 cal/week
+    };
+
+    const weeklyDeficit = weightLossDeficits[profileData.weight_loss_goal || 'maintain'];
+    const dailyDeficit = weeklyDeficit / 7;
+    let dailyCalorieTarget = Math.round(tee - dailyDeficit);
+
+    // Apply minimum calorie safety limits
+    const minCalories = profileData.gender === 'male' ? 1500 : 1200;
+    if (dailyCalorieTarget < minCalories) {
+      dailyCalorieTarget = minCalories;
+    }
     // Get metabolic profile macros
     const metabolicMacros = {
       fast_oxidizer: { protein: 25, carb: 35, fat: 40 },
@@ -195,6 +222,9 @@ function WellnessCalculator() {
       proteinPercentage: macros.protein,
       carbPercentage: macros.carb,
       fatPercentage: macros.fat
+      dailyCalorieTarget,
+      weeklyDeficit,
+      dailyDeficit: Math.round(dailyDeficit)
     };
 
     setResults(calculationResults);
