@@ -428,33 +428,15 @@ function WellnessCalculator() {
 
           {/* Body Fat Calculation */}
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Body Composition Analysis</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Body Fat Analysis</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-orange-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-orange-800 mb-2">Body Mass Index (BMI)</h3>
-                <p className="text-3xl font-bold text-orange-600">{results.bmi}</p>
-                <p className="text-sm text-orange-700">kg/m²</p>
-              </div>
-              
+            <div className="flex justify-center">
               <div className="bg-red-50 p-6 rounded-xl">
                 <h3 className="text-lg font-semibold text-red-800 mb-2">Body Fat Percentage</h3>
                 <p className="text-3xl font-bold text-red-600">{results.bodyFatPercentage}%</p>
                 <p className="text-sm text-red-700">estimated body fat</p>
+                <p className="text-xs text-red-600 mt-2">Based on your personal profile</p>
               </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-semibold text-gray-800 mb-2">Formula Used:</h4>
-              <p className="text-sm text-gray-600">
-                BMI = Weight(kg) / (Height(m) × Height(m))
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                {profile.gender === 'male' 
-                  ? 'Men: Body Fat % = 1.20 × BMI + 0.23 × Age - 16.2'
-                  : 'Women: Body Fat % = 1.20 × BMI + 0.23 × Age - 5.4'
-                }
-              </p>
             </div>
           </div>
 

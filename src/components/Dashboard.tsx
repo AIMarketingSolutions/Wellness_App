@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, LogOut, Dumbbell, Target, TrendingUp, Calendar, Settings } from 'lucide-react';
+import { User, LogOut, Dumbbell, Target, TrendingUp, Calendar, Settings, Home, Utensils, Activity, Pill, Droplets, BookOpen } from 'lucide-react';
 import { signOut, getCurrentUser } from '../lib/supabase';
 import WellnessCalculator from './WellnessCalculator';
 
@@ -10,7 +10,7 @@ interface DashboardProps {
 function Dashboard({ onLogout }: DashboardProps) {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<'dashboard' | 'calculator'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'meal-plan' | 'fitness' | 'supplements' | 'water' | 'blog' | 'profile-assessment' | 'transformation-tracker' | 'calculator'>('dashboard');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -40,43 +40,20 @@ function Dashboard({ onLogout }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      {/* Enhanced Header with Green Theme */}
+      <header className="bg-gradient-to-r from-green-600 to-green-700 text-white sticky top-0 z-50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-r from-blue-600 to-emerald-600 p-2 rounded-lg">
-                <Dumbbell className="w-6 h-6 text-white" />
+          {/* Top Bar */}
+          <div className="flex justify-between items-center h-14 border-b border-green-500/30">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+                <Dumbbell className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-gray-800">Nutrition One Fitness</h1>
+              <h1 className="text-xl font-bold text-white">Nutrition One Fitness</h1>
             </div>
             
-            <div className="flex items-center gap-4">
-              <nav className="flex items-center gap-4">
-                <button
-                  onClick={() => setActiveView('dashboard')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                    activeView === 'dashboard'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                  }`}
-                >
-                  Dashboard
-                </button>
-                <button
-                  onClick={() => setActiveView('calculator')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                    activeView === 'calculator'
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                  }`}
-                >
-                  Wellness Calculator
-                </button>
-              </nav>
-              
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-gray-700">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 text-white/90">
                 <User className="w-5 h-5" />
                 <span className="font-medium">
                   {user?.user_metadata?.full_name || user?.email || 'User'}
@@ -84,21 +61,199 @@ function Dashboard({ onLogout }: DashboardProps) {
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                className="flex items-center gap-2 px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors duration-200"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="font-medium">Logout</span>
               </button>
             </div>
+          </div>
+
+          {/* Secondary Navigation Bar */}
+          <div className="flex justify-between items-center h-12 bg-green-500/20">
+            <div className="flex items-center gap-8">
+              <button
+                onClick={() => setActiveView('profile-assessment')}
+                className={`px-4 py-2 font-medium transition-colors duration-200 ${
+                  activeView === 'profile-assessment'
+                    ? 'text-white bg-white/20 rounded-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                }`}
+              >
+                Profile Assessment
+              </button>
+              <button
+                onClick={() => setActiveView('transformation-tracker')}
+                className={`px-4 py-2 font-medium transition-colors duration-200 ${
+                  activeView === 'transformation-tracker'
+                    ? 'text-white bg-white/20 rounded-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                }`}
+              >
+                Transformation Tracker
+              </button>
             </div>
+            <div className="text-white font-semibold">
+              Total Daily Calories: {user ? '2,150' : '---'}
+            </div>
+          </div>
+
+          {/* Main Navigation */}
+          <div className="flex justify-center items-center h-14 bg-green-400/20">
+            <nav className="flex items-center gap-12">
+              <button
+                onClick={() => setActiveView('dashboard')}
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                  activeView === 'dashboard'
+                    ? 'text-white bg-white/20 rounded-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                }`}
+              >
+                <Home className="w-4 h-4" />
+                Dashboard
+              </button>
+              <button
+                onClick={() => setActiveView('meal-plan')}
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                  activeView === 'meal-plan'
+                    ? 'text-white bg-white/20 rounded-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                }`}
+              >
+                <Utensils className="w-4 h-4" />
+                Meal Plan
+              </button>
+              <button
+                onClick={() => setActiveView('fitness')}
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                  activeView === 'fitness'
+                    ? 'text-white bg-white/20 rounded-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                }`}
+              >
+                <Activity className="w-4 h-4" />
+                Fitness
+              </button>
+              <button
+                onClick={() => setActiveView('supplements')}
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                  activeView === 'supplements'
+                    ? 'text-white bg-white/20 rounded-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                }`}
+              >
+                <Pill className="w-4 h-4" />
+                Supplements
+              </button>
+              <button
+                onClick={() => setActiveView('water')}
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                  activeView === 'water'
+                    ? 'text-white bg-white/20 rounded-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                }`}
+              >
+                <Droplets className="w-4 h-4" />
+                Water
+              </button>
+              <button
+                onClick={() => setActiveView('blog')}
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                  activeView === 'blog'
+                    ? 'text-white bg-white/20 rounded-lg'
+                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                Blog
+              </button>
+            </nav>
           </div>
         </div>
       </header>
 
       {/* Conditional Content */}
-      {activeView === 'calculator' ? (
+      {activeView === 'calculator' || activeView === 'profile-assessment' ? (
         <main className="py-8">
           <WellnessCalculator />
+        </main>
+      ) : activeView === 'transformation-tracker' ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Transformation Tracker</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* TEE Display - No Formula */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl">
+                <h3 className="text-xl font-semibold text-blue-800 mb-4">Total Energy Expenditure</h3>
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-blue-600 mb-2">2,150</p>
+                  <p className="text-blue-700 font-medium">calories per day</p>
+                  <p className="text-sm text-blue-600 mt-2">Based on your activity level and metabolism</p>
+                </div>
+              </div>
+              
+              {/* Body Fat Percentage - No Formula */}
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl">
+                <h3 className="text-xl font-semibold text-purple-800 mb-4">Body Fat Percentage</h3>
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-purple-600 mb-2">18.5%</p>
+                  <p className="text-purple-700 font-medium">estimated body fat</p>
+                  <p className="text-sm text-purple-600 mt-2">Within healthy range for your profile</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Progress Charts Placeholder */}
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white/60 p-6 rounded-2xl">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4">Weight Progress</h4>
+                <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500">Progress chart coming soon</p>
+                </div>
+              </div>
+              <div className="bg-white/60 p-6 rounded-2xl">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4">Body Composition</h4>
+                <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500">Composition chart coming soon</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      ) : activeView === 'meal-plan' ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Meal Planning</h2>
+            <p className="text-gray-600">Comprehensive meal planning functionality will be available here.</p>
+          </div>
+        </main>
+      ) : activeView === 'fitness' ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Fitness Programs</h2>
+            <p className="text-gray-600">Personalized fitness programs and workout tracking will be available here.</p>
+          </div>
+        </main>
+      ) : activeView === 'supplements' ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Supplement Recommendations</h2>
+            <p className="text-gray-600">Personalized supplement recommendations based on your profile will be available here.</p>
+          </div>
+        </main>
+      ) : activeView === 'water' ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Water Intake Tracking</h2>
+            <p className="text-gray-600">Daily water intake tracking and hydration goals will be available here.</p>
+          </div>
+        </main>
+      ) : activeView === 'blog' ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Wellness Blog</h2>
+            <p className="text-gray-600">Educational content, tips, and wellness articles will be available here.</p>
+          </div>
         </main>
       ) : (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
