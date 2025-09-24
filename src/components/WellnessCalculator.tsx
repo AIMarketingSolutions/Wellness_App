@@ -109,12 +109,16 @@ function WellnessCalculator() {
     const heightInMeters = profileData.height_cm / 100;
     const bmi = profileData.weight_kg / (heightInMeters * heightInMeters);
 
-    // Calculate REE using Harris-Benedict equation
-    let ree: number;
+    // Convert weight and height to imperial units for BMR calculation
+    const weightInPounds = profileData.weight_kg * 2.20462;
+    const heightInInches = profileData.height_cm * 0.393701;
+
+    // Calculate BMR using gender-specific formulas
+    let bmr: number;
     if (profileData.gender === 'male') {
-      ree = 66.437 + (13.752 * profileData.weight_kg) + (5.003 * profileData.height_cm) - (6.755 * profileData.age);
+      bmr = 66.47 + (6.24 * weightInPounds) + (12.7 * heightInInches) - (6.76 * profileData.age);
     } else {
-      ree = 655.096 + (9.563 * profileData.weight_kg) + (1.85 * profileData.height_cm) - (4.676 * profileData.age);
+      bmr = 65.51 + (4.34 * weightInPounds) + (4.7 * heightInInches) - (4.7 * profileData.age);
     }
 
     // Calculate TEE based on activity level
@@ -125,7 +129,7 @@ function WellnessCalculator() {
       very_active: 1.725,
       extremely_active: 1.9
     };
-    const tee = ree * activityFactors[profileData.activity_level];
+    const tee = bmr * activityFactors[profileData.activity_level];
 
     // Calculate body fat percentage
     let bodyFatPercentage: number;
@@ -144,7 +148,7 @@ function WellnessCalculator() {
     const macros = metabolicMacros[profileData.metabolic_profile];
 
     const calculationResults: CalculationResults = {
-      ree: Math.round(ree),
+      ree: Math.round(bmr),
       tee: Math.round(tee),
       bmi: Math.round(bmi * 10) / 10,
       bodyFatPercentage: Math.round(bodyFatPercentage * 10) / 10,
@@ -161,7 +165,7 @@ function WellnessCalculator() {
     // Save TEE calculation
     await supabase.from('tee_calculations').insert({
       user_id: userId,
-      ree_calories: calculations.ree,
+      ree_calories: calculations.ree, // This now represents BMR
       activity_factor: getActivityFactor(profile.activity_level),
       tee_calories: calculations.tee
     });
@@ -390,13 +394,22 @@ function WellnessCalculator() {
         <div className="space-y-6">
           {/* TEE Calculation */}
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Total Energy Expenditure (TEE)</h2>
+            <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Total Energy Expenditure (TEE) Calculator</h2>
+            
+            {/* Step-by-step calculation display */}
+            <div className="mb-6 p-4 bg-[#F8F9FA] rounded-lg border border-gray-100">
+              <h4 className="font-semibold text-[#2C3E50] mb-2">Calculation Steps:</h4>
+              <div className="text-sm text-gray-700 space-y-1">
+                <p><strong>Step 1:</strong> BMR = {results.ree} calories/day (using gender-specific formula)</p>
+                <p><strong>Step 2:</strong> TEE = BMR × {getActivityFactor(profile.activity_level)} (activity multiplier) = <strong>{results.tee} calories/day</strong></p>
+              </div>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-[#52C878]/5 p-6 rounded-xl border border-[#52C878]/20">
-                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Resting Energy Expenditure (REE)</h3>
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Basal Metabolic Rate (BMR)</h3>
                 <p className="text-3xl font-bold text-[#52C878]">{results.ree}</p>
-                <p className="text-sm text-gray-600">calories/day at rest</p>
+                <p className="text-sm text-gray-600">calories/day (gender-specific)</p>
               </div>
               
               <div className="bg-[#4A90E2]/5 p-6 rounded-xl border border-[#4A90E2]/20">
@@ -410,6 +423,20 @@ function WellnessCalculator() {
                 <p className="text-3xl font-bold bg-gradient-to-r from-[#52C878] to-[#4A90E2] bg-clip-text text-transparent">{results.tee}</p>
                 <p className="text-sm text-gray-600">calories/day total</p>
               </div>
+            </div>
+            
+            {/* Formula explanation */}
+            <div className="mt-6 p-4 bg-[#52C878]/5 rounded-lg border border-[#52C878]/20">
+              <h4 className="font-semibold text-[#2C3E50] mb-2">Gender-Specific BMR Formula Used:</h4>
+              <p className="text-sm text-gray-600">
+                {profile.gender === 'male' 
+                  ? 'Men: 66.47 + (6.24 × weight in lbs) + (12.7 × height in inches) - (6.76 × age)'
+                  : 'Women: 65.51 + (4.34 × weight in lbs) + (4.7 × height in inches) - (4.7 × age)'
+                }
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Your measurements: {(profile.weight_kg * 2.20462).toFixed(1)} lbs, {(profile.height_cm * 0.393701).toFixed(1)} inches, {profile.age} years
+              </p>
             </div>
           </div>
 
