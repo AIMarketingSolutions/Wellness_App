@@ -544,6 +544,233 @@ function WellnessCalculator() {
         </div>
       )}
 
+      {/* Body Fat Calculator Tab */}
+      {activeTab === 'body-fat' && (
+        <div className="bg-white rounded-2xl shadow-sm p-8">
+          <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Body Fat Percentage Calculator</h2>
+          
+          {/* Educational Message */}
+          <div className="mb-8 p-6 bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 rounded-xl border border-[#52C878]/20">
+            <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Why Track Body Fat Percentage?</h3>
+            <p className="text-gray-700 mb-2">
+              Track your body composition changes over time. This helps determine whether weight loss comes from fat reduction (good) versus muscle or water loss (concerning).
+            </p>
+            <p className="text-sm text-gray-600">
+              Body fat percentage is a more accurate indicator of health and fitness progress than weight alone.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Input Form */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-[#2C3E50]">Measurements</h3>
+              
+              {/* Unit Toggle */}
+              <div className="flex items-center gap-4 p-4 bg-[#F8F9FA] rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Units:</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setBodyFatInputs({ ...bodyFatInputs, unit: 'imperial' })}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      bodyFatInputs.unit === 'imperial'
+                        ? 'bg-[#52C878] text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    Imperial (inches)
+                  </button>
+                  <button
+                    onClick={() => setBodyFatInputs({ ...bodyFatInputs, unit: 'metric' })}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      bodyFatInputs.unit === 'metric'
+                        ? 'bg-[#52C878] text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    Metric (cm)
+                  </button>
+                </div>
+              </div>
+
+              {/* Gender Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      value="male"
+                      checked={bodyFatInputs.gender === 'male'}
+                      onChange={(e) => setBodyFatInputs({ ...bodyFatInputs, gender: e.target.value as 'male' | 'female' })}
+                      className="mr-2 text-[#52C878] focus:ring-[#52C878]"
+                    />
+                    Male
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      value="female"
+                      checked={bodyFatInputs.gender === 'female'}
+                      onChange={(e) => setBodyFatInputs({ ...bodyFatInputs, gender: e.target.value as 'male' | 'female' })}
+                      className="mr-2 text-[#52C878] focus:ring-[#52C878]"
+                    />
+                    Female
+                  </label>
+                </div>
+              </div>
+
+              {/* Height */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Height ({bodyFatInputs.unit === 'imperial' ? 'inches' : 'cm'})
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={bodyFatInputs.height}
+                  onChange={(e) => setBodyFatInputs({ ...bodyFatInputs, height: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+                  placeholder={bodyFatInputs.unit === 'imperial' ? '70' : '178'}
+                />
+              </div>
+
+              {/* Waist */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Waist Circumference ({bodyFatInputs.unit === 'imperial' ? 'inches' : 'cm'})
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={bodyFatInputs.waist}
+                  onChange={(e) => setBodyFatInputs({ ...bodyFatInputs, waist: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+                  placeholder={bodyFatInputs.unit === 'imperial' ? '32' : '81'}
+                />
+                <p className="text-xs text-gray-500 mt-1">Measure at the narrowest point, usually just above the navel</p>
+              </div>
+
+              {/* Neck */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Neck Circumference ({bodyFatInputs.unit === 'imperial' ? 'inches' : 'cm'})
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={bodyFatInputs.neck}
+                  onChange={(e) => setBodyFatInputs({ ...bodyFatInputs, neck: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+                  placeholder={bodyFatInputs.unit === 'imperial' ? '15' : '38'}
+                />
+                <p className="text-xs text-gray-500 mt-1">Measure just below the larynx (Adam's apple)</p>
+              </div>
+
+              {/* Hip (Women Only) */}
+              {bodyFatInputs.gender === 'female' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hip Circumference ({bodyFatInputs.unit === 'imperial' ? 'inches' : 'cm'})
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={bodyFatInputs.hip}
+                    onChange={(e) => setBodyFatInputs({ ...bodyFatInputs, hip: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+                    placeholder={bodyFatInputs.unit === 'imperial' ? '36' : '91'}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Measure at the widest point of the hips</p>
+                </div>
+              )}
+
+              {/* Calculate Button */}
+              <button
+                onClick={calculateBodyFat}
+                className="w-full py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-lg hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-colors duration-200"
+              >
+                Calculate Body Fat Percentage
+              </button>
+            </div>
+
+            {/* Results */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-[#2C3E50]">Results</h3>
+              
+              {bodyFatResult !== null && (
+                <div className="space-y-4">
+                  {/* Main Result */}
+                  <div className="bg-gradient-to-br from-[#4A90E2]/5 to-[#52C878]/5 p-6 rounded-xl border border-[#4A90E2]/20">
+                    <h4 className="text-lg font-semibold text-[#2C3E50] mb-2">Your Body Fat Percentage</h4>
+                    <p className="text-4xl font-bold text-[#4A90E2] mb-2">{bodyFatResult.toFixed(1)}%</p>
+                    <p className={`font-medium ${getBodyFatCategory(bodyFatResult, bodyFatInputs.gender).color}`}>
+                      {getBodyFatCategory(bodyFatResult, bodyFatInputs.gender).category}
+                    </p>
+                  </div>
+
+                  {/* Category Ranges */}
+                  <div className="bg-[#F8F9FA] p-4 rounded-lg">
+                    <h5 className="font-semibold text-[#2C3E50] mb-2">
+                      Healthy Ranges for {bodyFatInputs.gender === 'male' ? 'Men' : 'Women'}
+                    </h5>
+                    <div className="text-sm space-y-1">
+                      {bodyFatInputs.gender === 'male' ? (
+                        <>
+                          <div className="flex justify-between"><span>Essential Fat:</span><span>2-5%</span></div>
+                          <div className="flex justify-between"><span>Athletic:</span><span>6-13%</span></div>
+                          <div className="flex justify-between"><span>Fitness:</span><span>14-17%</span></div>
+                          <div className="flex justify-between"><span>Average:</span><span>18-24%</span></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between"><span>Essential Fat:</span><span>10-13%</span></div>
+                          <div className="flex justify-between"><span>Athletic:</span><span>14-20%</span></div>
+                          <div className="flex justify-between"><span>Fitness:</span><span>21-24%</span></div>
+                          <div className="flex justify-between"><span>Average:</span><span>25-31%</span></div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Formula Explanation */}
+              <div className="border border-gray-200 rounded-lg">
+                <button
+                  onClick={() => setShowBodyFatFormula(!showBodyFatFormula)}
+                  className="w-full p-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+                >
+                  <span className="font-medium text-[#2C3E50]">How is this calculated?</span>
+                  <span className="text-gray-400">{showBodyFatFormula ? '−' : '+'}</span>
+                </button>
+                {showBodyFatFormula && (
+                  <div className="p-4 border-t border-gray-200 bg-[#F8F9FA]">
+                    <h6 className="font-semibold text-[#2C3E50] mb-2">U.S. Navy Method Formula:</h6>
+                    <div className="text-sm text-gray-600 space-y-2">
+                      {bodyFatInputs.gender === 'male' ? (
+                        <p><strong>Men:</strong> 86.010 × log₁₀(waist - neck) - 70.041 × log₁₀(height) + 36.76</p>
+                      ) : (
+                        <p><strong>Women:</strong> 163.205 × log₁₀(waist + hip - neck) - 97.684 × log₁₀(height) - 78.387</p>
+                      )}
+                      <p className="text-xs text-gray-500 mt-2">
+                        All measurements are converted to inches for calculation. This method is based on U.S. Navy research and provides reasonable accuracy for most individuals.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Disclaimer */}
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <strong>Disclaimer:</strong> This calculator provides estimates based on body measurements. For most accurate results, consider professional body composition analysis methods like DEXA scans or hydrostatic weighing.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Placeholder tabs */}
       {activeTab === 'meal-planning' && (
         <div className="bg-white rounded-2xl shadow-sm p-8">
