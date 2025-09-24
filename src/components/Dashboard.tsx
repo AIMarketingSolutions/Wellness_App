@@ -70,31 +70,39 @@ function Dashboard({ onLogout }: DashboardProps) {
           </div>
 
           {/* Secondary Navigation Bar */}
-          <div className="flex justify-between items-center h-12 bg-white/10">
-            <div className="flex items-center gap-8">
+          <div className="flex justify-between items-center h-12 bg-white/10 px-6">
+            <div className="flex-1 text-left">
               <button
                 onClick={() => setActiveView('profile-assessment')}
-                className={`px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`font-medium transition-colors duration-200 ${
                   activeView === 'profile-assessment'
-                    ? 'text-white bg-white/20 rounded-lg'
-                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                    ? 'text-white bg-white/20 px-4 py-2 rounded-lg'
+                    : 'text-[#2C3E50] hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
                 }`}
+                style={{ marginLeft: '24px' }}
               >
                 Profile Assessment
               </button>
+            </div>
+            
+            <div className="flex-1 text-center">
               <button
                 onClick={() => setActiveView('transformation-tracker')}
-                className={`px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`font-semibold transition-colors duration-200 ${
                   activeView === 'transformation-tracker'
-                    ? 'text-white bg-white/20 rounded-lg'
-                    : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
+                    ? 'text-white bg-white/20 px-4 py-2 rounded-lg'
+                    : 'text-[#52C878] hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
                 }`}
+                style={{ fontWeight: '600' }}
               >
                 Transformation Tracker
               </button>
             </div>
-            <div className="text-white font-semibold">
-              Total Daily Calories: {user ? '2,150' : '---'}
+            
+            <div className="flex-1 text-right" style={{ marginRight: '24px', paddingRight: '8px' }}>
+              <span className="text-[#2C3E50] font-medium">
+                Total Daily Calories: {user ? '2,150' : '---'}
+              </span>
             </div>
           </div>
 
