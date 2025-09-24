@@ -77,7 +77,7 @@ function Dashboard({ onLogout }: DashboardProps) {
                 className={`font-medium transition-colors duration-200 ${
                   activeView === 'profile-assessment'
                     ? 'text-white bg-white/20 px-4 py-2 rounded-lg'
-                    : 'text-[#2C3E50] hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
+                    : 'text-black hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
                 }`}
                 style={{ marginLeft: '24px' }}
               >
@@ -100,7 +100,7 @@ function Dashboard({ onLogout }: DashboardProps) {
             </div>
             
             <div className="flex-1 text-right" style={{ marginRight: '24px', paddingRight: '8px' }}>
-              <span className="text-[#2C3E50] font-medium">
+              <span className="text-black font-medium">
                 Total Daily Calories: {user ? '2,150' : '---'}
               </span>
             </div>
