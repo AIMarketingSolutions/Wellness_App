@@ -221,7 +221,7 @@ function WellnessCalculator() {
       bodyFatPercentage: Math.round(bodyFatPercentage * 10) / 10,
       proteinPercentage: macros.protein,
       carbPercentage: macros.carb,
-      fatPercentage: macros.fat
+      fatPercentage: macros.fat,
       dailyCalorieTarget,
       weeklyDeficit,
       dailyDeficit: Math.round(dailyDeficit)
