@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, LogOut, Dumbbell, Target, TrendingUp, Calendar, Settings, Home, Utensils, Activity, Pill, Droplets, BookOpen } from 'lucide-react';
 import { signOut, getCurrentUser } from '../lib/supabase';
 import WellnessCalculator from './WellnessCalculator';
+import MealPlanningSystem from './MealPlanningSystem';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -230,10 +231,16 @@ function Dashboard({ onLogout }: DashboardProps) {
         </main>
       ) : activeView === 'meal-plan' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
-            <h2 className="text-3xl font-bold text-[#2C3E50] mb-6">Meal Planning</h2>
-            <p className="text-gray-600">Comprehensive meal planning functionality will be available here.</p>
-          </div>
+          <MealPlanningSystem 
+            userProfile={{
+              tee_calories: 2150,
+              protein_percentage: 30,
+              carb_percentage: 30,
+              fat_percentage: 40,
+              metabolic_profile: 'medium_oxidizer',
+              gender: 'male'
+            }}
+          />
         </main>
       ) : activeView === 'fitness' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
