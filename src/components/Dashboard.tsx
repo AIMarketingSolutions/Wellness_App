@@ -3,6 +3,7 @@ import { User, LogOut, Dumbbell, Target, TrendingUp, Calendar, Settings, Home, U
 import { signOut, getCurrentUser } from '../lib/supabase';
 import WellnessCalculator from './WellnessCalculator';
 import MealPlanningSystem from './MealPlanningSystem';
+import FitnessSystem from './FitnessSystem';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -244,10 +245,18 @@ function Dashboard({ onLogout }: DashboardProps) {
         </main>
       ) : activeView === 'fitness' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
-            <h2 className="text-3xl font-bold text-[#2C3E50] mb-6">Fitness Programs</h2>
-            <p className="text-gray-600">Personalized fitness programs and workout tracking will be available here.</p>
-          </div>
+          <FitnessSystem 
+            userProfile={{
+              weight_lbs: 154,
+              tee_calories: 2150,
+              gender: 'male',
+              activity_level: 'moderately_active'
+            }}
+            onTEEUpdate={(newTEE) => {
+              // Handle TEE updates - could update state or trigger recalculations
+              console.log('Updated TEE:', newTEE);
+            }}
+          />
         </main>
       ) : activeView === 'supplements' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
