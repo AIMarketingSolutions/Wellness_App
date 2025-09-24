@@ -16,6 +16,14 @@ interface UserProfile {
   metabolic_profile: 'fast_oxidizer' | 'slow_oxidizer' | 'medium_oxidizer';
 }
 
+interface BodyFatInputs {
+  gender: 'male' | 'female';
+  height: number;
+  waist: number;
+  neck: number;
+  hip: number;
+  unit: 'imperial' | 'metric';
+}
 interface CalculationResults {
   ree: number;
   tee: number;
@@ -39,6 +47,16 @@ function WellnessCalculator() {
     blood_type: 'O',
     metabolic_profile: 'medium_oxidizer'
   });
+  const [bodyFatInputs, setBodyFatInputs] = useState<BodyFatInputs>({
+    gender: 'male',
+    height: 70,
+    waist: 32,
+    neck: 15,
+    hip: 36,
+    unit: 'imperial'
+  });
+  const [bodyFatResult, setBodyFatResult] = useState<number | null>(null);
+  const [showBodyFatFormula, setShowBodyFatFormula] = useState(false);
   const [results, setResults] = useState<CalculationResults | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -209,9 +227,47 @@ function WellnessCalculator() {
     return descriptions[profile as keyof typeof descriptions];
   };
 
+  const calculateBodyFat = () => {
+    const { gender, height, waist, neck, hip, unit } = bodyFatInputs;
+    
+    // Convert to inches if metric
+    const heightInches = unit === 'metric' ? height * 0.393701 : height;
+    const waistInches = unit === 'metric' ? waist * 0.393701 : waist;
+    const neckInches = unit === 'metric' ? neck * 0.393701 : neck;
+    const hipInches = unit === 'metric' ? hip * 0.393701 : hip;
+    
+    let bodyFatPercentage: number;
+    
+    if (gender === 'male') {
+      // Men: 86.010 × log₁₀(waist - neck) - 70.041 × log₁₀(height) + 36.76
+      bodyFatPercentage = 86.010 * Math.log10(waistInches - neckInches) - 70.041 * Math.log10(heightInches) + 36.76;
+    } else {
+      // Women: 163.205 × log₁₀(waist + hip - neck) - 97.684 × log₁₀(height) - 78.387
+      bodyFatPercentage = 163.205 * Math.log10(waistInches + hipInches - neckInches) - 97.684 * Math.log10(heightInches) - 78.387;
+    }
+    
+    setBodyFatResult(Math.max(0, Math.min(50, bodyFatPercentage))); // Clamp between 0-50%
+  };
+  
+  const getBodyFatCategory = (percentage: number, gender: 'male' | 'female') => {
+    if (gender === 'male') {
+      if (percentage < 6) return { category: 'Essential Fat', color: 'text-red-600' };
+      if (percentage < 14) return { category: 'Athletic', color: 'text-green-600' };
+      if (percentage < 18) return { category: 'Fitness', color: 'text-blue-600' };
+      if (percentage < 25) return { category: 'Average', color: 'text-yellow-600' };
+      return { category: 'Obese', color: 'text-red-600' };
+    } else {
+      if (percentage < 10) return { category: 'Essential Fat', color: 'text-red-600' };
+      if (percentage < 21) return { category: 'Athletic', color: 'text-green-600' };
+      if (percentage < 25) return { category: 'Fitness', color: 'text-blue-600' };
+      if (percentage < 32) return { category: 'Average', color: 'text-yellow-600' };
+      return { category: 'Obese', color: 'text-red-600' };
+    }
+  };
   const tabs = [
     { id: 'profile', label: 'Profile Setup', icon: User },
     { id: 'calculations', label: 'Calculations', icon: Calculator },
+    { id: 'body-fat', label: 'Body Fat Calculator', icon: Target },
     { id: 'meal-planning', label: 'Meal Planning', icon: Utensils },
     { id: 'exercise', label: 'Exercise Plan', icon: Dumbbell },
     { id: 'supplements', label: 'Supplements', icon: Pill },
