@@ -604,9 +604,111 @@ function WellnessCalculator() {
             disabled={loading || !user?.id}
             className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold text-lg rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
-            {loading ? 'Saving...' : !user?.id ? 'Please log in to save profile' : 'Save Profile & Calculate'}
+            {loading ? 'Saving...' : !user?.id ? 'Please log in to save profile' : 'Save Profile & Calculate TEE'}
           </button>
         </div>
+
+        {/* Results Display */}
+        {results && (
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+            <h3 className="text-2xl font-bold text-[#2C3E50] mb-6">Your Personalized Results</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* TEE Display */}
+              <div className="text-center p-6 bg-gradient-to-br from-[#52C878]/10 to-[#4A90E2]/10 rounded-xl border border-[#52C878]/20">
+                <h4 className="font-semibold text-[#2C3E50] mb-2">Total Energy Expenditure</h4>
+                <p className="text-3xl font-bold text-[#52C878] mb-1">{results.tee}</p>
+                <p className="text-sm text-gray-600">calories/day (maintenance)</p>
+              </div>
+
+              {/* Daily Calorie Target */}
+              <div className="text-center p-6 bg-gradient-to-br from-[#4A90E2]/10 to-[#52C878]/10 rounded-xl border border-[#4A90E2]/20">
+                <h4 className="font-semibold text-[#2C3E50] mb-2">Daily Calorie Target</h4>
+                <p className="text-3xl font-bold text-[#4A90E2] mb-1">{results.dailyCalorieTarget}</p>
+                <p className="text-sm text-gray-600">calories/day (goal)</p>
+                {results.dailyDeficit > 0 && (
+                  <p className="text-xs text-red-600 mt-1">-{results.dailyDeficit} cal deficit</p>
+                )}
+              </div>
+
+              {/* BMI */}
+              <div className="text-center p-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl border border-purple-200">
+                <h4 className="font-semibold text-[#2C3E50] mb-2">Body Mass Index</h4>
+                <p className="text-3xl font-bold text-purple-600 mb-1">{results.bmi}</p>
+                <p className="text-sm text-gray-600">BMI</p>
+              </div>
+
+              {/* Body Fat */}
+              <div className="text-center p-6 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-xl border border-orange-200">
+                <h4 className="font-semibold text-[#2C3E50] mb-2">Body Fat Estimate</h4>
+                <p className="text-3xl font-bold text-orange-600 mb-1">{results.bodyFatPercentage}%</p>
+                <p className="text-sm text-gray-600">estimated</p>
+              </div>
+            </div>
+
+            {/* Macro Breakdown */}
+            <div className="mt-8 p-6 bg-gray-50 rounded-xl">
+              <h4 className="font-semibold text-[#2C3E50] mb-4">Your Personalized Macro Targets</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-1">Protein</p>
+                  <p className="text-2xl font-bold text-green-600">{results.proteinPercentage}%</p>
+                  <p className="text-sm text-gray-500">
+                    {Math.round((results.dailyCalorieTarget * results.proteinPercentage / 100) / 4)}g per day
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-1">Carbohydrates</p>
+                  <p className="text-2xl font-bold text-yellow-600">{results.carbPercentage}%</p>
+                  <p className="text-sm text-gray-500">
+                    {Math.round((results.dailyCalorieTarget * results.carbPercentage / 100) / 4)}g per day
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-1">Fat</p>
+                  <p className="text-2xl font-bold text-purple-600">{results.fatPercentage}%</p>
+                  <p className="text-sm text-gray-500">
+                    {Math.round((results.dailyCalorieTarget * results.fatPercentage / 100) / 9)}g per day
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Safety Warnings */}
+            {results.dailyCalorieTarget <= (profile.gender === 'male' ? 1500 : 1200) && results.dailyDeficit > 0 && (
+              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-red-800">Minimum Calorie Limit Reached</p>
+                    <p className="text-sm text-red-600 mt-1">
+                      Your calorie target has been set to the minimum safe level ({profile.gender === 'male' ? '1,500' : '1,200'} calories). 
+                      Consider adding exercise to create additional deficit safely.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Next Steps */}
+            <div className="mt-8 p-6 bg-[#52C878]/5 rounded-xl border border-[#52C878]/20">
+              <h4 className="font-semibold text-[#2C3E50] mb-3">Ready for Your Personalized Meal Plan?</h4>
+              <p className="text-gray-600 mb-4">
+                Your profile is complete! Now you can create a customized meal plan based on your {results.dailyCalorieTarget} daily calorie target 
+                and {results.proteinPercentage}%/{results.carbPercentage}%/{results.fatPercentage}% macro split.
+              </p>
+              <button
+                onClick={() => {
+                  // This would navigate to meal planning - for now just show message
+                  alert('Meal planning system integration coming next!');
+                }}
+                className="px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-lg hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Create My Meal Plan →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
