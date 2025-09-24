@@ -91,7 +91,7 @@ function Dashboard({ onLogout }: DashboardProps) {
                 className={`font-semibold transition-colors duration-200 ${
                   activeView === 'transformation-tracker'
                     ? 'text-white bg-white/20 px-4 py-2 rounded-lg'
-                    : 'text-[#52C878] hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
+                    : 'text-black hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
                 }`}
                 style={{ fontWeight: '600' }}
               >
