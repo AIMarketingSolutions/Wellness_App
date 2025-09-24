@@ -76,12 +76,11 @@ function Dashboard({ onLogout }: DashboardProps) {
             <div className="flex-1 text-left">
               <button
                 onClick={() => setActiveView('profile-assessment')}
-                className={`font-medium transition-colors duration-200 ${
+                className={`font-medium transition-colors duration-200 cursor-pointer ${
                   activeView === 'profile-assessment'
                     ? 'text-white bg-white/20 px-4 py-2 rounded-lg'
-                    : 'text-black hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
+                    : 'text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
                 }`}
-                style={{ marginLeft: '24px' }}
               >
                 Profile Assessment
               </button>
@@ -90,18 +89,17 @@ function Dashboard({ onLogout }: DashboardProps) {
             <div className="flex-1 text-center">
               <button
                 onClick={() => setActiveView('transformation-tracker')}
-                className={`font-semibold transition-colors duration-200 ${
+                className={`font-semibold transition-colors duration-200 cursor-pointer ${
                   activeView === 'transformation-tracker'
                     ? 'text-white bg-white/20 px-4 py-2 rounded-lg'
-                    : 'text-black hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
+                    : 'text-white/90 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg'
                 }`}
-                style={{ fontWeight: '600' }}
               >
                 Transformation Tracker
               </button>
             </div>
             
-            <div className="flex-1 text-right" style={{ marginRight: '24px', paddingRight: '8px' }}>
+            <div className="flex-1 text-right pr-6">
               <span className="text-black font-medium">
                 Total Daily Calories: {user ? '2,150' : '---'}
               </span>
@@ -113,7 +111,7 @@ function Dashboard({ onLogout }: DashboardProps) {
             <nav className="flex items-center gap-12">
               <button
                 onClick={() => setActiveView('dashboard')}
-                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 cursor-pointer ${
                   activeView === 'dashboard'
                     ? 'text-white bg-white/20 rounded-lg'
                     : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
@@ -124,7 +122,7 @@ function Dashboard({ onLogout }: DashboardProps) {
               </button>
               <button
                 onClick={() => setActiveView('meal-plan')}
-                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 cursor-pointer ${
                   activeView === 'meal-plan'
                     ? 'text-white bg-white/20 rounded-lg'
                     : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
@@ -135,7 +133,7 @@ function Dashboard({ onLogout }: DashboardProps) {
               </button>
               <button
                 onClick={() => setActiveView('fitness')}
-                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 cursor-pointer ${
                   activeView === 'fitness'
                     ? 'text-white bg-white/20 rounded-lg'
                     : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
@@ -146,7 +144,7 @@ function Dashboard({ onLogout }: DashboardProps) {
               </button>
               <button
                 onClick={() => setActiveView('supplements')}
-                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 cursor-pointer ${
                   activeView === 'supplements'
                     ? 'text-white bg-white/20 rounded-lg'
                     : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
@@ -157,7 +155,7 @@ function Dashboard({ onLogout }: DashboardProps) {
               </button>
               <button
                 onClick={() => setActiveView('water')}
-                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 cursor-pointer ${
                   activeView === 'water'
                     ? 'text-white bg-white/20 rounded-lg'
                     : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
@@ -168,7 +166,7 @@ function Dashboard({ onLogout }: DashboardProps) {
               </button>
               <button
                 onClick={() => setActiveView('blog')}
-                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 font-medium transition-colors duration-200 cursor-pointer ${
                   activeView === 'blog'
                     ? 'text-white bg-white/20 rounded-lg'
                     : 'text-white/80 hover:text-white hover:bg-white/10 rounded-lg'
@@ -353,8 +351,14 @@ function Dashboard({ onLogout }: DashboardProps) {
                   <h4 className="font-semibold text-[#2C3E50]">Upper Body Workout</h4>
                   <p className="text-sm text-gray-600">45 minutes • 3:00 PM</p>
                 </div>
-                <button className="px-4 py-2 bg-[#52C878] text-white rounded-lg hover:bg-[#52C878]/90 transition-colors duration-200">
-                  Start
+                <button
+                  onClick={() => {
+                    // This would navigate to meal planning - for now just show message
+                    setActiveView('fitness');
+                  }}
+                  className="px-4 py-2 bg-[#52C878] text-white rounded-lg hover:bg-[#52C878]/90 transition-colors duration-200"
+                >
+                  Start My Fitness Plan →
                 </button>
               </div>
               
@@ -366,8 +370,14 @@ function Dashboard({ onLogout }: DashboardProps) {
                   <h4 className="font-semibold text-[#2C3E50]">Nutrition Check-in</h4>
                   <p className="text-sm text-gray-600">Log your meals</p>
                 </div>
-                <button className="px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors duration-200">
-                  Log
+                <button
+                  onClick={() => {
+                    // This would navigate to meal planning - for now just show message
+                    setActiveView('meal-plan');
+                  }}
+                  className="px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors duration-200"
+                >
+                  Create My Meal Plan →
                 </button>
               </div>
             </div>

@@ -602,7 +602,7 @@ function WellnessCalculator() {
           <button
             onClick={saveProfile}
             disabled={loading || !user?.id}
-            className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold text-lg rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold text-lg rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer"
           >
             {loading ? 'Saving...' : !user?.id ? 'Please log in to save profile' : 'Save Profile & Calculate TEE'}
           </button>
