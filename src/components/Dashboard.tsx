@@ -41,10 +41,10 @@ function Dashboard({ onLogout }: DashboardProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50">
       {/* Enhanced Header with Green Theme */}
-      <header className="bg-gradient-to-r from-green-600 to-green-700 text-white sticky top-0 z-50 shadow-lg">
+      <header className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white sticky top-0 z-50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Bar */}
-          <div className="flex justify-between items-center h-14 border-b border-green-500/30">
+          <div className="flex justify-between items-center h-14 border-b border-white/20">
             <div className="flex items-center gap-4">
               <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                 <Dumbbell className="w-5 h-5 text-white" />
@@ -70,7 +70,7 @@ function Dashboard({ onLogout }: DashboardProps) {
           </div>
 
           {/* Secondary Navigation Bar */}
-          <div className="flex justify-between items-center h-12 bg-green-500/20">
+          <div className="flex justify-between items-center h-12 bg-white/10">
             <div className="flex items-center gap-8">
               <button
                 onClick={() => setActiveView('profile-assessment')}
@@ -99,7 +99,7 @@ function Dashboard({ onLogout }: DashboardProps) {
           </div>
 
           {/* Main Navigation */}
-          <div className="flex justify-center items-center h-14 bg-green-400/20">
+          <div className="flex justify-center items-center h-14 bg-white/5">
             <nav className="flex items-center gap-12">
               <button
                 onClick={() => setActiveView('dashboard')}
@@ -179,41 +179,41 @@ function Dashboard({ onLogout }: DashboardProps) {
         </main>
       ) : activeView === 'transformation-tracker' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Transformation Tracker</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* TEE Display - No Formula */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl">
-                <h3 className="text-xl font-semibold text-blue-800 mb-4">Total Energy Expenditure</h3>
+              <div className="bg-gradient-to-br from-[#52C878]/10 to-[#4A90E2]/10 p-6 rounded-2xl border border-[#52C878]/20">
+                <h3 className="text-xl font-semibold text-[#2C3E50] mb-4">Total Energy Expenditure</h3>
                 <div className="text-center">
-                  <p className="text-4xl font-bold text-blue-600 mb-2">2,150</p>
-                  <p className="text-blue-700 font-medium">calories per day</p>
-                  <p className="text-sm text-blue-600 mt-2">Based on your activity level and metabolism</p>
+                  <p className="text-4xl font-bold text-[#52C878] mb-2">2,150</p>
+                  <p className="text-[#2C3E50] font-medium">calories per day</p>
+                  <p className="text-sm text-gray-600 mt-2">Based on your activity level and metabolism</p>
                 </div>
               </div>
               
               {/* Body Fat Percentage - No Formula */}
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl">
-                <h3 className="text-xl font-semibold text-purple-800 mb-4">Body Fat Percentage</h3>
+              <div className="bg-gradient-to-br from-[#4A90E2]/10 to-[#52C878]/10 p-6 rounded-2xl border border-[#4A90E2]/20">
+                <h3 className="text-xl font-semibold text-[#2C3E50] mb-4">Body Fat Percentage</h3>
                 <div className="text-center">
-                  <p className="text-4xl font-bold text-purple-600 mb-2">18.5%</p>
-                  <p className="text-purple-700 font-medium">estimated body fat</p>
-                  <p className="text-sm text-purple-600 mt-2">Within healthy range for your profile</p>
+                  <p className="text-4xl font-bold text-[#4A90E2] mb-2">18.5%</p>
+                  <p className="text-[#2C3E50] font-medium">estimated body fat</p>
+                  <p className="text-sm text-gray-600 mt-2">Within healthy range for your profile</p>
                 </div>
               </div>
             </div>
             
             {/* Progress Charts Placeholder */}
             <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white/60 p-6 rounded-2xl">
-                <h4 className="text-lg font-semibold text-gray-800 mb-4">Weight Progress</h4>
-                <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="bg-white/80 p-6 rounded-2xl border border-gray-100">
+                <h4 className="text-lg font-semibold text-[#2C3E50] mb-4">Weight Progress</h4>
+                <div className="h-48 bg-[#F8F9FA] rounded-lg flex items-center justify-center">
                   <p className="text-gray-500">Progress chart coming soon</p>
                 </div>
               </div>
-              <div className="bg-white/60 p-6 rounded-2xl">
-                <h4 className="text-lg font-semibold text-gray-800 mb-4">Body Composition</h4>
-                <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="bg-white/80 p-6 rounded-2xl border border-gray-100">
+                <h4 className="text-lg font-semibold text-[#2C3E50] mb-4">Body Composition</h4>
+                <div className="h-48 bg-[#F8F9FA] rounded-lg flex items-center justify-center">
                   <p className="text-gray-500">Composition chart coming soon</p>
                 </div>
               </div>
@@ -222,36 +222,36 @@ function Dashboard({ onLogout }: DashboardProps) {
         </main>
       ) : activeView === 'meal-plan' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Meal Planning</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-[#2C3E50] mb-6">Meal Planning</h2>
             <p className="text-gray-600">Comprehensive meal planning functionality will be available here.</p>
           </div>
         </main>
       ) : activeView === 'fitness' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Fitness Programs</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-[#2C3E50] mb-6">Fitness Programs</h2>
             <p className="text-gray-600">Personalized fitness programs and workout tracking will be available here.</p>
           </div>
         </main>
       ) : activeView === 'supplements' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Supplement Recommendations</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-[#2C3E50] mb-6">Supplement Recommendations</h2>
             <p className="text-gray-600">Personalized supplement recommendations based on your profile will be available here.</p>
           </div>
         </main>
       ) : activeView === 'water' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Water Intake Tracking</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-[#2C3E50] mb-6">Water Intake Tracking</h2>
             <p className="text-gray-600">Daily water intake tracking and hydration goals will be available here.</p>
           </div>
         </main>
       ) : activeView === 'blog' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Wellness Blog</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+            <h2 className="text-3xl font-bold text-[#2C3E50] mb-6">Wellness Blog</h2>
             <p className="text-gray-600">Educational content, tips, and wellness articles will be available here.</p>
           </div>
         </main>
@@ -270,47 +270,47 @@ function Dashboard({ onLogout }: DashboardProps) {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
-              <div className="bg-blue-100 p-3 rounded-full">
-                <Target className="w-6 h-6 text-blue-600" />
+              <div className="bg-[#52C878]/10 p-3 rounded-full">
+                <Target className="w-6 h-6 text-[#52C878]" />
               </div>
-              <span className="text-2xl font-bold text-gray-800">12</span>
+              <span className="text-2xl font-bold text-[#2C3E50]">12</span>
             </div>
-            <h3 className="font-semibold text-gray-800 mb-1">Goals Completed</h3>
+            <h3 className="font-semibold text-[#2C3E50] mb-1">Goals Completed</h3>
             <p className="text-sm text-gray-600">This month</p>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
-              <div className="bg-emerald-100 p-3 rounded-full">
-                <TrendingUp className="w-6 h-6 text-emerald-600" />
+              <div className="bg-[#4A90E2]/10 p-3 rounded-full">
+                <TrendingUp className="w-6 h-6 text-[#4A90E2]" />
               </div>
-              <span className="text-2xl font-bold text-gray-800">85%</span>
+              <span className="text-2xl font-bold text-[#2C3E50]">85%</span>
             </div>
-            <h3 className="font-semibold text-gray-800 mb-1">Progress Rate</h3>
+            <h3 className="font-semibold text-[#2C3E50] mb-1">Progress Rate</h3>
             <p className="text-sm text-gray-600">Overall improvement</p>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
-              <div className="bg-purple-100 p-3 rounded-full">
-                <Dumbbell className="w-6 h-6 text-purple-600" />
+              <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 p-3 rounded-full">
+                <Dumbbell className="w-6 h-6 text-[#52C878]" />
               </div>
-              <span className="text-2xl font-bold text-gray-800">24</span>
+              <span className="text-2xl font-bold text-[#2C3E50]">24</span>
             </div>
-            <h3 className="font-semibold text-gray-800 mb-1">Workouts</h3>
+            <h3 className="font-semibold text-[#2C3E50] mb-1">Workouts</h3>
             <p className="text-sm text-gray-600">This month</p>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
-              <div className="bg-orange-100 p-3 rounded-full">
-                <Calendar className="w-6 h-6 text-orange-600" />
+              <div className="bg-[#4A90E2]/10 p-3 rounded-full">
+                <Calendar className="w-6 h-6 text-[#4A90E2]" />
               </div>
-              <span className="text-2xl font-bold text-gray-800">7</span>
+              <span className="text-2xl font-bold text-[#2C3E50]">7</span>
             </div>
-            <h3 className="font-semibold text-gray-800 mb-1">Streak Days</h3>
+            <h3 className="font-semibold text-[#2C3E50] mb-1">Streak Days</h3>
             <p className="text-sm text-gray-600">Current streak</p>
           </div>
         </div>
@@ -318,31 +318,31 @@ function Dashboard({ onLogout }: DashboardProps) {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Today's Plan */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Today's Plan</h3>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-xl font-bold text-[#2C3E50] mb-4">Today's Plan</h3>
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-xl">
-                <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="flex items-center gap-4 p-4 bg-[#52C878]/5 rounded-xl border border-[#52C878]/10">
+                <div className="bg-[#52C878] p-2 rounded-lg">
                   <Dumbbell className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800">Upper Body Workout</h4>
+                  <h4 className="font-semibold text-[#2C3E50]">Upper Body Workout</h4>
                   <p className="text-sm text-gray-600">45 minutes • 3:00 PM</p>
                 </div>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                <button className="px-4 py-2 bg-[#52C878] text-white rounded-lg hover:bg-[#52C878]/90 transition-colors duration-200">
                   Start
                 </button>
               </div>
               
-              <div className="flex items-center gap-4 p-4 bg-emerald-50 rounded-xl">
-                <div className="bg-emerald-600 p-2 rounded-lg">
+              <div className="flex items-center gap-4 p-4 bg-[#4A90E2]/5 rounded-xl border border-[#4A90E2]/10">
+                <div className="bg-[#4A90E2] p-2 rounded-lg">
                   <Target className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800">Nutrition Check-in</h4>
+                  <h4 className="font-semibold text-[#2C3E50]">Nutrition Check-in</h4>
                   <p className="text-sm text-gray-600">Log your meals</p>
                 </div>
-                <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors duration-200">
+                <button className="px-4 py-2 bg-[#4A90E2] text-white rounded-lg hover:bg-[#4A90E2]/90 transition-colors duration-200">
                   Log
                 </button>
               </div>
@@ -350,26 +350,26 @@ function Dashboard({ onLogout }: DashboardProps) {
           </div>
 
           {/* Recent Activity */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Activity</h3>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-xl font-bold text-[#2C3E50] mb-4">Recent Activity</h3>
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-3 border-l-4 border-blue-500 bg-gray-50 rounded-r-lg">
+              <div className="flex items-center gap-4 p-3 border-l-4 border-[#52C878] bg-[#F8F9FA] rounded-r-lg">
                 <div className="text-sm">
-                  <p className="font-medium text-gray-800">Completed leg day workout</p>
+                  <p className="font-medium text-[#2C3E50]">Completed leg day workout</p>
                   <p className="text-gray-600">Yesterday, 6:30 PM</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 p-3 border-l-4 border-emerald-500 bg-gray-50 rounded-r-lg">
+              <div className="flex items-center gap-4 p-3 border-l-4 border-[#4A90E2] bg-[#F8F9FA] rounded-r-lg">
                 <div className="text-sm">
-                  <p className="font-medium text-gray-800">Logged daily nutrition</p>
+                  <p className="font-medium text-[#2C3E50]">Logged daily nutrition</p>
                   <p className="text-gray-600">Yesterday, 8:00 PM</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 p-3 border-l-4 border-purple-500 bg-gray-50 rounded-r-lg">
+              <div className="flex items-center gap-4 p-3 border-l-4 border-[#52C878] bg-[#F8F9FA] rounded-r-lg">
                 <div className="text-sm">
-                  <p className="font-medium text-gray-800">Reached weekly goal</p>
+                  <p className="font-medium text-[#2C3E50]">Reached weekly goal</p>
                   <p className="text-gray-600">2 days ago</p>
                 </div>
               </div>

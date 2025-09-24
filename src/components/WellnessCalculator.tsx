@@ -377,7 +377,7 @@ function WellnessCalculator() {
             <button
               onClick={saveProfile}
               disabled={loading || !user?.id}
-              className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-lg hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               {loading ? 'Saving...' : !user?.id ? 'Please log in to save profile' : 'Save Profile & Calculate'}
             </button>
@@ -390,82 +390,69 @@ function WellnessCalculator() {
         <div className="space-y-6">
           {/* TEE Calculation */}
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Total Energy Expenditure (TEE)</h2>
+            <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Total Energy Expenditure (TEE)</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-blue-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-blue-800 mb-2">Resting Energy Expenditure (REE)</h3>
-                <p className="text-3xl font-bold text-blue-600">{results.ree}</p>
-                <p className="text-sm text-blue-700">calories/day at rest</p>
+              <div className="bg-[#52C878]/5 p-6 rounded-xl border border-[#52C878]/20">
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Resting Energy Expenditure (REE)</h3>
+                <p className="text-3xl font-bold text-[#52C878]">{results.ree}</p>
+                <p className="text-sm text-gray-600">calories/day at rest</p>
               </div>
               
-              <div className="bg-emerald-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-emerald-800 mb-2">Activity Factor</h3>
-                <p className="text-3xl font-bold text-emerald-600">{getActivityFactor(profile.activity_level)}</p>
-                <p className="text-sm text-emerald-700">{profile.activity_level.replace('_', ' ')}</p>
+              <div className="bg-[#4A90E2]/5 p-6 rounded-xl border border-[#4A90E2]/20">
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Activity Factor</h3>
+                <p className="text-3xl font-bold text-[#4A90E2]">{getActivityFactor(profile.activity_level)}</p>
+                <p className="text-sm text-gray-600">{profile.activity_level.replace('_', ' ')}</p>
               </div>
               
-              <div className="bg-purple-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-purple-800 mb-2">Total Daily Energy</h3>
-                <p className="text-3xl font-bold text-purple-600">{results.tee}</p>
-                <p className="text-sm text-purple-700">calories/day total</p>
+              <div className="bg-gradient-to-br from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20">
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Total Daily Energy</h3>
+                <p className="text-3xl font-bold bg-gradient-to-r from-[#52C878] to-[#4A90E2] bg-clip-text text-transparent">{results.tee}</p>
+                <p className="text-sm text-gray-600">calories/day total</p>
               </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-semibold text-gray-800 mb-2">Formula Used:</h4>
-              <p className="text-sm text-gray-600">
-                {profile.gender === 'male' 
-                  ? 'Men: REE = 66.437 + (13.752 × weight[kg]) + (5.003 × height[cm]) - (6.755 × age)'
-                  : 'Women: REE = 655.096 + (9.563 × weight[kg]) + (1.85 × height[cm]) - (4.676 × age)'
-                }
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                TEE = REE × Activity Factor ({getActivityFactor(profile.activity_level)})
-              </p>
             </div>
           </div>
 
           {/* Body Fat Calculation */}
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Body Fat Analysis</h2>
+            <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Body Fat Analysis</h2>
             
             <div className="flex justify-center">
-              <div className="bg-red-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-red-800 mb-2">Body Fat Percentage</h3>
-                <p className="text-3xl font-bold text-red-600">{results.bodyFatPercentage}%</p>
-                <p className="text-sm text-red-700">estimated body fat</p>
-                <p className="text-xs text-red-600 mt-2">Based on your personal profile</p>
+              <div className="bg-gradient-to-br from-[#4A90E2]/5 to-[#52C878]/5 p-6 rounded-xl border border-[#4A90E2]/20">
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Body Fat Percentage</h3>
+                <p className="text-3xl font-bold text-[#4A90E2]">{results.bodyFatPercentage}%</p>
+                <p className="text-sm text-gray-600">estimated body fat</p>
+                <p className="text-xs text-gray-500 mt-2">Based on your personal profile</p>
               </div>
             </div>
           </div>
 
           {/* Metabolic Profile */}
           <div className="bg-white rounded-2xl shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Metabolic Profile & Macronutrients</h2>
+            <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Metabolic Profile & Macronutrients</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-green-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-green-800 mb-2">Protein</h3>
-                <p className="text-3xl font-bold text-green-600">{results.proteinPercentage}%</p>
-                <p className="text-sm text-green-700">{Math.round(results.tee * results.proteinPercentage / 100 / 4)}g daily</p>
+              <div className="bg-[#52C878]/5 p-6 rounded-xl border border-[#52C878]/20">
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Protein</h3>
+                <p className="text-3xl font-bold text-[#52C878]">{results.proteinPercentage}%</p>
+                <p className="text-sm text-gray-600">{Math.round(results.tee * results.proteinPercentage / 100 / 4)}g daily</p>
               </div>
               
-              <div className="bg-yellow-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-yellow-800 mb-2">Carbohydrates</h3>
-                <p className="text-3xl font-bold text-yellow-600">{results.carbPercentage}%</p>
-                <p className="text-sm text-yellow-700">{Math.round(results.tee * results.carbPercentage / 100 / 4)}g daily</p>
+              <div className="bg-[#4A90E2]/5 p-6 rounded-xl border border-[#4A90E2]/20">
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Carbohydrates</h3>
+                <p className="text-3xl font-bold text-[#4A90E2]">{results.carbPercentage}%</p>
+                <p className="text-sm text-gray-600">{Math.round(results.tee * results.carbPercentage / 100 / 4)}g daily</p>
               </div>
               
-              <div className="bg-indigo-50 p-6 rounded-xl">
-                <h3 className="text-lg font-semibold text-indigo-800 mb-2">Fats</h3>
-                <p className="text-3xl font-bold text-indigo-600">{results.fatPercentage}%</p>
-                <p className="text-sm text-indigo-700">{Math.round(results.tee * results.fatPercentage / 100 / 9)}g daily</p>
+              <div className="bg-gradient-to-br from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20">
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">Fats</h3>
+                <p className="text-3xl font-bold bg-gradient-to-r from-[#52C878] to-[#4A90E2] bg-clip-text text-transparent">{results.fatPercentage}%</p>
+                <p className="text-sm text-gray-600">{Math.round(results.tee * results.fatPercentage / 100 / 9)}g daily</p>
               </div>
             </div>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-semibold text-gray-800 mb-2">Your Metabolic Profile: {profile.metabolic_profile.replace('_', ' ').toUpperCase()}</h4>
+            <div className="mt-6 p-4 bg-[#F8F9FA] rounded-lg border border-gray-100">
+              <h4 className="font-semibold text-[#2C3E50] mb-2">Your Metabolic Profile: {profile.metabolic_profile.replace('_', ' ').toUpperCase()}</h4>
               <p className="text-sm text-gray-600">
                 {getMetabolicDescription(profile.metabolic_profile)}
               </p>
@@ -493,7 +480,7 @@ function WellnessCalculator() {
               </p>
               <button
                 onClick={() => setActiveTab('profile')}
-                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                className="px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-lg hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-colors duration-200"
               >
                 Go to Profile Setup
               </button>
