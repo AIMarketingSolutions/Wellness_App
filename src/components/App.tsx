@@ -1,5 +1,6 @@
 @@ .. @@
    return (
+   )
 -    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 flex items-center justify-center p-4">
 +    <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white flex items-center justify-center p-4">
        <div className="w-full max-w-2xl mx-auto text-center space-y-12">
