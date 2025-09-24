@@ -374,7 +374,7 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
             </div>
             <button
               onClick={() => setShowExerciseSelector(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               Add Exercise
