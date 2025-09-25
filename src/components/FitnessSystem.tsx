@@ -390,7 +390,7 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
   };
 
   // Safe state updates to prevent race conditions
-  const safeSetState = <T>(setter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
+  const safeSetState = <T,>(setter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
     WebContainerUtils.safeStateUpdate(setter, value);
   };
 
