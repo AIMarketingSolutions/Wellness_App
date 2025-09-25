@@ -1,3 +1,5 @@
+import React from 'react';
+
 // WebContainer-specific utilities to handle iframe and cross-origin issues
 
 export class WebContainerUtils {
