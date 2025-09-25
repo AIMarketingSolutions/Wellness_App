@@ -464,13 +464,15 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
             Fitness Routine System
           </h1>
           <div className="text-right">
-            <p className="text-sm text-gray-600">Enhanced TEE</p>
-            <p className="text-2xl font-bold text-[#52C878]">
-              {userProfile.tee_calories + currentWorkout.total_calories}
-            </p>
-            <p className="text-xs text-gray-500">
-              Base: {userProfile.tee_calories} + Exercise: {currentWorkout.total_calories}
-            </p>
+            <div className="bg-white/50 p-3 rounded-lg">
+              <p className="text-sm text-gray-600">Enhanced Total Daily Calories</p>
+              <p className="text-2xl font-bold text-[#52C878]">
+                {userProfile.tee_calories + currentWorkout.total_calories}
+              </p>
+              <p className="text-xs text-gray-500">
+                Base: {userProfile.tee_calories} + Exercise: {currentWorkout.total_calories}
+              </p>
+            </div>
           </div>
         </div>
       </div>

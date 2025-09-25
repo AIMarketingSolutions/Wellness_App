@@ -358,11 +358,13 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
             Personalized Meal Planning System
           </h1>
           <div className="text-right">
-            <p className="text-sm text-gray-600">Metabolic Profile</p>
-            <p className="font-semibold text-[#2C3E50] capitalize">{userProfile.metabolic_profile.replace('_', ' ')}</p>
-            <p className="text-xs text-gray-500">
-              P:{userProfile.protein_percentage}% C:{userProfile.carb_percentage}% F:{userProfile.fat_percentage}%
-            </p>
+            <div className="bg-white/50 p-3 rounded-lg">
+              <p className="text-sm text-gray-600">Total Daily Calories</p>
+              <p className="text-2xl font-bold text-[#52C878]">{userProfile.tee_calories}</p>
+              <p className="text-xs text-gray-500">
+                P:{userProfile.protein_percentage}% C:{userProfile.carb_percentage}% F:{userProfile.fat_percentage}%
+              </p>
+            </div>
           </div>
         </div>
 

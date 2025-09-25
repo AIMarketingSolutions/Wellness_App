@@ -1047,15 +1047,26 @@ function WellnessCalculator() {
                 Your profile is complete! Now you can create a customized meal plan based on your {results.dailyCalorieTarget} daily calorie target 
                 and {results.proteinPercentage}%/{results.carbPercentage}%/{results.fatPercentage}% macro split.
               </p>
-              <button
-                onClick={() => {
-                  // This would navigate to meal planning - for now just show message
-                  alert('Meal planning system integration coming next!');
-                }}
-                className="px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-lg hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                Create My Meal Plan →
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    // Navigate to transformation tracker to see complete TEE breakdown
+                    window.location.hash = 'transformation-tracker';
+                  }}
+                  className="px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-lg hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  View Transformation Tracker →
+                </button>
+                <button
+                  onClick={() => {
+                    // Navigate to meal planning
+                    window.location.hash = 'meal-plan';
+                  }}
+                  className="px-6 py-3 bg-white text-[#52C878] font-semibold rounded-lg border-2 border-[#52C878] hover:bg-[#52C878]/10 transition-all duration-200"
+                >
+                  Create Meal Plan
+                </button>
+              </div>
             </div>
           </div>
         )}

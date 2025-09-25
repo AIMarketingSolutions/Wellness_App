@@ -4,6 +4,7 @@ import { signOut, getCurrentUser } from '../lib/supabase';
 import WellnessCalculator from './WellnessCalculator';
 import MealPlanningSystem from './MealPlanningSystem';
 import FitnessSystem from './FitnessSystem';
+import TransformationTracker from './TransformationTracker';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -100,9 +101,12 @@ function Dashboard({ onLogout }: DashboardProps) {
             </div>
             
             <div className="flex-1 text-right pr-6">
-              <span className="text-black font-medium">
+              <button
+                onClick={() => setActiveView('transformation-tracker')}
+                className="text-white font-medium hover:text-yellow-200 transition-colors duration-200 cursor-pointer"
+              >
                 Total Daily Calories: {user ? '2,150' : '---'}
-              </span>
+              </button>
             </div>
           </div>
 
@@ -186,48 +190,7 @@ function Dashboard({ onLogout }: DashboardProps) {
           <WellnessCalculator />
         </main>
       ) : activeView === 'transformation-tracker' ? (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Transformation Tracker</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* TEE Display - No Formula */}
-              <div className="bg-gradient-to-br from-[#52C878]/10 to-[#4A90E2]/10 p-6 rounded-2xl border border-[#52C878]/20">
-                <h3 className="text-xl font-semibold text-[#2C3E50] mb-4">Total Energy Expenditure</h3>
-                <div className="text-center">
-                  <p className="text-4xl font-bold text-[#52C878] mb-2">2,150</p>
-                  <p className="text-[#2C3E50] font-medium">calories per day</p>
-                  <p className="text-sm text-gray-600 mt-2">Based on your activity level and metabolism</p>
-                </div>
-              </div>
-              
-              {/* Body Fat Percentage - No Formula */}
-              <div className="bg-gradient-to-br from-[#4A90E2]/10 to-[#52C878]/10 p-6 rounded-2xl border border-[#4A90E2]/20">
-                <h3 className="text-xl font-semibold text-[#2C3E50] mb-4">Body Fat Percentage</h3>
-                <div className="text-center">
-                  <p className="text-4xl font-bold text-[#4A90E2] mb-2">18.5%</p>
-                  <p className="text-[#2C3E50] font-medium">estimated body fat</p>
-                  <p className="text-sm text-gray-600 mt-2">Within healthy range for your profile</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Progress Charts Placeholder */}
-            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white/80 p-6 rounded-2xl border border-gray-100">
-                <h4 className="text-lg font-semibold text-[#2C3E50] mb-4">Weight Progress</h4>
-                <div className="h-48 bg-[#F8F9FA] rounded-lg flex items-center justify-center">
-                  <p className="text-gray-500">Progress chart coming soon</p>
-                </div>
-              </div>
-              <div className="bg-white/80 p-6 rounded-2xl border border-gray-100">
-                <h4 className="text-lg font-semibold text-[#2C3E50] mb-4">Body Composition</h4>
-                <div className="h-48 bg-[#F8F9FA] rounded-lg flex items-center justify-center">
-                  <p className="text-gray-500">Composition chart coming soon</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+        <TransformationTracker />
       ) : activeView === 'meal-plan' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <MealPlanningSystem 
