@@ -98,8 +98,22 @@ function WellnessCalculator() {
       .single();
 
     if (data && !error) {
-      setProfile(data);
-      calculateResults(data);
+      // Handle null values from database by providing defaults
+      const cleanedProfile = {
+        ...data,
+        age: data.age ?? 25,
+        weight_lbs: data.weight_lbs ?? 154,
+        height_inches: data.height_inches ?? 67,
+        waist_inches: data.waist_inches ?? 32,
+        neck_inches: data.neck_inches ?? 15,
+        hip_inches: data.hip_inches ?? 36,
+        custom_protein_percentage: data.custom_protein_percentage ?? undefined,
+        custom_carb_percentage: data.custom_carb_percentage ?? undefined,
+        custom_fat_percentage: data.custom_fat_percentage ?? undefined,
+        target_weight: data.target_weight ?? data.weight_lbs ?? 154
+      };
+      setProfile(cleanedProfile);
+      calculateResults(cleanedProfile);
     }
   };
 
@@ -111,11 +125,16 @@ function WellnessCalculator() {
 
     setLoading(true);
     try {
-      // Ensure user_id is set to the authenticated user's ID
-      const profileToSave = {
+      // Create profile for saving with constraint-compliant values
+      let profileToSave = {
         ...profile,
         user_id: user.id
       };
+
+      // Handle 'custom' metabolic profile for database constraint
+      if (profileToSave.metabolic_profile === 'custom') {
+        profileToSave.metabolic_profile = 'medium_oxidizer';
+      }
 
       const { data, error } = await supabase
         .from('user_profiles')
@@ -125,7 +144,14 @@ function WellnessCalculator() {
 
       if (error) throw error;
 
-      setProfile(data);
+      // Keep local state with 'custom' if user had custom macros
+      const updatedProfile = {
+        ...data,
+        metabolic_profile: (profile.custom_protein_percentage && 
+                           profile.custom_carb_percentage && 
+                           profile.custom_fat_percentage) ? 'custom' : data.metabolic_profile
+      };
+      setProfile(updatedProfile);
       await calculateResults(data);
       
       // Save calculations to database
