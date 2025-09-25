@@ -3,31 +3,32 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file contains VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY')
-}
+// Create a mock client if credentials are missing or placeholders
+const isPlaceholder = !supabaseUrl || !supabaseAnonKey || 
+  supabaseUrl.includes('your-project-ref') || 
+  supabaseUrl.includes('placeholder') ||
+  supabaseAnonKey.includes('your-anon-key') || 
+  supabaseAnonKey.includes('placeholder') ||
+  supabaseAnonKey.length < 100;
 
-// Validate URL format
-try {
-  new URL(supabaseUrl)
-} catch {
-  throw new Error(`Invalid VITE_SUPABASE_URL format: "${supabaseUrl}". Expected format: https://your-project-id.supabase.co`)
-}
+// Use placeholder values for development if real credentials aren't available
+const finalUrl = isPlaceholder ? 'https://placeholder.supabase.co' : supabaseUrl;
+const finalKey = isPlaceholder ? 'placeholder-key' : supabaseAnonKey;
 
-// Validate that the URL is not a placeholder
-if (supabaseUrl.includes('your-project-ref') || supabaseUrl.includes('placeholder')) {
-  throw new Error('VITE_SUPABASE_URL appears to be a placeholder. Please replace with your actual Supabase project URL from your Supabase dashboard.')
-}
-
-// Validate that the anon key is not a placeholder
-if (supabaseAnonKey.includes('your-anon-key') || supabaseAnonKey.includes('placeholder') || supabaseAnonKey.length < 100) {
-  throw new Error('VITE_SUPABASE_ANON_KEY appears to be invalid or a placeholder. Please replace with your actual anon key from your Supabase dashboard.')
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(finalUrl, finalKey)
 
 // Auth helper functions
 export const signUp = async (email: string, password: string, name: string) => {
+  if (isPlaceholder) {
+    return { 
+      data: null, 
+      error: { 
+        message: 'Supabase not configured. Please set up your Supabase credentials in the .env file. Go to https://supabase.com/dashboard to get your project URL and anon key.',
+        details: 'Missing or placeholder Supabase credentials'
+      } 
+    }
+  }
+  
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -52,6 +53,16 @@ export const signUp = async (email: string, password: string, name: string) => {
 }
 
 export const signIn = async (email: string, password: string) => {
+  if (isPlaceholder) {
+    return { 
+      data: null, 
+      error: { 
+        message: 'Supabase not configured. Please set up your Supabase credentials in the .env file. Go to https://supabase.com/dashboard to get your project URL and anon key.',
+        details: 'Missing or placeholder Supabase credentials'
+      } 
+    }
+  }
+  
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -70,6 +81,15 @@ export const signIn = async (email: string, password: string) => {
 }
 
 export const signOut = async () => {
+  if (isPlaceholder) {
+    return { 
+      error: { 
+        message: 'Supabase not configured. Please set up your Supabase credentials in the .env file.',
+        details: 'Missing or placeholder Supabase credentials'
+      } 
+    }
+  }
+  
   try {
     const { error } = await supabase.auth.signOut()
     return { error }
@@ -84,6 +104,16 @@ export const signOut = async () => {
 }
 
 export const getCurrentUser = async () => {
+  if (isPlaceholder) {
+    return { 
+      user: null, 
+      error: { 
+        message: 'Supabase not configured. Please set up your Supabase credentials in the .env file.',
+        details: 'Missing or placeholder Supabase credentials'
+      } 
+    }
+  }
+  
   try {
     const { data: { user }, error } = await supabase.auth.getUser()
     return { user, error }
@@ -99,6 +129,16 @@ export const getCurrentUser = async () => {
 }
 
 export const resendConfirmationEmail = async (email: string) => {
+  if (isPlaceholder) {
+    return { 
+      data: null, 
+      error: { 
+        message: 'Supabase not configured. Please set up your Supabase credentials in the .env file.',
+        details: 'Missing or placeholder Supabase credentials'
+      } 
+    }
+  }
+  
   try {
     const { data, error } = await supabase.auth.resend({
       type: 'signup',
