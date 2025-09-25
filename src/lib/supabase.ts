@@ -8,8 +8,7 @@ const isPlaceholder = !supabaseUrl || !supabaseAnonKey ||
   supabaseUrl.includes('your-project-ref') || 
   supabaseUrl.includes('placeholder') ||
   supabaseAnonKey.includes('your-anon-key') || 
-  supabaseAnonKey.includes('placeholder') ||
-  supabaseAnonKey.length < 100;
+  supabaseAnonKey.includes('placeholder');
 
 // Use placeholder values for development if real credentials aren't available
 const finalUrl = isPlaceholder ? 'https://placeholder.supabase.co' : supabaseUrl;
