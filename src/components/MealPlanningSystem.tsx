@@ -971,13 +971,15 @@ function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, on
           >
             Cancel
           </button>
-          <button
-            onClick={handleAddFood}
-            disabled={!selectedFood || quantity <= 0}
-            className="px-8 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            Review & Add Food
-          </button>
+          {selectedFood && (
+            <button
+              onClick={handleAddFood}
+              disabled={quantity <= 0}
+              className="px-8 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              Review & Add Food
+            </button>
+          )}
         </div>
       </div>
     </div>
