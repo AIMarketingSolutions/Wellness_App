@@ -5,6 +5,7 @@ import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignupPage';
 import Dashboard from './components/Dashboard';
 import { supabase } from './lib/supabase';
+import { WebContainerErrorBoundary } from './utils/webcontainer';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'dashboard'>('home');
@@ -75,6 +76,7 @@ function App() {
   }
 
   return (
+    <WebContainerErrorBoundary>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl mx-auto text-center space-y-12">
         {/* Header Section */}
@@ -160,6 +162,7 @@ function App() {
         </div>
       </div>
     </div>
+    </WebContainerErrorBoundary>
   );
 }
 

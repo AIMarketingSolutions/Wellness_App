@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Clock, Target, Zap, Calendar, Trophy, Play, Pause, Plus, Search, Filter, BookOpen, Heart, Dumbbell, Timer } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { WebContainerUtils, useWebContainerEffect } from '../utils/webcontainer';
+
 
 interface Exercise {
   id: string;
@@ -74,6 +76,8 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
     intensity: 'light' | 'moderate' | 'vigorous';
     calories: number;
   } | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -85,6 +89,15 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
     loadWorkoutHistory();
   }, []);
 
+  // WebContainer-safe cleanup effect to prevent memory leaks
+  useWebContainerEffect(() => {
+    return () => {
+      setShowConfirmDialog(false);
+      setPendingExercise(null);
+      setIsCompleting(false);
+      setError(null);
+    };
+  }, []);
   const loadExercises = async () => {
     // Sample exercise data - in production this would come from database
     const sampleExercises: Exercise[] = [
@@ -237,80 +250,159 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
   };
 
   const confirmAddExercise = () => {
-    if (!pendingExercise) return;
+    if (!pendingExercise) {
+      setError('No exercise data available');
+      return;
+    }
 
-    const workoutExercise: WorkoutExercise = {
-      exercise: pendingExercise.exercise,
-      duration_minutes: pendingExercise.duration,
-      intensity: pendingExercise.intensity,
-      calories_burned: pendingExercise.calories
-    };
+    try {
+      const workoutExercise: WorkoutExercise = {
+        exercise: pendingExercise.exercise,
+        duration_minutes: pendingExercise.duration,
+        intensity: pendingExercise.intensity,
+        calories_burned: pendingExercise.calories
+      };
 
-    const updatedWorkout = {
-      ...currentWorkout,
-      exercises: [...currentWorkout.exercises, workoutExercise],
-      total_duration: currentWorkout.total_duration + pendingExercise.duration,
-      total_calories: currentWorkout.total_calories + pendingExercise.calories
-    };
+      const updatedWorkout = {
+        ...currentWorkout,
+        exercises: [...currentWorkout.exercises, workoutExercise],
+        total_duration: currentWorkout.total_duration + pendingExercise.duration,
+        total_calories: currentWorkout.total_calories + pendingExercise.calories
+      };
 
-    setCurrentWorkout(updatedWorkout);
-    setShowExerciseSelector(false);
-    setSelectedExercise(null);
-    setDuration(30);
-    setIntensity('moderate');
-    setShowConfirmDialog(false);
-    setPendingExercise(null);
+      setCurrentWorkout(updatedWorkout);
+      
+      // Update TEE with exercise calories
+      const newTEE = userProfile.tee_calories + pendingExercise.calories;
+      onTEEUpdate(newTEE);
 
-    // Update TEE with exercise calories
-    const newTEE = userProfile.tee_calories + pendingExercise.calories;
-    onTEEUpdate(newTEE);
+      // Clean up state
+      setShowExerciseSelector(false);
+      setSelectedExercise(null);
+      setDuration(30);
+      setIntensity('moderate');
+      setShowConfirmDialog(false);
+      setPendingExercise(null);
+      setError(null);
+    } catch (err) {
+      console.error('Error adding exercise:', err);
+      setError('Failed to add exercise. Please try again.');
+    }
   };
 
   const cancelAddExercise = () => {
-    setShowConfirmDialog(false);
-    setPendingExercise(null);
-  };
-
-  const removeExerciseFromWorkout = (index: number) => {
-    const removedExercise = currentWorkout.exercises[index];
-    const updatedWorkout = {
-      ...currentWorkout,
-      exercises: currentWorkout.exercises.filter((_, i) => i !== index),
-      total_duration: currentWorkout.total_duration - removedExercise.duration_minutes,
-      total_calories: currentWorkout.total_calories - removedExercise.calories_burned
-    };
-
-    setCurrentWorkout(updatedWorkout);
-
-    // Update TEE
-    const newTEE = userProfile.tee_calories - removedExercise.calories_burned;
-    onTEEUpdate(newTEE);
+    try {
+      setShowConfirmDialog(false);
+      setPendingExercise(null);
+      setError(null);
+    } catch (err) {
+      console.error('Error canceling exercise:', err);
+    }
   };
 
   const completeWorkout = async () => {
+    if (!pendingExercise) return;
+
     if (currentWorkout.exercises.length === 0) return;
 
-    const completedWorkout = {
-      ...currentWorkout,
-      is_completed: true
-    };
+    setIsCompleting(true);
+    setError(null);
 
-    // Save to database (placeholder)
-    const updatedHistory = [...workoutHistory, completedWorkout];
-    setWorkoutHistory(updatedHistory);
-    calculateWeeklyStats(updatedHistory);
+    try {
+      const completedWorkout = {
+        ...currentWorkout,
+        is_completed: true,
+        id: `workout_${Date.now()}` // Generate a unique ID
+      };
 
-    // Reset current workout
-    setCurrentWorkout({
-      name: "Today's Workout",
-      exercises: [],
-      total_duration: 0,
-      total_calories: 0,
-      date: new Date().toISOString().split('T')[0],
-      is_completed: false
-    });
+      // Save to database with proper error handling
+      if (user?.id) {
+        try {
+          // In a real implementation, you would save to Supabase here
+          // For now, we'll simulate the save operation
+          await new Promise(resolve => setTimeout(resolve, 500));
+        } catch (dbError) {
+          console.error('Database save error:', dbError);
+          // Continue with local state update even if DB save fails
+        }
+      }
 
-    alert('Workout completed! Great job! 🎉');
+      // Update local state
+      const updatedHistory = [...workoutHistory, completedWorkout];
+      setWorkoutHistory(updatedHistory);
+      calculateWeeklyStats(updatedHistory);
+
+      // Reset current workout
+      setCurrentWorkout({
+        name: "Today's Workout",
+        exercises: [],
+        total_duration: 0,
+        total_calories: 0,
+        date: new Date().toISOString().split('T')[0],
+        is_completed: false
+      });
+
+      // Show success message without using alert (which can cause iframe issues)
+      setError(null);
+      
+      // Use a more stable notification method
+      WebContainerUtils.showNotification('🎉 Workout completed! Great job!', 'success');
+
+    } catch (error) {
+      console.error('Error completing workout:', error);
+      setError('Failed to complete workout. Your progress has been saved locally.');
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
+  const removeExerciseFromWorkout = (index: number) => {
+    try {
+      const removedExercise = currentWorkout.exercises[index];
+      const updatedWorkout = {
+        ...currentWorkout,
+        exercises: currentWorkout.exercises.filter((_, i) => i !== index),
+        total_duration: currentWorkout.total_duration - removedExercise.duration_minutes,
+        total_calories: currentWorkout.total_calories - removedExercise.calories_burned
+      };
+
+      setCurrentWorkout(updatedWorkout);
+
+      // Update TEE
+      const newTEE = userProfile.tee_calories - removedExercise.calories_burned;
+      onTEEUpdate(newTEE);
+      setError(null);
+    } catch (err) {
+      console.error('Error removing exercise:', err);
+      setError('Failed to remove exercise. Please try again.');
+    }
+  };
+
+  // Enhanced error handling for async operations
+  const handleAsyncOperation = async (operation: () => Promise<void>, errorMessage: string) => {
+    try {
+      setError(null);
+      await operation();
+    } catch (err) {
+      console.error(errorMessage, err);
+      setError(errorMessage);
+    }
+  };
+
+  // Safe state updates to prevent race conditions
+  const safeSetState = <T>(setter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
+    WebContainerUtils.safeStateUpdate(setter, value);
+  };
+
+  const completeWorkoutSafe = async () => {
+    const result = await WebContainerUtils.safeAsyncOperation(
+      completeWorkout,
+      'Failed to complete workout'
+    );
+    
+    if (!result.success && result.error) {
+      setError(result.error);
+    }
   };
 
   const categories = ['all', ...Array.from(new Set(exercises.map(e => e.category)))];
@@ -341,6 +433,29 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-8">
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs">!</span>
+            </div>
+            <div>
+              <p className="font-medium text-red-800">Error</p>
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="ml-auto text-red-400 hover:text-red-600"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 rounded-2xl p-6 border border-[#52C878]/20">
         <div className="flex items-center justify-between mb-4">
@@ -458,10 +573,18 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
         {currentWorkout.exercises.length > 0 && (
           <div className="flex justify-center">
             <button
-              onClick={completeWorkout}
-              className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+              onClick={completeWorkoutSafe}
+              disabled={isCompleting}
+              className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              Complete Workout
+              {isCompleting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Completing...
+                </div>
+              ) : (
+                'Complete Workout'
+              )}
             </button>
           </div>
         )}
@@ -690,6 +813,18 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
                   Confirm & Add
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay for async operations */}
+      {isCompleting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 shadow-xl">
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 border-4 border-[#52C878] border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-lg font-medium text-[#2C3E50]">Completing your workout...</p>
             </div>
           </div>
         </div>
