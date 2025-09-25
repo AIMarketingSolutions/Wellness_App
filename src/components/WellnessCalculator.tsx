@@ -140,10 +140,24 @@ function WellnessCalculator() {
   };
 
   const calculateResults = async (profileData: UserProfile) => {
+    // Validate input data to prevent NaN/null values
+    if (!profileData.height_inches || profileData.height_inches <= 0 || 
+        !profileData.weight_lbs || profileData.weight_lbs <= 0 || 
+        !profileData.age || profileData.age <= 0) {
+      console.error('Invalid profile data for calculations');
+      return;
+    }
+
     // Calculate BMI
     const heightInMeters = (profileData.height_inches * 2.54) / 100;
     const weightInKg = profileData.weight_lbs / 2.20462;
     const bmi = weightInKg / (heightInMeters * heightInMeters);
+
+    // Validate BMI calculation
+    if (!isFinite(bmi) || bmi <= 0) {
+      console.error('Invalid BMI calculation');
+      return;
+    }
 
     // Use imperial units directly for BMR calculation
     const weightInPounds = profileData.weight_lbs;
@@ -155,6 +169,12 @@ function WellnessCalculator() {
       bmr = 66.47 + (6.24 * weightInPounds) + (12.7 * heightInInches) - (6.76 * profileData.age);
     } else {
       bmr = 65.51 + (4.34 * weightInPounds) + (4.7 * heightInInches) - (4.7 * profileData.age);
+    }
+
+    // Validate BMR calculation
+    if (!isFinite(bmr) || bmr <= 0) {
+      console.error('Invalid BMR calculation');
+      return;
     }
 
     // Calculate TEE based on activity level
@@ -173,6 +193,12 @@ function WellnessCalculator() {
       bodyFatPercentage = 1.20 * bmi + 0.23 * profileData.age - 16.2;
     } else {
       bodyFatPercentage = 1.20 * bmi + 0.23 * profileData.age - 5.4;
+    }
+
+    // Ensure body fat percentage is valid and non-negative
+    bodyFatPercentage = Math.max(0, bodyFatPercentage);
+    if (!isFinite(bodyFatPercentage)) {
+      bodyFatPercentage = 0;
     }
 
     // Calculate weight loss targets
@@ -217,8 +243,8 @@ function WellnessCalculator() {
     const calculationResults: CalculationResults = {
       ree: Math.round(bmr),
       tee: Math.round(tee),
-      bmi: Math.round(bmi * 10) / 10,
-      bodyFatPercentage: Math.round(bodyFatPercentage * 10) / 10,
+      bmi: isFinite(bmi) ? Math.round(bmi * 10) / 10 : 0,
+      bodyFatPercentage: isFinite(bodyFatPercentage) ? Math.round(bodyFatPercentage * 10) / 10 : 0,
       proteinPercentage: macros.protein,
       carbPercentage: macros.carb,
       fatPercentage: macros.fat,
@@ -232,6 +258,13 @@ function WellnessCalculator() {
   };
 
   const saveCalculations = async (userId: string, calculations: CalculationResults) => {
+    // Validate calculations before saving to prevent null constraint violations
+    if (!isFinite(calculations.bmi) || calculations.bmi <= 0 ||
+        !isFinite(calculations.bodyFatPercentage) || calculations.bodyFatPercentage < 0) {
+      console.error('Invalid calculations, skipping database save');
+      return;
+    }
+
     // Save TEE calculation
     await supabase.from('tee_calculations').insert({
       user_id: userId,
