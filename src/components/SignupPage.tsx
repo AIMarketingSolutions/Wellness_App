@@ -21,24 +21,48 @@ function SignupPage({ onBack, onSignupSuccess }: SignupPageProps) {
     setError(null);
     setSuccess(false);
 
+    // Basic validation
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      setLoading(false);
+      return;
+    }
+
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await signUp(email, password, name);
       
       if (error) {
-        if (error.message.includes('Email not confirmed')) {
-          setError('Please check your email inbox (including spam/junk folders) and click the confirmation link to activate your account.');
+        if (error.message.includes('User already registered')) {
+          setError('An account with this email already exists. Please try logging in instead.');
+        } else if (error.message.includes('Password should be at least')) {
+          setError('Password must be at least 6 characters long.');
+        } else if (error.message.includes('Unable to validate email address')) {
+          setError('Please enter a valid email address.');
         } else {
-          setError(error.message);
+          setError(`Signup failed: ${error.message}`);
         }
       } else if (data.user) {
         setSuccess(true);
-        // Auto-login after successful signup
-        setTimeout(() => {
-          onSignupSuccess();
-        }, 2000);
+        if (data.user.email_confirmed_at) {
+          // User is immediately confirmed, redirect to dashboard
+          setTimeout(() => {
+            onSignupSuccess();
+          }, 1500);
+        } else {
+          // User needs to confirm email
+          setError('Please check your email inbox (including spam/junk folders) and click the confirmation link to activate your account, then return to login.');
+          setSuccess(false);
+        }
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      console.error('Signup error:', err);
+      setError('Network error: Unable to connect to the server. Please check your internet connection and try again.');
     } finally {
       setLoading(false);
     }

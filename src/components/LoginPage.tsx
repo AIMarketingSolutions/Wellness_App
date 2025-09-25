@@ -20,23 +20,30 @@ function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setShowResendButton(false);
 
     try {
       const { data, error } = await signIn(email, password);
       
       if (error) {
-        if (error.message.includes('Email not confirmed')) {
+        if (error.message.includes('Email not confirmed') || error.message.includes('email_not_confirmed')) {
           setError('Please check your email inbox (including spam/junk folders) and click the confirmation link before logging in.');
           setShowResendButton(true);
+        } else if (error.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please check your credentials and try again.');
+        } else if (error.message.includes('Too many requests')) {
+          setError('Too many login attempts. Please wait a few minutes before trying again.');
         } else {
-          setError(error.message);
+          setError(`Login failed: ${error.message}`);
           setShowResendButton(false);
         }
       } else if (data.user) {
+        setError(null);
         onLoginSuccess();
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      console.error('Login error:', err);
+      setError('Network error: Unable to connect to the server. Please check your internet connection and try again.');
     } finally {
       setLoading(false);
     }
