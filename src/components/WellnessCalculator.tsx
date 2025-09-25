@@ -511,9 +511,9 @@ function WellnessCalculator() {
                   type="number"
                   step="0.1"
                   value={profile.weight_lbs}
-                  onChange={(e) => setProfile({ ...profile, weight_lbs: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-red-400 bg-gray-50"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                   disabled
+                  readOnly
                 />
                 <p className="text-xs text-gray-500 mt-1">From your basic information above</p>
               </div>
