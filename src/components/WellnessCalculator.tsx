@@ -496,6 +496,220 @@ function WellnessCalculator() {
             </div>
           </div>
 
+          {/* Section 5: Weight Loss Goal Calculator */}
+          <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-xl border border-red-200">
+            <h3 className="text-xl font-semibold text-[#2C3E50] mb-6 flex items-center gap-2">
+              <Target className="w-5 h-5" />
+              Weight Loss Goal Calculator
+            </h3>
+            
+            {/* Current Weight & Target Weight */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Current Weight (lbs)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={profile.weight_lbs}
+                  onChange={(e) => setProfile({ ...profile, weight_lbs: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-red-400 bg-gray-50"
+                  disabled
+                />
+                <p className="text-xs text-gray-500 mt-1">From your basic information above</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Target Weight (lbs)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={profile.target_weight || ''}
+                  onChange={(e) => setProfile({ ...profile, target_weight: parseFloat(e.target.value) || undefined })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-red-400"
+                  placeholder="Enter your goal weight"
+                  min="80"
+                  max="400"
+                />
+                {profile.target_weight && profile.weight_lbs && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    {profile.weight_lbs > profile.target_weight 
+                      ? `Goal: Lose ${(profile.weight_lbs - profile.target_weight).toFixed(1)} lbs`
+                      : profile.weight_lbs < profile.target_weight
+                      ? `Goal: Gain ${(profile.target_weight - profile.weight_lbs).toFixed(1)} lbs`
+                      : 'Goal: Maintain current weight'
+                    }
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Weight Loss Rate Selection */}
+            <div className="mb-6">
+              <h4 className="font-semibold text-[#2C3E50] mb-4">Weekly Weight Loss Goal</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  {
+                    value: 'maintain',
+                    title: 'Maintain Weight',
+                    weeklyLoss: '0 lbs/week',
+                    dailyDeficit: '0 calories/day',
+                    weeklyDeficit: 0,
+                    recommendation: 'Perfect for body recomposition',
+                    safety: 'safe',
+                    color: 'blue'
+                  },
+                  {
+                    value: 'lose_0_5',
+                    title: 'Gradual Loss',
+                    weeklyLoss: '0.5 lbs/week',
+                    dailyDeficit: '250 calories/day',
+                    weeklyDeficit: 1750,
+                    recommendation: 'Sustainable & easy to maintain',
+                    safety: 'safe',
+                    color: 'green'
+                  },
+                  {
+                    value: 'lose_1',
+                    title: 'Moderate Loss',
+                    weeklyLoss: '1 lb/week',
+                    dailyDeficit: '500 calories/day',
+                    weeklyDeficit: 3500,
+                    recommendation: 'Balanced approach - most popular',
+                    safety: 'safe',
+                    color: 'yellow'
+                  },
+                  {
+                    value: 'lose_1_5',
+                    title: 'Aggressive Loss',
+                    weeklyLoss: '1.5 lbs/week',
+                    dailyDeficit: '750 calories/day',
+                    weeklyDeficit: 5250,
+                    recommendation: 'Requires discipline & planning',
+                    safety: 'caution',
+                    color: 'orange'
+                  },
+                  {
+                    value: 'lose_2',
+                    title: 'Maximum Loss',
+                    weeklyLoss: '2 lbs/week',
+                    dailyDeficit: '1000 calories/day',
+                    weeklyDeficit: 7000,
+                    recommendation: 'Medical supervision recommended',
+                    safety: 'warning',
+                    color: 'red'
+                  }
+                ].map((goal) => (
+                  <button
+                    key={goal.value}
+                    onClick={() => setProfile({ ...profile, weight_loss_goal: goal.value as any })}
+                    className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                      profile.weight_loss_goal === goal.value
+                        ? `border-${goal.color}-500 bg-${goal.color}-50`
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <h5 className="font-semibold text-[#2C3E50] mb-1">{goal.title}</h5>
+                    <p className="text-sm font-medium text-gray-800 mb-1">{goal.weeklyLoss}</p>
+                    <p className="text-xs text-gray-600 mb-2">{goal.dailyDeficit}</p>
+                    <p className="text-xs text-gray-500 mb-2">{goal.recommendation}</p>
+                    {goal.safety === 'warning' && (
+                      <p className="text-xs text-red-600 font-medium">⚠ Aggressive Rate</p>
+                    )}
+                    {goal.safety === 'caution' && (
+                      <p className="text-xs text-orange-600 font-medium">⚡ Requires Commitment</p>
+                    )}
+                    {goal.safety === 'safe' && (
+                      <p className="text-xs text-green-600 font-medium">✓ Sustainable</p>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Deficit Implementation Method */}
+            {profile.weight_loss_goal && profile.weight_loss_goal !== 'maintain' && (
+              <div className="mb-6">
+                <h4 className="font-semibold text-[#2C3E50] mb-4">How to Create Your Calorie Deficit</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    {
+                      value: 'diet_only',
+                      title: 'Diet Only',
+                      description: 'Reduce food intake by full deficit amount',
+                      pros: 'Simple to track, no exercise required',
+                      cons: 'May feel restrictive, slower metabolism adaptation'
+                    },
+                    {
+                      value: 'exercise_only',
+                      title: 'Exercise Only',
+                      description: 'Maintain current eating, add exercise to burn calories',
+                      pros: 'Keep current eating habits, build fitness',
+                      cons: 'Time-intensive, exercise appetite increase'
+                    },
+                    {
+                      value: 'combined',
+                      title: 'Combined Approach',
+                      description: 'Split deficit between reduced eating and increased exercise',
+                      pros: 'Most sustainable, builds healthy habits',
+                      cons: 'Requires planning both diet and exercise'
+                    }
+                  ].map((method) => (
+                    <button
+                      key={method.value}
+                      onClick={() => setProfile({ ...profile, deficit_method: method.value as any })}
+                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                        profile.deficit_method === method.value
+                          ? 'border-purple-500 bg-purple-50'
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
+                    >
+                      <h5 className="font-semibold text-[#2C3E50] mb-2">{method.title}</h5>
+                      <p className="text-sm text-gray-600 mb-3">{method.description}</p>
+                      <div className="text-xs">
+                        <p className="text-green-600 mb-1">✓ {method.pros}</p>
+                        <p className="text-orange-600">⚠ {method.cons}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Timeline Estimation */}
+            {profile.target_weight && profile.weight_loss_goal && profile.weight_loss_goal !== 'maintain' && (
+              <div className="bg-white p-4 rounded-xl border border-gray-200">
+                <h4 className="font-semibold text-[#2C3E50] mb-3">Goal Timeline Estimation</h4>
+                {(() => {
+                  const weightToLose = profile.weight_lbs - (profile.target_weight || profile.weight_lbs);
+                  const weeklyRates = {
+                    lose_0_5: 0.5,
+                    lose_1: 1,
+                    lose_1_5: 1.5,
+                    lose_2: 2
+                  };
+                  const weeklyRate = weeklyRates[profile.weight_loss_goal as keyof typeof weeklyRates] || 0;
+                  const weeksToGoal = Math.ceil(weightToLose / weeklyRate);
+                  const monthsToGoal = Math.ceil(weeksToGoal / 4.33);
+                  
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold text-purple-600">{weightToLose.toFixed(1)}</p>
+                        <p className="text-sm text-gray-600">lbs to lose</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-blue-600">{weeksToGoal}</p>
+                        <p className="text-sm text-gray-600">weeks estimated</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-green-600">{monthsToGoal}</p>
+                        <p className="text-sm text-gray-600">months estimated</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
           {/* Section 3: Activity Level Assessment */}
           <div className="bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20">
             <h3 className="text-xl font-semibold text-[#2C3E50] mb-6 flex items-center gap-2">
@@ -711,6 +925,47 @@ function WellnessCalculator() {
               </div>
             </div>
 
+            {/* Weight Loss Summary */}
+            {profile.weight_loss_goal && profile.weight_loss_goal !== 'maintain' && (
+              <div className="mt-8 p-6 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200">
+                <h4 className="font-semibold text-[#2C3E50] mb-4">Weight Loss Plan Summary</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-1">Weekly Goal</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {profile.weight_loss_goal === 'lose_0_5' ? '0.5' :
+                       profile.weight_loss_goal === 'lose_1' ? '1' :
+                       profile.weight_loss_goal === 'lose_1_5' ? '1.5' :
+                       profile.weight_loss_goal === 'lose_2' ? '2' : '0'} lbs
+                    </p>
+                    <p className="text-xs text-gray-500">per week</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-1">Daily Deficit</p>
+                    <p className="text-2xl font-bold text-orange-600">{results.dailyDeficit}</p>
+                    <p className="text-xs text-gray-500">calories</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-1">Method</p>
+                    <p className="text-lg font-bold text-purple-600 capitalize">
+                      {profile.deficit_method?.replace('_', ' ') || 'Not selected'}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-1">Safety Level</p>
+                    <p className={`text-lg font-bold ${
+                      profile.weight_loss_goal === 'lose_2' ? 'text-red-600' :
+                      profile.weight_loss_goal === 'lose_1_5' ? 'text-orange-600' :
+                      'text-green-600'
+                    }`}>
+                      {profile.weight_loss_goal === 'lose_2' ? '⚠ Aggressive' :
+                       profile.weight_loss_goal === 'lose_1_5' ? '⚡ Moderate' :
+                       '✓ Safe'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Macro Breakdown */}
             <div className="mt-8 p-6 bg-gray-50 rounded-xl">
               <h4 className="font-semibold text-[#2C3E50] mb-4">Your Personalized Macro Targets</h4>
@@ -743,7 +998,7 @@ function WellnessCalculator() {
             {results.dailyCalorieTarget <= (profile.gender === 'male' ? 1500 : 1200) && results.dailyDeficit > 0 && (
               <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <Target className="w-5 h-5 text-red-500 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-red-800">Minimum Calorie Limit Reached</p>
                     <p className="text-sm text-red-600 mt-1">
@@ -755,6 +1010,36 @@ function WellnessCalculator() {
               </div>
             )}
 
+            {/* Professional Guidance Warnings */}
+            {profile.weight_loss_goal === 'lose_2' && (
+              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <Target className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-red-800">Aggressive Weight Loss Rate</p>
+                    <p className="text-sm text-red-600 mt-1">
+                      Losing 2 lbs per week requires a significant calorie deficit. Consider consulting with a healthcare provider 
+                      or registered dietitian for guidance and monitoring.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {profile.weight_loss_goal === 'lose_1_5' && (
+              <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <Target className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-orange-800">Moderate Weight Loss Rate</p>
+                    <p className="text-sm text-orange-600 mt-1">
+                      This rate requires consistent adherence to your calorie deficit. Focus on sustainable habits 
+                      and consider incorporating both diet and exercise strategies.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Next Steps */}
             <div className="mt-8 p-6 bg-[#52C878]/5 rounded-xl border border-[#52C878]/20">
               <h4 className="font-semibold text-[#2C3E50] mb-3">Ready for Your Personalized Meal Plan?</h4>
