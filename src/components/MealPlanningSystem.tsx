@@ -70,6 +70,16 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
   const [currentMealIndex, setCurrentMealIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingFood, setPendingFood] = useState<{
+    mealIndex: number;
+    foodItem: FoodItem;
+    quantity: number;
+    calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+  } | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -207,31 +217,54 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
     const carbs = (foodItem.carbs_per_100g * quantity) / 100;
     const fat = (foodItem.fat_per_100g * quantity) / 100;
 
-    const newFood: MealFood = {
-      food_item_id: foodItem.id,
-      food_item: foodItem,
-      quantity_g: quantity,
+    // Set pending food for confirmation
+    setPendingFood({
+      mealIndex,
+      foodItem,
+      quantity,
       calories: Math.round(calories * 100) / 100,
       protein_g: Math.round(protein * 100) / 100,
       carbs_g: Math.round(carbs * 100) / 100,
       fat_g: Math.round(fat * 100) / 100
+    });
+    setShowConfirmDialog(true);
+  };
+
+  const confirmAddFood = () => {
+    if (!pendingFood) return;
+
+    const newFood: MealFood = {
+      food_item_id: pendingFood.foodItem.id,
+      food_item: pendingFood.foodItem,
+      quantity_g: pendingFood.quantity,
+      calories: pendingFood.calories,
+      protein_g: pendingFood.protein_g,
+      carbs_g: pendingFood.carbs_g,
+      fat_g: pendingFood.fat_g
     };
 
     const updatedMeals = [...meals];
-    updatedMeals[mealIndex].foods.push(newFood);
+    updatedMeals[pendingFood.mealIndex].foods.push(newFood);
     
     // Update actual totals
-    updatedMeals[mealIndex].actual_calories += newFood.calories;
-    updatedMeals[mealIndex].actual_protein_g += newFood.protein_g;
-    updatedMeals[mealIndex].actual_carbs_g += newFood.carbs_g;
-    updatedMeals[mealIndex].actual_fat_g += newFood.fat_g;
+    updatedMeals[pendingFood.mealIndex].actual_calories += newFood.calories;
+    updatedMeals[pendingFood.mealIndex].actual_protein_g += newFood.protein_g;
+    updatedMeals[pendingFood.mealIndex].actual_carbs_g += newFood.carbs_g;
+    updatedMeals[pendingFood.mealIndex].actual_fat_g += newFood.fat_g;
 
     setMeals(updatedMeals);
     setShowFoodSelector(false);
     setSelectedMeal(null);
+    setShowConfirmDialog(false);
+    setPendingFood(null);
     
     // Check for macro balance and show suggestions
-    checkMacroBalance(mealIndex, updatedMeals[mealIndex]);
+    checkMacroBalance(pendingFood.mealIndex, updatedMeals[pendingFood.mealIndex]);
+  };
+
+  const cancelAddFood = () => {
+    setShowConfirmDialog(false);
+    setPendingFood(null);
   };
 
   const removeFoodFromMeal = (mealIndex: number, foodIndex: number) => {
@@ -684,6 +717,64 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
           }}
         />
       )}
+
+      {/* Food Confirmation Dialog */}
+      {showConfirmDialog && pendingFood && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-[#2C3E50]">Confirm Food Addition</h3>
+            </div>
+            
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="bg-[#52C878]/10 p-4 rounded-xl mb-4">
+                  <h4 className="font-semibold text-[#2C3E50] mb-2">{pendingFood.foodItem.name}</h4>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {pendingFood.quantity}g ({(pendingFood.quantity / 28.35).toFixed(1)} oz)
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-gray-600">Calories</p>
+                      <p className="font-bold text-[#2C3E50]">{Math.round(pendingFood.calories)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Protein</p>
+                      <p className="font-bold text-green-600">{Math.round(pendingFood.protein_g)}g</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Carbs</p>
+                      <p className="font-bold text-yellow-600">{Math.round(pendingFood.carbs_g)}g</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Fat</p>
+                      <p className="font-bold text-purple-600">{Math.round(pendingFood.fat_g)}g</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-600">
+                  Add this food to your {getMealTypeLabel(meals[pendingFood.mealIndex]?.meal_type || 'meal', pendingFood.mealIndex)}?
+                </p>
+              </div>
+              
+              <div className="flex gap-4">
+                <button
+                  onClick={cancelAddFood}
+                  className="flex-1 px-4 py-3 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmAddFood}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                >
+                  Confirm & Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -885,7 +976,7 @@ function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, on
             disabled={!selectedFood || quantity <= 0}
             className="px-8 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            Add to Meal
+            Review & Add Food
           </button>
         </div>
       </div>

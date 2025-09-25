@@ -67,6 +67,13 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
     workouts_completed: 0
   });
   const [user, setUser] = useState<any>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingExercise, setPendingExercise] = useState<{
+    exercise: Exercise;
+    duration: number;
+    intensity: 'light' | 'moderate' | 'vigorous';
+    calories: number;
+  } | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -219,18 +226,31 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
 
     const calories = calculateCaloriesBurned(selectedExercise, duration, intensity);
     
-    const workoutExercise: WorkoutExercise = {
+    // Set pending exercise for confirmation
+    setPendingExercise({
       exercise: selectedExercise,
-      duration_minutes: duration,
+      duration,
       intensity,
-      calories_burned: calories
+      calories
+    });
+    setShowConfirmDialog(true);
+  };
+
+  const confirmAddExercise = () => {
+    if (!pendingExercise) return;
+
+    const workoutExercise: WorkoutExercise = {
+      exercise: pendingExercise.exercise,
+      duration_minutes: pendingExercise.duration,
+      intensity: pendingExercise.intensity,
+      calories_burned: pendingExercise.calories
     };
 
     const updatedWorkout = {
       ...currentWorkout,
       exercises: [...currentWorkout.exercises, workoutExercise],
-      total_duration: currentWorkout.total_duration + duration,
-      total_calories: currentWorkout.total_calories + calories
+      total_duration: currentWorkout.total_duration + pendingExercise.duration,
+      total_calories: currentWorkout.total_calories + pendingExercise.calories
     };
 
     setCurrentWorkout(updatedWorkout);
@@ -238,10 +258,17 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
     setSelectedExercise(null);
     setDuration(30);
     setIntensity('moderate');
+    setShowConfirmDialog(false);
+    setPendingExercise(null);
 
     // Update TEE with exercise calories
-    const newTEE = userProfile.tee_calories + calories;
+    const newTEE = userProfile.tee_calories + pendingExercise.calories;
     onTEEUpdate(newTEE);
+  };
+
+  const cancelAddExercise = () => {
+    setShowConfirmDialog(false);
+    setPendingExercise(null);
   };
 
   const removeExerciseFromWorkout = (index: number) => {
@@ -606,10 +633,63 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
               <button
                 onClick={addExerciseToWorkout}
                 disabled={!selectedExercise}
-                className="px-8 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="px-8 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
               >
-                Add to Workout
+                Review & Add Exercise
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Exercise Confirmation Dialog */}
+      {showConfirmDialog && pendingExercise && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-[#2C3E50]">Confirm Exercise Addition</h3>
+            </div>
+            
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="bg-[#52C878]/10 p-4 rounded-xl mb-4">
+                  <h4 className="font-semibold text-[#2C3E50] mb-2">{pendingExercise.exercise.name}</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-600">Duration</p>
+                      <p className="font-bold text-[#2C3E50]">{pendingExercise.duration} minutes</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Intensity</p>
+                      <p className={`font-bold capitalize ${getIntensityColor(pendingExercise.intensity)}`}>
+                        {pendingExercise.intensity}
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-gray-600">Estimated Calories Burned</p>
+                      <p className="text-2xl font-bold text-[#52C878]">{pendingExercise.calories}</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-600">
+                  Are you sure you want to add this exercise to your workout?
+                </p>
+              </div>
+              
+              <div className="flex gap-4">
+                <button
+                  onClick={cancelAddExercise}
+                  className="flex-1 px-4 py-3 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmAddExercise}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                >
+                  Confirm & Add
+                </button>
+              </div>
             </div>
           </div>
         </div>
