@@ -251,6 +251,7 @@ function WellnessCalculator() {
     if (dailyCalorieTarget < minCalories) {
       dailyCalorieTarget = minCalories;
     }
+
     // Get metabolic profile macros
     const metabolicMacros = {
       fast_oxidizer: { protein: 25, carb: 35, fat: 40 },

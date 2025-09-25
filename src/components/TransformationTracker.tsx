@@ -395,21 +395,21 @@ function TransformationTracker() {
                   <div className="text-2xl font-bold text-green-600 mb-1">{tee.protein_percentage}%</div>
                   <p className="text-xs text-gray-600 mb-1">Protein</p>
                   <p className="text-xs text-gray-500">
-                    {Math.round((tee.total_daily_calories * tee.protein_percentage / 100) / 4)}g
+                    {Math.round((tee.base_tee * tee.protein_percentage / 100) / 4)}g
                   </p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-yellow-600 mb-1">{tee.carb_percentage}%</div>
                   <p className="text-xs text-gray-600 mb-1">Carbs</p>
                   <p className="text-xs text-gray-500">
-                    {Math.round((tee.total_daily_calories * tee.carb_percentage / 100) / 4)}g
+                    {Math.round((tee.base_tee * tee.carb_percentage / 100) / 4)}g
                   </p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-purple-600 mb-1">{tee.fat_percentage}%</div>
                   <p className="text-xs text-gray-600 mb-1">Fat</p>
                   <p className="text-xs text-gray-500">
-                    {Math.round((tee.total_daily_calories * tee.fat_percentage / 100) / 9)}g
+                    {Math.round((tee.base_tee * tee.fat_percentage / 100) / 9)}g
                   </p>
                 </div>
               </div>
