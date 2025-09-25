@@ -141,10 +141,16 @@ function WellnessCalculator() {
 
   const calculateResults = async (profileData: UserProfile) => {
     // Validate input data to prevent NaN/null values
-    if (!profileData.height_inches || profileData.height_inches <= 0 || 
-        !profileData.weight_lbs || profileData.weight_lbs <= 0 || 
-        !profileData.age || profileData.age <= 0) {
-      console.error('Invalid profile data for calculations');
+    if (!profileData.height_inches || profileData.height_inches <= 0) {
+      console.error('Invalid height data for calculations:', profileData.height_inches);
+      return;
+    }
+    if (!profileData.weight_lbs || profileData.weight_lbs <= 0) {
+      console.error('Invalid weight data for calculations:', profileData.weight_lbs);
+      return;
+    }
+    if (!profileData.age || profileData.age <= 0) {
+      console.error('Invalid age data for calculations:', profileData.age);
       return;
     }
 
