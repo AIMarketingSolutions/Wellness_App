@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Target, TrendingUp, Calendar, Activity, Dumbbell, Scale, Clock, Award, ChevronRight } from 'lucide-react';
+import { User, Target, TrendingUp, Calendar, Activity, Dumbbell, Scale, Clock, Award, ChevronRight, Home, Plus, Minus, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface UserProfile {
@@ -52,6 +52,7 @@ function TransformationTracker() {
       estimated_completion: ''
     }
   });
+  const [activeTab, setActiveTab] = useState<'overview' | 'calories'>('overview');
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
 
@@ -215,6 +216,27 @@ function TransformationTracker() {
     return goal ? goals[goal as keyof typeof goals] || goal : 'Not Set';
   };
 
+  const calculateWeightLossDeficit = (goal?: string) => {
+    const deficits = {
+      maintain: 0,
+      lose_0_5: 250,  // 0.5 lbs/week = 1,750 cal/week ÷ 7 = 250 cal/day
+      lose_1: 500,    // 1 lb/week = 3,500 cal/week ÷ 7 = 500 cal/day
+      lose_1_5: 750,  // 1.5 lbs/week = 5,250 cal/week ÷ 7 = 750 cal/day
+      lose_2: 1000    // 2 lbs/week = 7,000 cal/week ÷ 7 = 1,000 cal/day
+    };
+    return goal ? deficits[goal as keyof typeof deficits] || 0 : 0;
+  };
+
+  const getWeightLossGoalText = (goal?: string) => {
+    const goalTexts = {
+      maintain: 'maintenance',
+      lose_0_5: '0.5 lb/week goal',
+      lose_1: '1 lb/week goal',
+      lose_1_5: '1.5 lbs/week goal',
+      lose_2: '2 lbs/week goal'
+    };
+    return goal ? goalTexts[goal as keyof typeof goalTexts] || 'custom goal' : 'no goal set';
+  };
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -252,241 +274,415 @@ function TransformationTracker() {
 
   const { profile, tee, progress } = transformationData;
 
+  // Calculate calorie breakdown
+  const maintenanceCalories = tee ? Math.round(tee.base_tee / 10) * 10 : 0; // Round to nearest 10
+  const exerciseCalories = tee ? Math.round(tee.exercise_calories / 10) * 10 : 0;
+  const totalDailyCalories = maintenanceCalories + exerciseCalories;
+  const weightLossReduction = calculateWeightLossDeficit(profile?.weight_loss_goal);
+  const dailyCalorieTarget = Math.max(totalDailyCalories - weightLossReduction, profile?.gender === 'male' ? 1500 : 1200);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 rounded-2xl p-6 border border-[#52C878]/20">
-        <h1 className="text-3xl font-bold text-[#2C3E50] mb-2">Transformation Tracker</h1>
-        <p className="text-gray-600">
-          Your personalized fitness journey with integrated TEE calculations and progress monitoring
-        </p>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-[#2C3E50] mb-2">Transformation Tracker</h1>
+            <p className="text-gray-600">
+              Your personalized fitness journey with integrated calorie calculations and progress monitoring
+            </p>
+          </div>
+        </div>
+        
+        {/* Tab Navigation */}
+        <div className="flex gap-4 mt-6">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+              activeTab === 'overview'
+                ? 'bg-[#52C878] text-white shadow-lg'
+                : 'bg-white text-[#52C878] hover:bg-[#52C878]/10'
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('calories')}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+              activeTab === 'calories'
+                ? 'bg-[#52C878] text-white shadow-lg'
+                : 'bg-white text-[#52C878] hover:bg-[#52C878]/10'
+            }`}
+          >
+            Total Daily Calories
+          </button>
+        </div>
       </div>
 
-      {/* Member Information Card */}
-      <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
-        <div className="border-b border-gray-200 pb-6 mb-6">
-          <h2 className="text-2xl font-bold text-[#2C3E50] mb-4 flex items-center gap-3">
-            <Award className="w-6 h-6 text-[#52C878]" />
-            TRANSFORMATION TRACKER
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column - Member Info */}
-          <div className="space-y-6">
-            <div className="bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20">
-              <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Member Information
-              </h3>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Member Name:</span>
-                  <span className="font-semibold text-[#2C3E50]">{profile.full_name}</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Current Weight:</span>
-                  <span className="font-semibold text-[#2C3E50]">{profile.weight_lbs} lbs</span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Target Weight:</span>
-                  <span className="font-semibold text-[#2C3E50]">
-                    {profile.target_weight ? `${profile.target_weight} lbs` : 'Not Set'}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Goal Timeline:</span>
-                  <span className="font-semibold text-[#2C3E50]">
-                    {progress.estimated_completion !== 'Invalid Date' ? progress.estimated_completion : 'Calculating...'}
-                  </span>
-                </div>
-              </div>
+      {/* Tab Content */}
+      {activeTab === 'overview' ? (
+        <>
+          {/* Member Information Card */}
+          <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+            <div className="border-b border-gray-200 pb-6 mb-6">
+              <h2 className="text-2xl font-bold text-[#2C3E50] mb-4 flex items-center gap-3">
+                <Award className="w-6 h-6 text-[#52C878]" />
+                TRANSFORMATION TRACKER
+              </h2>
             </div>
-
-            <div className="bg-gradient-to-r from-[#4A90E2]/5 to-[#52C878]/5 p-6 rounded-xl border border-[#4A90E2]/20">
-              <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                Profile Settings
-              </h3>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Activity Level:</span>
-                  <span className="font-semibold text-[#2C3E50]">
-                    {getActivityLevelDisplay(profile.activity_level)}
-                  </span>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column - Member Info */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20">
+                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    Member Information
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Member Name:</span>
+                      <span className="font-semibold text-[#2C3E50]">{profile.full_name}</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Current Weight:</span>
+                      <span className="font-semibold text-[#2C3E50]">{profile.weight_lbs} lbs</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Target Weight:</span>
+                      <span className="font-semibold text-[#2C3E50]">
+                        {profile.target_weight ? `${profile.target_weight} lbs` : 'Not Set'}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Goal Timeline:</span>
+                      <span className="font-semibold text-[#2C3E50]">
+                        {progress.estimated_completion !== 'Invalid Date' ? progress.estimated_completion : 'Calculating...'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Metabolic Profile:</span>
-                  <span className="font-semibold text-[#2C3E50]">
-                    {getMetabolicProfileDisplay(profile.metabolic_profile)}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Weight Loss Goal:</span>
-                  <span className="font-semibold text-[#2C3E50]">
-                    {getWeightLossGoalDisplay(profile.weight_loss_goal)}
-                  </span>
+                <div className="bg-gradient-to-r from-[#4A90E2]/5 to-[#52C878]/5 p-6 rounded-xl border border-[#4A90E2]/20">
+                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
+                    <Activity className="w-5 h-5" />
+                    Profile Settings
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Activity Level:</span>
+                      <span className="font-semibold text-[#2C3E50]">
+                        {getActivityLevelDisplay(profile.activity_level)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Metabolic Profile:</span>
+                      <span className="font-semibold text-[#2C3E50]">
+                        {getMetabolicProfileDisplay(profile.metabolic_profile)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Weight Loss Goal:</span>
+                      <span className="font-semibold text-[#2C3E50]">
+                        {getWeightLossGoalDisplay(profile.weight_loss_goal)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Right Column - TEE Breakdown */}
-          <div className="space-y-6">
-            <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 p-6 rounded-xl border border-[#52C878]/30">
-              <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5" />
-                Total Daily Calories
-              </h3>
-              
-              <div className="text-center mb-6">
-                <div className="text-4xl font-bold text-[#52C878] mb-2">
-                  {tee.total_daily_calories}
-                </div>
-                <p className="text-gray-600">calories per day</p>
-              </div>
+              {/* Right Column - TEE Breakdown */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 p-6 rounded-xl border border-[#52C878]/30">
+                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    Total Daily Calories
+                  </h3>
+                  
+                  <div className="text-center mb-6">
+                    <div className="text-4xl font-bold text-[#52C878] mb-2">
+                      {tee.total_daily_calories}
+                    </div>
+                    <p className="text-gray-600">calories per day</p>
+                  </div>
 
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                  <span className="text-gray-600">Base Metabolic Rate (BMR):</span>
-                  <span className="font-semibold text-[#2C3E50]">{tee.bmr} cal</span>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                      <span className="text-gray-600">Base Metabolic Rate (BMR):</span>
+                      <span className="font-semibold text-[#2C3E50]">{tee.bmr} cal</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                      <span className="text-gray-600">Activity Multiplier:</span>
+                      <span className="font-semibold text-[#2C3E50]">{tee.activity_multiplier}x</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                      <span className="text-gray-600">Base TEE:</span>
+                      <span className="font-semibold text-[#2C3E50]">{tee.base_tee} cal</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                      <span className="text-gray-600">Exercise Calories:</span>
+                      <span className="font-semibold text-[#52C878]">+{tee.exercise_calories} cal</span>
+                    </div>
+                    
+                    <div className="border-t border-gray-200 pt-3">
+                      <div className="flex justify-between items-center p-3 bg-[#52C878]/10 rounded-lg">
+                        <span className="font-semibold text-[#2C3E50]">Total Daily Calories:</span>
+                        <span className="text-xl font-bold text-[#52C878]">{tee.total_daily_calories} cal</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                  <span className="text-gray-600">Activity Multiplier:</span>
-                  <span className="font-semibold text-[#2C3E50]">{tee.activity_multiplier}x</span>
-                </div>
-                
-                <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                  <span className="text-gray-600">Base TEE:</span>
-                  <span className="font-semibold text-[#2C3E50]">{tee.base_tee} cal</span>
-                </div>
-                
-                <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                  <span className="text-gray-600">Exercise Calories:</span>
-                  <span className="font-semibold text-[#52C878]">+{tee.exercise_calories} cal</span>
-                </div>
-                
-                <div className="border-t border-gray-200 pt-3">
-                  <div className="flex justify-between items-center p-3 bg-[#52C878]/10 rounded-lg">
-                    <span className="font-semibold text-[#2C3E50]">Total Daily Calories:</span>
-                    <span className="text-xl font-bold text-[#52C878]">{tee.total_daily_calories} cal</span>
+
+                {/* Macro Breakdown */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
+                    <Dumbbell className="w-5 h-5" />
+                    Macro Distribution
+                  </h3>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600 mb-1">{tee.protein_percentage}%</div>
+                      <p className="text-xs text-gray-600 mb-1">Protein</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((tee.base_tee * tee.protein_percentage / 100) / 4)}g
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-yellow-600 mb-1">{tee.carb_percentage}%</div>
+                      <p className="text-xs text-gray-600 mb-1">Carbs</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((tee.base_tee * tee.carb_percentage / 100) / 4)}g
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600 mb-1">{tee.fat_percentage}%</div>
+                      <p className="text-xs text-gray-600 mb-1">Fat</p>
+                      <p className="text-xs text-gray-500">
+                        {Math.round((tee.base_tee * tee.fat_percentage / 100) / 9)}g
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Macro Breakdown */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
-              <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
-                <Dumbbell className="w-5 h-5" />
-                Macro Distribution
-              </h3>
-              
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 mb-1">{tee.protein_percentage}%</div>
-                  <p className="text-xs text-gray-600 mb-1">Protein</p>
-                  <p className="text-xs text-gray-500">
-                    {Math.round((tee.base_tee * tee.protein_percentage / 100) / 4)}g
-                  </p>
+          {/* Progress Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-[#2C3E50]">Time Elapsed</h3>
+                <Clock className="w-5 h-5 text-[#52C878]" />
+              </div>
+              <div className="text-3xl font-bold text-[#52C878] mb-2">{progress.weeks_elapsed}</div>
+              <p className="text-gray-600">weeks on program</p>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-[#2C3E50]">Weight Change</h3>
+                <Scale className="w-5 h-5 text-[#4A90E2]" />
+              </div>
+              <div className={`text-3xl font-bold mb-2 ${progress.weight_change < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {progress.weight_change > 0 ? '+' : ''}{progress.weight_change}
+              </div>
+              <p className="text-gray-600">lbs from start</p>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-[#2C3E50]">Goal Progress</h3>
+                <TrendingUp className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">{Math.round(progress.goal_progress)}%</div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-purple-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(progress.goal_progress, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Items */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-[#2C3E50] mb-6">Next Steps</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button className="flex items-center justify-between p-4 bg-[#52C878]/5 rounded-xl border border-[#52C878]/20 hover:bg-[#52C878]/10 transition-colors duration-200">
+                <div className="flex items-center gap-3">
+                  <div className="bg-[#52C878] p-2 rounded-lg">
+                    <Target className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-[#2C3E50]">Update Meal Plan</p>
+                    <p className="text-sm text-gray-600">Based on your {tee.total_daily_calories} daily calories</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600 mb-1">{tee.carb_percentage}%</div>
-                  <p className="text-xs text-gray-600 mb-1">Carbs</p>
-                  <p className="text-xs text-gray-500">
-                    {Math.round((tee.base_tee * tee.carb_percentage / 100) / 4)}g
-                  </p>
+                <ChevronRight className="w-5 h-5 text-gray-400" />
+              </button>
+
+              <button className="flex items-center justify-between p-4 bg-[#4A90E2]/5 rounded-xl border border-[#4A90E2]/20 hover:bg-[#4A90E2]/10 transition-colors duration-200">
+                <div className="flex items-center gap-3">
+                  <div className="bg-[#4A90E2] p-2 rounded-lg">
+                    <Activity className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-[#2C3E50]">Plan Workouts</p>
+                    <p className="text-sm text-gray-600">Optimize your exercise routine</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600 mb-1">{tee.fat_percentage}%</div>
-                  <p className="text-xs text-gray-600 mb-1">Fat</p>
-                  <p className="text-xs text-gray-500">
-                    {Math.round((tee.base_tee * tee.fat_percentage / 100) / 9)}g
-                  </p>
+                <ChevronRight className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* Total Daily Calories Tab */
+        <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+          <div className="border-b border-gray-200 pb-6 mb-8">
+            <h2 className="text-2xl font-bold text-[#2C3E50] mb-2">TOTAL DAILY CALORIES BREAKDOWN</h2>
+            <p className="text-gray-600">Your complete calorie calculation from maintenance to weight loss target</p>
+          </div>
+
+          <div className="space-y-8">
+            {/* 1. Maintenance Calories */}
+            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+              <div className="flex items-center gap-4">
+                <div className="bg-blue-500 p-3 rounded-full">
+                  <Home className="w-6 h-6 text-white" />
                 </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Maintenance Calories</h3>
+                  <p className="text-gray-600">Your body's baseline calorie needs for daily activities</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-blue-600 mb-1">{maintenanceCalories.toLocaleString()}</div>
+                <p className="text-sm text-gray-600">calories</p>
+              </div>
+            </div>
+
+            {/* 2. Daily Exercise Calories */}
+            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+              <div className="flex items-center gap-4">
+                <div className="bg-orange-500 p-3 rounded-full">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Daily Exercise Calories</h3>
+                  <p className="text-gray-600">Additional calories burned from planned workouts</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-orange-600 mb-1">{exerciseCalories.toLocaleString()}</div>
+                <p className="text-sm text-gray-600">calories</p>
+              </div>
+            </div>
+
+            {/* 3. Total Daily Calories */}
+            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#52C878]/10 to-[#52C878]/20 rounded-xl border border-[#52C878]/30">
+              <div className="flex items-center gap-4">
+                <div className="bg-[#52C878] p-3 rounded-full">
+                  <Plus className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Total Daily Calories</h3>
+                  <p className="text-gray-600">Complete calorie expenditure for the day</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-4xl font-bold text-[#52C878] mb-1">{totalDailyCalories.toLocaleString()}</div>
+                <p className="text-sm text-gray-600">calories</p>
+              </div>
+            </div>
+
+            {/* 4. Weight Loss Reduction */}
+            {profile?.weight_loss_goal && profile.weight_loss_goal !== 'maintain' && (
+              <div className="flex items-center justify-between p-6 bg-gradient-to-r from-red-50 to-red-100 rounded-xl border border-red-200">
+                <div className="flex items-center gap-4">
+                  <div className="bg-red-500 p-3 rounded-full">
+                    <Minus className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Weight Loss Reduction</h3>
+                    <p className="text-gray-600">Calorie deficit needed to reach weight loss goal</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-red-600 mb-1">-{weightLossReduction.toLocaleString()}</div>
+                  <p className="text-sm text-gray-600">calories ({getWeightLossGoalText(profile.weight_loss_goal)})</p>
+                </div>
+              </div>
+            )}
+
+            {/* 5. Daily Calorie Target */}
+            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#4A90E2]/10 to-[#4A90E2]/20 rounded-xl border border-[#4A90E2]/30">
+              <div className="flex items-center gap-4">
+                <div className="bg-[#4A90E2] p-3 rounded-full">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Daily Calorie Target</h3>
+                  <p className="text-gray-600">Your personalized eating goal</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-4xl font-bold text-[#4A90E2] mb-1">{dailyCalorieTarget.toLocaleString()}</div>
+                <p className="text-sm text-gray-600">calories</p>
+              </div>
+            </div>
+
+            {/* Safety Notice */}
+            {dailyCalorieTarget <= (profile?.gender === 'male' ? 1500 : 1200) && weightLossReduction > 0 && (
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-xs font-bold">!</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-yellow-800">Minimum Calorie Safety Limit</p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Your target has been set to the minimum safe level ({profile?.gender === 'male' ? '1,500' : '1,200'} calories). 
+                      Consider adding more exercise to create additional deficit safely.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Educational Component */}
+            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+              <h4 className="font-semibold text-[#2C3E50] mb-4">Understanding Your Calorie Breakdown</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="font-medium text-gray-800 mb-1">Maintenance Calories</p>
+                  <p className="text-gray-600">This represents the calories your body naturally burns through basic functions and daily activities</p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800 mb-1">Exercise Addition</p>
+                  <p className="text-gray-600">Planned workouts add extra calorie burn on top of your maintenance level</p>
+                </div>
+                {weightLossReduction > 0 && (
+                  <div className="md:col-span-2">
+                    <p className="font-medium text-gray-800 mb-1">Weight Loss Science</p>
+                    <p className="text-gray-600">A deficit of 3,500 calories typically equals 1 pound of weight loss</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Progress Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#2C3E50]">Time Elapsed</h3>
-            <Clock className="w-5 h-5 text-[#52C878]" />
-          </div>
-          <div className="text-3xl font-bold text-[#52C878] mb-2">{progress.weeks_elapsed}</div>
-          <p className="text-gray-600">weeks on program</p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#2C3E50]">Weight Change</h3>
-            <Scale className="w-5 h-5 text-[#4A90E2]" />
-          </div>
-          <div className={`text-3xl font-bold mb-2 ${progress.weight_change < 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {progress.weight_change > 0 ? '+' : ''}{progress.weight_change}
-          </div>
-          <p className="text-gray-600">lbs from start</p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-[#2C3E50]">Goal Progress</h3>
-            <TrendingUp className="w-5 h-5 text-purple-600" />
-          </div>
-          <div className="text-3xl font-bold text-purple-600 mb-2">{Math.round(progress.goal_progress)}%</div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-purple-600 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(progress.goal_progress, 100)}%` }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Items */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-        <h3 className="text-xl font-bold text-[#2C3E50] mb-6">Next Steps</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button className="flex items-center justify-between p-4 bg-[#52C878]/5 rounded-xl border border-[#52C878]/20 hover:bg-[#52C878]/10 transition-colors duration-200">
-            <div className="flex items-center gap-3">
-              <div className="bg-[#52C878] p-2 rounded-lg">
-                <Target className="w-5 h-5 text-white" />
-              </div>
-              <div className="text-left">
-                <p className="font-semibold text-[#2C3E50]">Update Meal Plan</p>
-                <p className="text-sm text-gray-600">Based on your {tee.total_daily_calories} daily calories</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-
-          <button className="flex items-center justify-between p-4 bg-[#4A90E2]/5 rounded-xl border border-[#4A90E2]/20 hover:bg-[#4A90E2]/10 transition-colors duration-200">
-            <div className="flex items-center gap-3">
-              <div className="bg-[#4A90E2] p-2 rounded-lg">
-                <Activity className="w-5 h-5 text-white" />
-              </div>
-              <div className="text-left">
-                <p className="font-semibold text-[#2C3E50]">Plan Workouts</p>
-                <p className="text-sm text-gray-600">Optimize your exercise routine</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
