@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Search, Clock, Target, Utensils, Droplets, ChefHat, BookOpen, ShoppingCart, AlertTriangle, Check, Star, Coffee, Sun, Moon, Apple } from 'lucide-react';
+import { Plus, Trash2, Search, Clock, Target, Utensils, Droplets, ChefHat, BookOpen, ShoppingCart, AlertTriangle, Check, Star, Coffee, Sun, Moon, Apple, Calculator, Database, Scale } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+interface USDAFoodItem {
+  fdcId: number;
+  description: string;
+  dataType: string;
+  foodCategory?: string;
+  foodNutrients: {
+    nutrientId: number;
+    nutrientName: string;
+    nutrientNumber: string;
+    unitName: string;
+    value: number;
+  }[];
+}
 
 interface FoodItem {
   id: string;
@@ -11,6 +25,7 @@ interface FoodItem {
   fat_per_100g: number;
   calories_per_100g: number;
   serving_size_g: number;
+  usda_fdc_id?: number;
 }
 
 interface MealFood {
@@ -18,6 +33,7 @@ interface MealFood {
   food_item_id: string;
   food_item?: FoodItem;
   quantity_g: number;
+  quantity_oz: number;
   calories: number;
   protein_g: number;
   carbs_g: number;
@@ -26,7 +42,7 @@ interface MealFood {
 
 interface Meal {
   id?: string;
-  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack_1' | 'snack_2';
   target_calories: number;
   target_protein_g: number;
   target_carbs_g: number;
@@ -58,28 +74,29 @@ interface MealPlanningSystemProps {
 }
 
 function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
-  const [planType, setPlanType] = useState<'three_meals' | 'three_meals_one_snack' | 'three_meals_two_snacks'>('three_meals');
+  const [planType, setPlanType] = useState<'three_meals' | 'four_meals' | 'five_meals'>('three_meals');
   const [meals, setMeals] = useState<Meal[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [selectedMeal, setSelectedMeal] = useState<number | null>(null);
   const [showFoodSelector, setShowFoodSelector] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [waterIntake, setWaterIntake] = useState<WaterIntake>({ glasses_consumed: 0, target_glasses: 8 });
-  const [favoriteMeals, setFavoriteMeals] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [currentMealIndex, setCurrentMealIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [pendingFood, setPendingFood] = useState<{
     mealIndex: number;
     foodItem: FoodItem;
-    quantity: number;
+    quantity_g: number;
+    quantity_oz: number;
     calories: number;
     protein_g: number;
     carbs_g: number;
     fat_g: number;
   } | null>(null);
+  const [usdaSearchResults, setUsdaSearchResults] = useState<USDAFoodItem[]>([]);
+  const [showUSDASearch, setShowUSDASearch] = useState(false);
+  const [usdaLoading, setUsdaLoading] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -127,6 +144,99 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
     }
   };
 
+  // USDA Food Data Central Integration
+  const searchUSDAFoods = async (query: string) => {
+    if (!query.trim()) return;
+    
+    setUsdaLoading(true);
+    try {
+      // Note: In production, you would use a real USDA API key
+      // For demo purposes, we'll simulate the API response
+      const mockUSDAResults: USDAFoodItem[] = [
+        {
+          fdcId: 171688,
+          description: "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
+          dataType: "SR Legacy",
+          foodCategory: "Poultry Products",
+          foodNutrients: [
+            { nutrientId: 1008, nutrientName: "Energy", nutrientNumber: "208", unitName: "kcal", value: 165 },
+            { nutrientId: 1003, nutrientName: "Protein", nutrientNumber: "203", unitName: "g", value: 31.02 },
+            { nutrientId: 1005, nutrientName: "Carbohydrate, by difference", nutrientNumber: "205", unitName: "g", value: 0 },
+            { nutrientId: 1004, nutrientName: "Total lipid (fat)", nutrientNumber: "204", unitName: "g", value: 3.57 }
+          ]
+        },
+        {
+          fdcId: 168874,
+          description: "Rice, white, long-grain, regular, cooked",
+          dataType: "SR Legacy",
+          foodCategory: "Cereal Grains and Pasta",
+          foodNutrients: [
+            { nutrientId: 1008, nutrientName: "Energy", nutrientNumber: "208", unitName: "kcal", value: 130 },
+            { nutrientId: 1003, nutrientName: "Protein", nutrientNumber: "203", unitName: "g", value: 2.69 },
+            { nutrientId: 1005, nutrientName: "Carbohydrate, by difference", nutrientNumber: "205", unitName: "g", value: 28.17 },
+            { nutrientId: 1004, nutrientName: "Total lipid (fat)", nutrientNumber: "204", unitName: "g", value: 0.28 }
+          ]
+        },
+        {
+          fdcId: 170379,
+          description: "Broccoli, cooked, boiled, drained, without salt",
+          dataType: "SR Legacy",
+          foodCategory: "Vegetables and Vegetable Products",
+          foodNutrients: [
+            { nutrientId: 1008, nutrientName: "Energy", nutrientNumber: "208", unitName: "kcal", value: 35 },
+            { nutrientId: 1003, nutrientName: "Protein", nutrientNumber: "203", unitName: "g", value: 2.38 },
+            { nutrientId: 1005, nutrientName: "Carbohydrate, by difference", nutrientNumber: "205", unitName: "g", value: 7.18 },
+            { nutrientId: 1004, nutrientName: "Total lipid (fat)", nutrientNumber: "204", unitName: "g", value: 0.41 }
+          ]
+        }
+      ];
+
+      // Filter results based on search query
+      const filteredResults = mockUSDAResults.filter(item =>
+        item.description.toLowerCase().includes(query.toLowerCase())
+      );
+
+      setUsdaSearchResults(filteredResults);
+    } catch (error) {
+      console.error('Error searching USDA foods:', error);
+    } finally {
+      setUsdaLoading(false);
+    }
+  };
+
+  const addUSDAFoodToDatabase = async (usdaFood: USDAFoodItem) => {
+    const calories = usdaFood.foodNutrients.find(n => n.nutrientName === "Energy")?.value || 0;
+    const protein = usdaFood.foodNutrients.find(n => n.nutrientName === "Protein")?.value || 0;
+    const carbs = usdaFood.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0;
+    const fat = usdaFood.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0;
+
+    const newFoodItem: FoodItem = {
+      id: `usda_${usdaFood.fdcId}`,
+      name: usdaFood.description,
+      category: usdaFood.foodCategory || 'Other',
+      protein_per_100g: protein,
+      carbs_per_100g: carbs,
+      fat_per_100g: fat,
+      calories_per_100g: calories,
+      serving_size_g: 100,
+      usda_fdc_id: usdaFood.fdcId
+    };
+
+    // Add to local state
+    setFoodItems(prev => [...prev, newFoodItem]);
+    
+    // Save to database if user is logged in
+    if (user?.id) {
+      await supabase.from('food_items').insert({
+        ...newFoodItem,
+        created_by: user.id,
+        is_custom: true
+      });
+    }
+
+    return newFoodItem;
+  };
+
   const generateMealPlan = () => {
     const minCalories = userProfile.gender === 'male' ? 1500 : 1200;
     const dailyCalories = Math.max(userProfile.tee_calories, minCalories);
@@ -141,21 +251,21 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
           dinner: 0.3334
         };
         break;
-      case 'three_meals_one_snack':
+      case 'four_meals':
         mealDistribution = {
-          breakfast: 0.3,
-          lunch: 0.3,
-          dinner: 0.3,
-          snack: 0.1
+          breakfast: 0.25,
+          lunch: 0.30,
+          dinner: 0.35,
+          snack_1: 0.10
         };
         break;
-      case 'three_meals_two_snacks':
+      case 'five_meals':
         mealDistribution = {
-          breakfast: 0.2667,
-          lunch: 0.2667,
-          dinner: 0.2666,
-          snack1: 0.1,
-          snack2: 0.1
+          breakfast: 0.20,
+          lunch: 0.25,
+          dinner: 0.30,
+          snack_1: 0.125,
+          snack_2: 0.125
         };
         break;
     }
@@ -168,11 +278,10 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
       const carbs = Math.round((calories * userProfile.carb_percentage / 100) / 4);
       const fat = Math.round((calories * userProfile.fat_percentage / 100) / 9);
 
-      const actualMealType = mealType.includes('snack') ? 'snack' : mealType;
       const timeSlot = getTimeSlot(mealType);
 
       newMeals.push({
-        meal_type: actualMealType as any,
+        meal_type: mealType as any,
         target_calories: calories,
         target_protein_g: protein,
         target_carbs_g: carbs,
@@ -194,9 +303,8 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
       breakfast: '7:00 AM - 9:00 AM',
       lunch: '12:00 PM - 2:00 PM',
       dinner: '6:00 PM - 8:00 PM',
-      snack: '3:00 PM - 4:00 PM',
-      snack1: '10:00 AM - 11:00 AM',
-      snack2: '3:00 PM - 4:00 PM'
+      snack_1: '10:00 AM - 11:00 AM',
+      snack_2: '3:00 PM - 4:00 PM'
     };
     return timeSlots[mealType as keyof typeof timeSlots] || '';
   };
@@ -206,22 +314,25 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
       case 'breakfast': return <Coffee className="w-5 h-5" />;
       case 'lunch': return <Sun className="w-5 h-5" />;
       case 'dinner': return <Moon className="w-5 h-5" />;
-      case 'snack': return <Apple className="w-5 h-5" />;
+      case 'snack_1':
+      case 'snack_2': return <Apple className="w-5 h-5" />;
       default: return <Utensils className="w-5 h-5" />;
     }
   };
 
-  const addFoodToMeal = (mealIndex: number, foodItem: FoodItem, quantity: number) => {
-    const calories = (foodItem.calories_per_100g * quantity) / 100;
-    const protein = (foodItem.protein_per_100g * quantity) / 100;
-    const carbs = (foodItem.carbs_per_100g * quantity) / 100;
-    const fat = (foodItem.fat_per_100g * quantity) / 100;
+  const addFoodToMeal = (mealIndex: number, foodItem: FoodItem, quantity_g: number) => {
+    const quantity_oz = quantity_g / 28.35;
+    const calories = (foodItem.calories_per_100g * quantity_g) / 100;
+    const protein = (foodItem.protein_per_100g * quantity_g) / 100;
+    const carbs = (foodItem.carbs_per_100g * quantity_g) / 100;
+    const fat = (foodItem.fat_per_100g * quantity_g) / 100;
 
     // Set pending food for confirmation
     setPendingFood({
       mealIndex,
       foodItem,
-      quantity,
+      quantity_g,
+      quantity_oz: Math.round(quantity_oz * 10) / 10,
       calories: Math.round(calories * 100) / 100,
       protein_g: Math.round(protein * 100) / 100,
       carbs_g: Math.round(carbs * 100) / 100,
@@ -236,7 +347,8 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
     const newFood: MealFood = {
       food_item_id: pendingFood.foodItem.id,
       food_item: pendingFood.foodItem,
-      quantity_g: pendingFood.quantity,
+      quantity_g: pendingFood.quantity_g,
+      quantity_oz: pendingFood.quantity_oz,
       calories: pendingFood.calories,
       protein_g: pendingFood.protein_g,
       carbs_g: pendingFood.carbs_g,
@@ -257,9 +369,6 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
     setSelectedMeal(null);
     setShowConfirmDialog(false);
     setPendingFood(null);
-    
-    // Check for macro balance and show suggestions
-    checkMacroBalance(pendingFood.mealIndex, updatedMeals[pendingFood.mealIndex]);
   };
 
   const cancelAddFood = () => {
@@ -279,17 +388,6 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
     
     updatedMeals[mealIndex].foods.splice(foodIndex, 1);
     setMeals(updatedMeals);
-  };
-
-  const checkMacroBalance = (mealIndex: number, meal: Meal) => {
-    const proteinDeficit = meal.target_protein_g - meal.actual_protein_g;
-    const carbDeficit = meal.target_carbs_g - meal.actual_carbs_g;
-    const fatDeficit = meal.target_fat_g - meal.actual_fat_g;
-
-    if (proteinDeficit > 5 || carbDeficit > 10 || fatDeficit > 3) {
-      setCurrentMealIndex(mealIndex);
-      setShowSuggestions(true);
-    }
   };
 
   const updateWaterIntake = async (glasses: number) => {
@@ -330,11 +428,14 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
   };
 
   const getMealTypeLabel = (mealType: string, index: number) => {
-    if (mealType === 'snack' && planType === 'three_meals_two_snacks') {
-      const snackCount = meals.slice(0, index + 1).filter(m => m.meal_type === 'snack').length;
-      return `Snack ${snackCount}`;
-    }
-    return mealType.charAt(0).toUpperCase() + mealType.slice(1);
+    const labels = {
+      breakfast: 'Breakfast',
+      lunch: 'Lunch',
+      dinner: 'Dinner',
+      snack_1: 'Morning Snack',
+      snack_2: 'Afternoon Snack'
+    };
+    return labels[mealType as keyof typeof labels] || `Meal ${index + 1}`;
   };
 
   const totals = getTotalActuals();
@@ -350,16 +451,16 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* Header with Metabolic Profile Info */}
+      {/* Header with TEE Integration */}
       <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 rounded-2xl p-6 border border-[#52C878]/20">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold text-[#2C3E50] flex items-center gap-3">
             <ChefHat className="w-8 h-8 text-[#52C878]" />
-            Personalized Meal Planning System
+            Comprehensive Meal Planning System
           </h1>
           <div className="text-right">
             <div className="bg-white/50 p-3 rounded-lg">
-              <p className="text-sm text-gray-600">Total Daily Calories</p>
+              <p className="text-sm text-gray-600">Total Energy Expenditure (TEE)</p>
               <p className="text-2xl font-bold text-[#52C878]">{userProfile.tee_calories}</p>
               <p className="text-xs text-gray-500">
                 P:{userProfile.protein_percentage}% C:{userProfile.carb_percentage}% F:{userProfile.fat_percentage}%
@@ -368,9 +469,14 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
           </div>
         </div>
 
+        <p className="text-gray-600">
+          Build a nutritional meal planning application that allows members to select up to 5 meals per 
+          day that collectively equal their Total Energy Expenditure (TEE) based on their individual metabolic profile.
+        </p>
+
         {/* Safety Warning */}
         {isUnderMinimum && (
-          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-4">
+          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mt-4">
             <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-red-800">
@@ -516,7 +622,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
 
       {/* Meal Plan Structure Selection */}
       <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-        <h3 className="text-xl font-bold text-[#2C3E50] mb-4">Meal Plan Structure</h3>
+        <h3 className="text-xl font-bold text-[#2C3E50] mb-4">Meal Plan Structure (Up to 5 Meals Per Day)</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             { 
@@ -526,16 +632,16 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
               distribution: '33.33% each meal'
             },
             { 
-              value: 'three_meals_one_snack', 
-              label: 'Three Meals + One Snack', 
+              value: 'four_meals', 
+              label: 'Four Meals', 
               description: '3 meals + 1 snack',
-              distribution: '30% meals, 10% snack'
+              distribution: '25%, 30%, 35%, 10%'
             },
             { 
-              value: 'three_meals_two_snacks', 
-              label: 'Three Meals + Two Snacks', 
+              value: 'five_meals', 
+              label: 'Five Meals', 
               description: '3 meals + 2 snacks',
-              distribution: '26.67% meals, 10% each snack'
+              distribution: '20%, 25%, 30%, 12.5%, 12.5%'
             }
           ].map((option) => (
             <button
@@ -627,7 +733,9 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
                   <div key={foodIndex} className="flex items-center justify-between p-4 bg-[#52C878]/5 rounded-xl border border-[#52C878]/10">
                     <div className="flex-1">
                       <p className="font-semibold text-[#2C3E50]">{food.food_item?.name}</p>
-                      <p className="text-sm text-gray-600">{food.quantity_g}g ({(food.quantity_g / 28.35).toFixed(1)} oz)</p>
+                      <p className="text-sm text-gray-600">
+                        {food.quantity_g}g ({food.quantity_oz} oz)
+                      </p>
                     </div>
                     <div className="flex items-center gap-6 text-sm">
                       <span className="font-medium">{Math.round(food.calories)} cal</span>
@@ -693,7 +801,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
         ))}
       </div>
 
-      {/* Food Selector Modal */}
+      {/* Food Selector Modal with USDA Integration */}
       {showFoodSelector && selectedMeal !== null && (
         <FoodSelectorModal
           foodItems={foodItems}
@@ -704,19 +812,10 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
             setShowFoodSelector(false);
             setSelectedMeal(null);
           }}
-        />
-      )}
-
-      {/* Macro Balance Suggestions Modal */}
-      {showSuggestions && currentMealIndex !== null && (
-        <MacroSuggestionsModal
-          meal={meals[currentMealIndex]}
-          foodItems={foodItems}
-          onClose={() => setShowSuggestions(false)}
-          onAddSuggestion={(foodItem, quantity) => {
-            addFoodToMeal(currentMealIndex, foodItem, quantity);
-            setShowSuggestions(false);
-          }}
+          onUSDASearch={searchUSDAFoods}
+          usdaSearchResults={usdaSearchResults}
+          usdaLoading={usdaLoading}
+          onAddUSDAFood={addUSDAFoodToDatabase}
         />
       )}
 
@@ -733,7 +832,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
                 <div className="bg-[#52C878]/10 p-4 rounded-xl mb-4">
                   <h4 className="font-semibold text-[#2C3E50] mb-2">{pendingFood.foodItem.name}</h4>
                   <p className="text-sm text-gray-600 mb-3">
-                    {pendingFood.quantity}g ({(pendingFood.quantity / 28.35).toFixed(1)} oz)
+                    {pendingFood.quantity_g}g ({pendingFood.quantity_oz} oz)
                   </p>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
@@ -781,19 +880,34 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
   );
 }
 
-// Food Selector Modal Component
+// Enhanced Food Selector Modal with USDA Integration
 interface FoodSelectorModalProps {
   foodItems: FoodItem[];
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   onAddFood: (foodItem: FoodItem, quantity: number) => void;
   onClose: () => void;
+  onUSDASearch: (query: string) => void;
+  usdaSearchResults: USDAFoodItem[];
+  usdaLoading: boolean;
+  onAddUSDAFood: (usdaFood: USDAFoodItem) => Promise<FoodItem>;
 }
 
-function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, onClose }: FoodSelectorModalProps) {
+function FoodSelectorModal({ 
+  foodItems, 
+  searchTerm, 
+  setSearchTerm, 
+  onAddFood, 
+  onClose,
+  onUSDASearch,
+  usdaSearchResults,
+  usdaLoading,
+  onAddUSDAFood
+}: FoodSelectorModalProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [quantity, setQuantity] = useState(100);
+  const [showUSDAResults, setShowUSDAResults] = useState(false);
 
   const categories = ['all', ...Array.from(new Set(foodItems.map(item => item.category)))];
   
@@ -809,12 +923,28 @@ function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, on
     }
   };
 
+  const handleUSDASearch = () => {
+    if (searchTerm.trim()) {
+      onUSDASearch(searchTerm);
+      setShowUSDAResults(true);
+    }
+  };
+
+  const handleAddUSDAFood = async (usdaFood: USDAFoodItem) => {
+    const newFoodItem = await onAddUSDAFood(usdaFood);
+    setSelectedFood(newFoodItem);
+    setShowUSDAResults(false);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-[#2C3E50]">Add Food to Meal</h3>
+            <h3 className="text-2xl font-bold text-[#2C3E50] flex items-center gap-2">
+              <Database className="w-6 h-6" />
+              Food Selection & Database Integration
+            </h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -827,59 +957,117 @@ function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, on
         </div>
         
         <div className="p-6 space-y-6">
-          {/* Search and Filter */}
-          <div className="flex gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search foods (e.g., chicken breast, rice, broccoli)..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
-              />
+          {/* Search and Filter with USDA Integration */}
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search foods (e.g., chicken breast, rice, broccoli)..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+                />
+              </div>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+              >
+                {categories.map(category => (
+                  <option key={category} value={category}>
+                    {category === 'all' ? 'All Categories' : category.charAt(0).toUpperCase() + category.slice(1)}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category.charAt(0).toUpperCase() + category.slice(1)}
-                </option>
-              ))}
-            </select>
+
+            {/* USDA Search Integration */}
+            <div className="flex gap-4">
+              <button
+                onClick={handleUSDASearch}
+                disabled={!searchTerm.trim() || usdaLoading}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              >
+                <Database className="w-4 h-4" />
+                {usdaLoading ? 'Searching USDA...' : 'Search USDA Database'}
+              </button>
+              <button
+                onClick={() => setShowUSDAResults(!showUSDAResults)}
+                className="px-4 py-3 text-blue-600 border border-blue-300 rounded-xl hover:bg-blue-50 transition-colors"
+              >
+                {showUSDAResults ? 'Show Local Foods' : 'Show USDA Results'}
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Food List */}
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              <h4 className="font-semibold text-[#2C3E50] mb-3">Select Food ({filteredFoods.length} items)</h4>
-              {filteredFoods.map(food => (
-                <button
-                  key={food.id}
-                  onClick={() => setSelectedFood(food)}
-                  className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
-                    selectedFood?.id === food.id
-                      ? 'border-[#52C878] bg-[#52C878]/10'
-                      : 'border-gray-200 hover:border-[#52C878]/50 hover:bg-[#52C878]/5'
-                  }`}
-                >
-                  <p className="font-semibold text-[#2C3E50]">{food.name}</p>
-                  <p className="text-sm text-gray-600 capitalize mb-1">{food.category}</p>
-                  <div className="flex gap-4 text-xs text-gray-500">
-                    <span>{food.calories_per_100g} cal/100g</span>
-                    <span className="text-green-600">P:{food.protein_per_100g}g</span>
-                    <span className="text-yellow-600">C:{food.carbs_per_100g}g</span>
-                    <span className="text-purple-600">F:{food.fat_per_100g}g</span>
-                  </div>
-                </button>
-              ))}
+              <h4 className="font-semibold text-[#2C3E50] mb-3 flex items-center gap-2">
+                {showUSDAResults ? (
+                  <>
+                    <Database className="w-4 h-4" />
+                    USDA Food Database ({usdaSearchResults.length} results)
+                  </>
+                ) : (
+                  <>
+                    <BookOpen className="w-4 h-4" />
+                    Local Food Database ({filteredFoods.length} items)
+                  </>
+                )}
+              </h4>
+
+              {showUSDAResults ? (
+                // USDA Search Results
+                usdaSearchResults.map(food => (
+                  <button
+                    key={food.fdcId}
+                    onClick={() => handleAddUSDAFood(food)}
+                    className="w-full text-left p-4 rounded-xl border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200"
+                  >
+                    <p className="font-semibold text-[#2C3E50]">{food.description}</p>
+                    <p className="text-sm text-gray-600 capitalize mb-1">{food.foodCategory}</p>
+                    <div className="flex gap-4 text-xs text-gray-500">
+                      <span>{food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || 0} cal/100g</span>
+                      <span className="text-green-600">P:{food.foodNutrients.find(n => n.nutrientName === "Protein")?.value || 0}g</span>
+                      <span className="text-yellow-600">C:{food.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0}g</span>
+                      <span className="text-purple-600">F:{food.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0}g</span>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-1">Click to add to local database</p>
+                  </button>
+                ))
+              ) : (
+                // Local Food Database
+                filteredFoods.map(food => (
+                  <button
+                    key={food.id}
+                    onClick={() => setSelectedFood(food)}
+                    className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
+                      selectedFood?.id === food.id
+                        ? 'border-[#52C878] bg-[#52C878]/10'
+                        : 'border-gray-200 hover:border-[#52C878]/50 hover:bg-[#52C878]/5'
+                    }`}
+                  >
+                    <p className="font-semibold text-[#2C3E50]">{food.name}</p>
+                    <p className="text-sm text-gray-600 capitalize mb-1">{food.category}</p>
+                    <div className="flex gap-4 text-xs text-gray-500">
+                      <span>{food.calories_per_100g} cal/100g</span>
+                      <span className="text-green-600">P:{food.protein_per_100g}g</span>
+                      <span className="text-yellow-600">C:{food.carbs_per_100g}g</span>
+                      <span className="text-purple-600">F:{food.fat_per_100g}g</span>
+                    </div>
+                    {food.usda_fdc_id && (
+                      <p className="text-xs text-blue-600 mt-1">USDA Verified</p>
+                    )}
+                  </button>
+                ))
+              )}
             </div>
 
             {/* Food Details and Quantity */}
-            {selectedFood && (
+            {selectedFood && !showUSDAResults && (
               <div className="space-y-6">
                 <div className="p-6 bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 rounded-xl border border-[#52C878]/20">
                   <h4 className="font-bold text-[#2C3E50] text-lg mb-4">{selectedFood.name}</h4>
@@ -906,7 +1094,7 @@ function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, on
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Quantity
+                      Quantity Selection
                     </label>
                     <div className="flex gap-4">
                       <div className="flex-1">
@@ -937,7 +1125,8 @@ function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, on
 
                   {quantity > 0 && (
                     <div className="p-4 bg-[#4A90E2]/10 rounded-xl border border-[#4A90E2]/20">
-                      <h5 className="font-semibold text-[#2C3E50] mb-3">
+                      <h5 className="font-semibold text-[#2C3E50] mb-3 flex items-center gap-2">
+                        <Calculator className="w-4 h-4" />
                         Nutrition for {quantity}g ({(quantity / 28.35).toFixed(1)} oz):
                       </h5>
                       <div className="grid grid-cols-2 gap-3 text-sm">
@@ -973,7 +1162,7 @@ function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, on
           >
             Cancel
           </button>
-          {selectedFood && (
+          {selectedFood && !showUSDAResults && (
             <button
               onClick={handleAddFood}
               disabled={quantity <= 0}
@@ -982,174 +1171,6 @@ function FoodSelectorModal({ foodItems, searchTerm, setSearchTerm, onAddFood, on
               Review & Add Food
             </button>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Macro Suggestions Modal Component
-interface MacroSuggestionsModalProps {
-  meal: Meal;
-  foodItems: FoodItem[];
-  onClose: () => void;
-  onAddSuggestion: (foodItem: FoodItem, quantity: number) => void;
-}
-
-function MacroSuggestionsModal({ meal, foodItems, onClose, onAddSuggestion }: MacroSuggestionsModalProps) {
-  const proteinDeficit = Math.max(0, meal.target_protein_g - meal.actual_protein_g);
-  const carbDeficit = Math.max(0, meal.target_carbs_g - meal.actual_carbs_g);
-  const fatDeficit = Math.max(0, meal.target_fat_g - meal.actual_fat_g);
-
-  const getProteinSuggestions = () => {
-    return foodItems
-      .filter(food => food.protein_per_100g > 15)
-      .sort((a, b) => b.protein_per_100g - a.protein_per_100g)
-      .slice(0, 3);
-  };
-
-  const getCarbSuggestions = () => {
-    return foodItems
-      .filter(food => food.carbs_per_100g > 20)
-      .sort((a, b) => b.carbs_per_100g - a.carbs_per_100g)
-      .slice(0, 3);
-  };
-
-  const getFatSuggestions = () => {
-    return foodItems
-      .filter(food => food.fat_per_100g > 10)
-      .sort((a, b) => b.fat_per_100g - a.fat_per_100g)
-      .slice(0, 3);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-[#2C3E50]">Smart Macro Balance Suggestions</h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <p className="text-gray-600 mt-2">
-            Your meal needs balancing. Here are smart suggestions to meet your macro targets.
-          </p>
-        </div>
-        
-        <div className="p-6 space-y-8">
-          {/* Protein Suggestions */}
-          {proteinDeficit > 5 && (
-            <div>
-              <h4 className="text-lg font-bold text-green-600 mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5" />
-                Protein Deficit: {Math.round(proteinDeficit)}g
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {getProteinSuggestions().map(food => {
-                  const suggestedQuantity = Math.round((proteinDeficit / food.protein_per_100g) * 100);
-                  return (
-                    <div key={food.id} className="p-4 border border-green-200 rounded-xl bg-green-50">
-                      <h5 className="font-semibold text-[#2C3E50] mb-2">{food.name}</h5>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Add {suggestedQuantity}g ({(suggestedQuantity / 28.35).toFixed(1)} oz)
-                      </p>
-                      <div className="text-xs text-gray-500 mb-3">
-                        <p>+{Math.round((food.protein_per_100g * suggestedQuantity) / 100)}g protein</p>
-                        <p>+{Math.round((food.calories_per_100g * suggestedQuantity) / 100)} calories</p>
-                      </div>
-                      <button
-                        onClick={() => onAddSuggestion(food, suggestedQuantity)}
-                        className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                      >
-                        Add to Meal
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Carb Suggestions */}
-          {carbDeficit > 10 && (
-            <div>
-              <h4 className="text-lg font-bold text-yellow-600 mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5" />
-                Carbohydrate Deficit: {Math.round(carbDeficit)}g
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {getCarbSuggestions().map(food => {
-                  const suggestedQuantity = Math.round((carbDeficit / food.carbs_per_100g) * 100);
-                  return (
-                    <div key={food.id} className="p-4 border border-yellow-200 rounded-xl bg-yellow-50">
-                      <h5 className="font-semibold text-[#2C3E50] mb-2">{food.name}</h5>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Add {suggestedQuantity}g ({(suggestedQuantity / 28.35).toFixed(1)} oz)
-                      </p>
-                      <div className="text-xs text-gray-500 mb-3">
-                        <p>+{Math.round((food.carbs_per_100g * suggestedQuantity) / 100)}g carbs</p>
-                        <p>+{Math.round((food.calories_per_100g * suggestedQuantity) / 100)} calories</p>
-                      </div>
-                      <button
-                        onClick={() => onAddSuggestion(food, suggestedQuantity)}
-                        className="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
-                      >
-                        Add to Meal
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Fat Suggestions */}
-          {fatDeficit > 3 && (
-            <div>
-              <h4 className="text-lg font-bold text-purple-600 mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5" />
-                Fat Deficit: {Math.round(fatDeficit)}g
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {getFatSuggestions().map(food => {
-                  const suggestedQuantity = Math.round((fatDeficit / food.fat_per_100g) * 100);
-                  return (
-                    <div key={food.id} className="p-4 border border-purple-200 rounded-xl bg-purple-50">
-                      <h5 className="font-semibold text-[#2C3E50] mb-2">{food.name}</h5>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Add {suggestedQuantity}g ({(suggestedQuantity / 28.35).toFixed(1)} oz)
-                      </p>
-                      <div className="text-xs text-gray-500 mb-3">
-                        <p>+{Math.round((food.fat_per_100g * suggestedQuantity) / 100)}g fat</p>
-                        <p>+{Math.round((food.calories_per_100g * suggestedQuantity) / 100)} calories</p>
-                      </div>
-                      <button
-                        onClick={() => onAddSuggestion(food, suggestedQuantity)}
-                        className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                      >
-                        Add to Meal
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="p-6 border-t border-gray-200 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
-          >
-            Close Suggestions
-          </button>
         </div>
       </div>
     </div>

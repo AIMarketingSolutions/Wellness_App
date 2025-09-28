@@ -195,7 +195,7 @@ function Dashboard({ onLogout }: DashboardProps) {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <MealPlanningSystem 
             userProfile={{
-              tee_calories: 2150,
+              tee_calories: 2150, // This should come from actual user profile
               protein_percentage: 30,
               carb_percentage: 30,
               fat_percentage: 40,
