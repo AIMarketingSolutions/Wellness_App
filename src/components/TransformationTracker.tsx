@@ -285,269 +285,84 @@ function TransformationTracker() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 rounded-2xl p-6 border border-[#52C878]/20">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-[#2C3E50] mb-2">Transformation Tracker</h1>
-            <p className="text-gray-600">
-              Your personalized fitness journey with integrated calorie calculations and progress monitoring
-            </p>
+        <h1 className="text-3xl font-bold text-[#2C3E50] mb-2">Transformation Tracker</h1>
+        <p className="text-gray-600">
+          Your personalized nutritional journey with customized total daily calories.
+        </p>
+      </div>
+
+      {/* Top Section - Side by Side Layout */}
+      <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Side - Member Information */}
+          <div className="bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20">
+            <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Member Information
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Member Name:</span>
+                <span className="font-semibold text-[#2C3E50]">{profile.full_name}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Current Weight:</span>
+                <span className="font-semibold text-[#2C3E50]">{profile.weight_lbs} lbs</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Target Weight:</span>
+                <span className="font-semibold text-[#2C3E50]">
+                  {profile.target_weight ? `${profile.target_weight} lbs` : 'Not Set'}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Goal Timeline:</span>
+                <span className="font-semibold text-[#2C3E50]">
+                  {progress.estimated_completion !== 'Invalid Date' ? progress.estimated_completion : 'Calculating...'}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        {/* Tab Navigation */}
-        <div className="flex gap-4 mt-6">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-              activeTab === 'overview'
-                ? 'bg-[#52C878] text-white shadow-lg'
-                : 'bg-white text-[#52C878] hover:bg-[#52C878]/10'
-            }`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab('calories')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-              activeTab === 'calories'
-                ? 'bg-[#52C878] text-white shadow-lg'
-                : 'bg-white text-[#52C878] hover:bg-[#52C878]/10'
-            }`}
-          >
-            Total Daily Calories
-          </button>
+
+          {/* Right Side - Profile Settings */}
+          <div className="bg-gradient-to-r from-[#4A90E2]/5 to-[#52C878]/5 p-6 rounded-xl border border-[#4A90E2]/20">
+            <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5" />
+              Profile Settings
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Activity Level:</span>
+                <span className="font-semibold text-[#2C3E50]">
+                  {getActivityLevelDisplay(profile.activity_level)}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Metabolic Profile:</span>
+                <span className="font-semibold text-[#2C3E50]">
+                  {getMetabolicProfileDisplay(profile.metabolic_profile)}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Weight Loss Goal:</span>
+                <span className="font-semibold text-[#2C3E50]">
+                  {getWeightLossGoalDisplay(profile.weight_loss_goal)}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Tab Content */}
-      {activeTab === 'overview' ? (
-        <>
-          {/* Member Information Card */}
-          <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
-            <div className="border-b border-gray-200 pb-6 mb-6">
-              <h2 className="text-2xl font-bold text-[#2C3E50] mb-4 flex items-center gap-3">
-                <Award className="w-6 h-6 text-[#52C878]" />
-                TRANSFORMATION TRACKER
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Column - Member Info */}
-              <div className="space-y-6">
-                <div className="bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20">
-                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    Member Information
-                  </h3>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Member Name:</span>
-                      <span className="font-semibold text-[#2C3E50]">{profile.full_name}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Current Weight:</span>
-                      <span className="font-semibold text-[#2C3E50]">{profile.weight_lbs} lbs</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Target Weight:</span>
-                      <span className="font-semibold text-[#2C3E50]">
-                        {profile.target_weight ? `${profile.target_weight} lbs` : 'Not Set'}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Goal Timeline:</span>
-                      <span className="font-semibold text-[#2C3E50]">
-                        {progress.estimated_completion !== 'Invalid Date' ? progress.estimated_completion : 'Calculating...'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-gradient-to-r from-[#4A90E2]/5 to-[#52C878]/5 p-6 rounded-xl border border-[#4A90E2]/20">
-                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
-                    <Activity className="w-5 h-5" />
-                    Profile Settings
-                  </h3>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Activity Level:</span>
-                      <span className="font-semibold text-[#2C3E50]">
-                        {getActivityLevelDisplay(profile.activity_level)}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Metabolic Profile:</span>
-                      <span className="font-semibold text-[#2C3E50]">
-                        {getMetabolicProfileDisplay(profile.metabolic_profile)}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Weight Loss Goal:</span>
-                      <span className="font-semibold text-[#2C3E50]">
-                        {getWeightLossGoalDisplay(profile.weight_loss_goal)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column - TEE Breakdown */}
-              <div className="space-y-6">
-                <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 p-6 rounded-xl border border-[#52C878]/30">
-                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Total Daily Calories
-                  </h3>
-                  
-                  <div className="text-center mb-6">
-                    <div className="text-4xl font-bold text-[#52C878] mb-2">
-                      {tee.total_daily_calories}
-                    </div>
-                    <p className="text-gray-600">calories per day</p>
-                  </div>
-
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                      <span className="text-gray-600">Base Metabolic Rate (BMR):</span>
-                      <span className="font-semibold text-[#2C3E50]">{tee.bmr} cal</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                      <span className="text-gray-600">Activity Multiplier:</span>
-                      <span className="font-semibold text-[#2C3E50]">{tee.activity_multiplier}x</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                      <span className="text-gray-600">Base TEE:</span>
-                      <span className="font-semibold text-[#2C3E50]">{tee.base_tee} cal</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
-                      <span className="text-gray-600">Exercise Calories:</span>
-                      <span className="font-semibold text-[#52C878]">+{tee.exercise_calories} cal</span>
-                    </div>
-                    
-                    <div className="border-t border-gray-200 pt-3">
-                      <div className="flex justify-between items-center p-3 bg-[#52C878]/10 rounded-lg">
-                        <span className="font-semibold text-[#2C3E50]">Total Daily Calories:</span>
-                        <span className="text-xl font-bold text-[#52C878]">{tee.total_daily_calories} cal</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Macro Breakdown */}
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
-                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-4 flex items-center gap-2">
-                    <Dumbbell className="w-5 h-5" />
-                    Macro Distribution
-                  </h3>
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600 mb-1">{tee.protein_percentage}%</div>
-                      <p className="text-xs text-gray-600 mb-1">Protein</p>
-                      <p className="text-xs text-gray-500">
-                        {Math.round((tee.base_tee * tee.protein_percentage / 100) / 4)}g
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-600 mb-1">{tee.carb_percentage}%</div>
-                      <p className="text-xs text-gray-600 mb-1">Carbs</p>
-                      <p className="text-xs text-gray-500">
-                        {Math.round((tee.base_tee * tee.carb_percentage / 100) / 4)}g
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-purple-600 mb-1">{tee.fat_percentage}%</div>
-                      <p className="text-xs text-gray-600 mb-1">Fat</p>
-                      <p className="text-xs text-gray-500">
-                        {Math.round((tee.base_tee * tee.fat_percentage / 100) / 9)}g
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-[#2C3E50]">Time Elapsed</h3>
-                <Clock className="w-5 h-5 text-[#52C878]" />
-              </div>
-              <div className="text-3xl font-bold text-[#52C878] mb-2">{progress.weeks_elapsed}</div>
-              <p className="text-gray-600">weeks on program</p>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-[#2C3E50]">Weight Change</h3>
-                <Scale className="w-5 h-5 text-[#4A90E2]" />
-              </div>
-              <div className={`text-3xl font-bold mb-2 ${progress.weight_change < 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {progress.weight_change > 0 ? '+' : ''}{progress.weight_change}
-              </div>
-              <p className="text-gray-600">lbs from start</p>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-[#2C3E50]">Goal Progress</h3>
-                <TrendingUp className="w-5 h-5 text-purple-600" />
-              </div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">{Math.round(progress.goal_progress)}%</div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-purple-600 h-2 rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(progress.goal_progress, 100)}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Items */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <h3 className="text-xl font-bold text-[#2C3E50] mb-6">Next Steps</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button className="flex items-center justify-between p-4 bg-[#52C878]/5 rounded-xl border border-[#52C878]/20 hover:bg-[#52C878]/10 transition-colors duration-200">
-                <div className="flex items-center gap-3">
-                  <div className="bg-[#52C878] p-2 rounded-lg">
-                    <Target className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-[#2C3E50]">Update Meal Plan</p>
-                    <p className="text-sm text-gray-600">Based on your {tee.total_daily_calories} daily calories</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-
-              <button className="flex items-center justify-between p-4 bg-[#4A90E2]/5 rounded-xl border border-[#4A90E2]/20 hover:bg-[#4A90E2]/10 transition-colors duration-200">
-                <div className="flex items-center gap-3">
-                  <div className="bg-[#4A90E2] p-2 rounded-lg">
-                    <Activity className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-semibold text-[#2C3E50]">Plan Workouts</p>
-                    <p className="text-sm text-gray-600">Optimize your exercise routine</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-          </div>
-        </>
-      ) : (
-        /* Total Daily Calories Tab */
+      {/* Bottom Section - Total Daily Calories (Full Width) */}
+      <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
         <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
           <div className="border-b border-gray-200 pb-6 mb-8">
             <h2 className="text-2xl font-bold text-[#2C3E50] mb-2">TOTAL DAILY CALORIES BREAKDOWN</h2>
@@ -682,7 +497,6 @@ function TransformationTracker() {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 }
