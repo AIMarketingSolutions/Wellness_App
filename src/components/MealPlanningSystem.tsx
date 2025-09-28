@@ -38,6 +38,8 @@ interface MealFood {
   protein_g: number;
   carbs_g: number;
   fat_g: number;
+  food_type: 'carbohydrate' | 'protein' | 'fat';
+  calculation_order: number;
 }
 
 interface Meal {
@@ -310,44 +312,65 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
   };
 
   const addFoodToMeal = (mealIndex: number, foodItem: FoodItem, quantity_g: number) => {
-    // Calculate optimal quantity based on meal's remaining macro needs
+    // Sequential macro calculation system
     const meal = meals[mealIndex];
-    const remainingCalories = meal.target_calories - meal.actual_calories;
-    const remainingProtein = meal.target_protein_g - meal.actual_protein_g;
-    const remainingCarbs = meal.target_carbs_g - meal.actual_carbs_g;
-    const remainingFat = meal.target_fat_g - meal.actual_fat_g;
-
-    // Calculate quantity needed based on the most limiting macro
-    let optimalQuantity_g = 100; // Default starting point
     
-    // Calculate based on calories if significant remaining
-    if (remainingCalories > 50 && foodItem.calories_per_100g > 0) {
-      const calorieBasedQuantity = (remainingCalories * 100) / foodItem.calories_per_100g;
-      optimalQuantity_g = Math.min(optimalQuantity_g, calorieBasedQuantity);
+    // Determine food type based on dominant macro
+    const foodType = determineFoodType(foodItem);
+    
+    let optimalQuantity_g = 0;
+    let calculationOrder = 0;
+    
+    // Step 1: Calculate carbohydrates first (in ounces, then convert to grams)
+    if (foodType === 'carbohydrate') {
+      calculationOrder = 1;
+      const remainingCarbs = meal.target_carbs_g - meal.actual_carbs_g;
+      if (remainingCarbs > 0 && foodItem.carbs_per_100g > 0) {
+        const carbsNeeded_oz = (remainingCarbs * 100) / foodItem.carbs_per_100g / 28.35;
+        optimalQuantity_g = Math.round(carbsNeeded_oz * 28.35);
+      }
     }
     
-    // Calculate based on protein if significant remaining
-    if (remainingProtein > 5 && foodItem.protein_per_100g > 0) {
-      const proteinBasedQuantity = (remainingProtein * 100) / foodItem.protein_per_100g;
-      optimalQuantity_g = Math.min(optimalQuantity_g, proteinBasedQuantity);
+    // Step 2: Calculate protein (subtract protein found in carbohydrates first)
+    else if (foodType === 'protein') {
+      calculationOrder = 2;
+      const proteinFromCarbs = meal.foods
+        .filter(f => f.food_type === 'carbohydrate')
+        .reduce((sum, f) => sum + f.protein_g, 0);
+      
+      const adjustedProteinTarget = meal.target_protein_g - proteinFromCarbs;
+      const remainingProtein = adjustedProteinTarget - meal.foods
+        .filter(f => f.food_type === 'protein')
+        .reduce((sum, f) => sum + f.protein_g, 0);
+      
+      if (remainingProtein > 0 && foodItem.protein_per_100g > 0) {
+        const proteinNeeded_oz = (remainingProtein * 100) / foodItem.protein_per_100g / 28.35;
+        optimalQuantity_g = Math.round(proteinNeeded_oz * 28.35);
+      }
     }
     
-    // Calculate based on carbs if significant remaining
-    if (remainingCarbs > 5 && foodItem.carbs_per_100g > 0) {
-      const carbBasedQuantity = (remainingCarbs * 100) / foodItem.carbs_per_100g;
-      optimalQuantity_g = Math.min(optimalQuantity_g, carbBasedQuantity);
-    }
-    
-    // Calculate based on fat if significant remaining
-    if (remainingFat > 2 && foodItem.fat_per_100g > 0) {
-      const fatBasedQuantity = (remainingFat * 100) / foodItem.fat_per_100g;
-      optimalQuantity_g = Math.min(optimalQuantity_g, fatBasedQuantity);
+    // Step 3: Calculate fats (subtract fats found in carbs and proteins first)
+    else if (foodType === 'fat') {
+      calculationOrder = 3;
+      const fatFromCarbsAndProteins = meal.foods
+        .filter(f => f.food_type === 'carbohydrate' || f.food_type === 'protein')
+        .reduce((sum, f) => sum + f.fat_g, 0);
+      
+      const adjustedFatTarget = meal.target_fat_g - fatFromCarbsAndProteins;
+      const remainingFat = adjustedFatTarget - meal.foods
+        .filter(f => f.food_type === 'fat')
+        .reduce((sum, f) => sum + f.fat_g, 0);
+      
+      if (remainingFat > 0 && foodItem.fat_per_100g > 0) {
+        const fatNeeded_oz = (remainingFat * 100) / foodItem.fat_per_100g / 28.35;
+        optimalQuantity_g = Math.round(fatNeeded_oz * 28.35);
+      }
     }
     
     // Ensure reasonable portion size (minimum 10g, maximum 500g)
-    optimalQuantity_g = Math.max(10, Math.min(500, optimalQuantity_g));
+    optimalQuantity_g = Math.max(10, Math.min(500, optimalQuantity_g || 100));
     
-    // Convert to ounces first, then back to grams for consistency
+    // Final conversion: ounces to grams for display
     const quantity_oz = optimalQuantity_g / 28.35;
     const finalQuantity_g = Math.round(quantity_oz * 28.35);
     
@@ -365,7 +388,9 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
       calories: Math.round(calories * 100) / 100,
       protein_g: Math.round(protein * 100) / 100,
       carbs_g: Math.round(carbs * 100) / 100,
-      fat_g: Math.round(fat * 100) / 100
+      fat_g: Math.round(fat * 100) / 100,
+      food_type: foodType,
+      calculation_order: calculationOrder
     };
 
     const updatedMeals = [...meals];
@@ -380,6 +405,56 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
     setMeals(updatedMeals);
     setShowFoodSelector(false);
     setSelectedMeal(null);
+  };
+
+  // Determine food type based on dominant macronutrient
+  const determineFoodType = (foodItem: FoodItem): 'carbohydrate' | 'protein' | 'fat' => {
+    const protein = foodItem.protein_per_100g;
+    const carbs = foodItem.carbs_per_100g;
+    const fat = foodItem.fat_per_100g;
+    
+    // Determine dominant macro
+    if (carbs >= protein && carbs >= fat) {
+      return 'carbohydrate';
+    } else if (protein >= carbs && protein >= fat) {
+      return 'protein';
+    } else {
+      return 'fat';
+    }
+  };
+
+  // Get remaining macros after sequential calculation
+  const getRemainingMacros = (meal: Meal) => {
+    // Step 1: Carbs are calculated first
+    const remainingCarbs = meal.target_carbs_g - meal.actual_carbs_g;
+    
+    // Step 2: Protein calculation (subtract protein from carbs)
+    const proteinFromCarbs = meal.foods
+      .filter(f => f.food_type === 'carbohydrate')
+      .reduce((sum, f) => sum + f.protein_g, 0);
+    const adjustedProteinTarget = meal.target_protein_g - proteinFromCarbs;
+    const proteinFromProteinFoods = meal.foods
+      .filter(f => f.food_type === 'protein')
+      .reduce((sum, f) => sum + f.protein_g, 0);
+    const remainingProtein = adjustedProteinTarget - proteinFromProteinFoods;
+    
+    // Step 3: Fat calculation (subtract fats from carbs and proteins)
+    const fatFromCarbsAndProteins = meal.foods
+      .filter(f => f.food_type === 'carbohydrate' || f.food_type === 'protein')
+      .reduce((sum, f) => sum + f.fat_g, 0);
+    const adjustedFatTarget = meal.target_fat_g - fatFromCarbsAndProteins;
+    const fatFromFatFoods = meal.foods
+      .filter(f => f.food_type === 'fat')
+      .reduce((sum, f) => sum + f.fat_g, 0);
+    const remainingFat = adjustedFatTarget - fatFromFatFoods;
+    
+    return {
+      carbs: Math.max(0, remainingCarbs),
+      protein: Math.max(0, remainingProtein),
+      fat: Math.max(0, remainingFat),
+      adjustedProteinTarget,
+      adjustedFatTarget
+    };
   };
 
   const removeFoodFromMeal = (mealIndex: number, foodIndex: number) => {
@@ -732,15 +807,26 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
               {meal.foods.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Utensils className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No foods added yet. Click "Add Food" to start building your meal.</p>
+                  <p>No foods added yet. Click "Select Food" to start building your meal.</p>
                 </div>
               ) : (
-                meal.foods.map((food, foodIndex) => (
+                meal.foods
+                  .sort((a, b) => a.calculation_order - b.calculation_order)
+                  .map((food, foodIndex) => (
                   <div key={foodIndex} className="flex items-center justify-between p-4 bg-[#52C878]/5 rounded-xl border border-[#52C878]/10">
                     <div className="flex-1">
-                      <p className="font-semibold text-[#2C3E50]">{food.food_item?.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-[#2C3E50]">{food.food_item?.name}</p>
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          food.food_type === 'carbohydrate' ? 'bg-yellow-100 text-yellow-800' :
+                          food.food_type === 'protein' ? 'bg-green-100 text-green-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}>
+                          {food.food_type}
+                        </span>
+                      </div>
                       <p className="text-sm text-gray-600">
-                        {food.quantity_g}g ({food.quantity_oz} oz)
+                        {food.quantity_g}g ({food.quantity_oz} oz) • Auto-calculated
                       </p>
                     </div>
                     <div className="flex items-center gap-6 text-sm">
@@ -759,6 +845,34 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
                 ))
               )}
             </div>
+
+            {/* Sequential Calculation Display */}
+            {meal.foods.length > 0 && (
+              <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                <h5 className="font-semibold text-[#2C3E50] mb-3">Sequential Macro Calculation</h5>
+                {(() => {
+                  const remaining = getRemainingMacros(meal);
+                  return (
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p className="text-yellow-700 font-medium">1. Carbs Remaining</p>
+                        <p className="text-lg font-bold text-yellow-600">{Math.round(remaining.carbs)}g</p>
+                      </div>
+                      <div>
+                        <p className="text-green-700 font-medium">2. Protein Remaining</p>
+                        <p className="text-lg font-bold text-green-600">{Math.round(remaining.protein)}g</p>
+                        <p className="text-xs text-gray-500">After carb protein: {Math.round(remaining.adjustedProteinTarget)}g target</p>
+                      </div>
+                      <div>
+                        <p className="text-purple-700 font-medium">3. Fat Remaining</p>
+                        <p className="text-lg font-bold text-purple-600">{Math.round(remaining.fat)}g</p>
+                        <p className="text-xs text-gray-500">After carb/protein fat: {Math.round(remaining.adjustedFatTarget)}g target</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
             {/* Meal Progress */}
             <div className="grid grid-cols-4 gap-4 p-4 bg-[#4A90E2]/5 rounded-xl">
@@ -977,7 +1091,7 @@ function FoodSelectorModal({
                       <span className="text-yellow-600">C:{food.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0}g</span>
                       <span className="text-purple-600">F:{food.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0}g</span>
                     </div>
-                    <p className="text-xs text-blue-600 mt-1">Click to add to meal (auto-calculated portion)</p>
+                    <p className="text-xs text-blue-600 mt-1">Click to add - portion auto-calculated by macro sequence</p>
                   </button>
                 ))
               ) : (
@@ -999,7 +1113,7 @@ function FoodSelectorModal({
                     {food.usda_fdc_id && (
                       <p className="text-xs text-blue-600 mt-1">USDA Verified</p>
                     )}
-                    <p className="text-xs text-[#52C878] mt-1 font-medium">Click to add to meal (auto-calculated portion)</p>
+                    <p className="text-xs text-[#52C878] mt-1 font-medium">Click to add - portion calculated by macro sequence</p>
                   </button>
                 ))
               )}
@@ -1010,13 +1124,20 @@ function FoodSelectorModal({
               <div className="p-6 bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 rounded-xl border border-[#52C878]/20">
                 <h4 className="font-bold text-[#2C3E50] text-lg mb-3 flex items-center gap-2">
                   <Calculator className="w-5 h-5" />
-                  Automatic Portion Calculation
+                  Sequential Macro Calculation System
                 </h4>
                 <div className="space-y-2 text-sm text-gray-600">
-                  <p>• The system automatically calculates the optimal portion size</p>
-                  <p>• Quantities are calculated in ounces, then converted to grams</p>
-                  <p>• Portions are based on your meal's remaining macro targets</p>
-                  <p>• Simply click on any food to add it to your meal</p>
+                  <p><strong>1. Carbohydrates First:</strong> Calculates ounces needed, converts to grams</p>
+                  <p><strong>2. Protein Second:</strong> Subtracts protein from carbs, calculates remaining protein needed</p>
+                  <p><strong>3. Fats Last:</strong> Subtracts fats from carbs & proteins, calculates remaining fat needed</p>
+                  <p><strong>No Buttons:</strong> Simply click any food to add with auto-calculated portions</p>
+                </div>
+                
+                <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <p className="text-sm text-yellow-800 font-medium">Example Calculation:</p>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    If you need 54g protein but carbs contain 6g protein, system calculates protein food for remaining 48g only.
+                  </p>
                 </div>
               </div>
             </div>
