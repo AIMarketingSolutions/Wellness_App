@@ -83,17 +83,6 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
   const [waterIntake, setWaterIntake] = useState<WaterIntake>({ glasses_consumed: 0, target_glasses: 8 });
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [pendingFood, setPendingFood] = useState<{
-    mealIndex: number;
-    foodItem: FoodItem;
-    quantity_g: number;
-    quantity_oz: number;
-    calories: number;
-    protein_g: number;
-    carbs_g: number;
-    fat_g: number;
-  } | null>(null);
   const [usdaSearchResults, setUsdaSearchResults] = useState<USDAFoodItem[]>([]);
   const [showUSDASearch, setShowUSDASearch] = useState(false);
   const [usdaLoading, setUsdaLoading] = useState(false);
@@ -321,59 +310,76 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
   };
 
   const addFoodToMeal = (mealIndex: number, foodItem: FoodItem, quantity_g: number) => {
-    const quantity_oz = quantity_g / 28.35;
-    const calories = (foodItem.calories_per_100g * quantity_g) / 100;
-    const protein = (foodItem.protein_per_100g * quantity_g) / 100;
-    const carbs = (foodItem.carbs_per_100g * quantity_g) / 100;
-    const fat = (foodItem.fat_per_100g * quantity_g) / 100;
+    // Calculate optimal quantity based on meal's remaining macro needs
+    const meal = meals[mealIndex];
+    const remainingCalories = meal.target_calories - meal.actual_calories;
+    const remainingProtein = meal.target_protein_g - meal.actual_protein_g;
+    const remainingCarbs = meal.target_carbs_g - meal.actual_carbs_g;
+    const remainingFat = meal.target_fat_g - meal.actual_fat_g;
 
-    // Set pending food for confirmation
-    setPendingFood({
-      mealIndex,
-      foodItem,
-      quantity_g,
+    // Calculate quantity needed based on the most limiting macro
+    let optimalQuantity_g = 100; // Default starting point
+    
+    // Calculate based on calories if significant remaining
+    if (remainingCalories > 50 && foodItem.calories_per_100g > 0) {
+      const calorieBasedQuantity = (remainingCalories * 100) / foodItem.calories_per_100g;
+      optimalQuantity_g = Math.min(optimalQuantity_g, calorieBasedQuantity);
+    }
+    
+    // Calculate based on protein if significant remaining
+    if (remainingProtein > 5 && foodItem.protein_per_100g > 0) {
+      const proteinBasedQuantity = (remainingProtein * 100) / foodItem.protein_per_100g;
+      optimalQuantity_g = Math.min(optimalQuantity_g, proteinBasedQuantity);
+    }
+    
+    // Calculate based on carbs if significant remaining
+    if (remainingCarbs > 5 && foodItem.carbs_per_100g > 0) {
+      const carbBasedQuantity = (remainingCarbs * 100) / foodItem.carbs_per_100g;
+      optimalQuantity_g = Math.min(optimalQuantity_g, carbBasedQuantity);
+    }
+    
+    // Calculate based on fat if significant remaining
+    if (remainingFat > 2 && foodItem.fat_per_100g > 0) {
+      const fatBasedQuantity = (remainingFat * 100) / foodItem.fat_per_100g;
+      optimalQuantity_g = Math.min(optimalQuantity_g, fatBasedQuantity);
+    }
+    
+    // Ensure reasonable portion size (minimum 10g, maximum 500g)
+    optimalQuantity_g = Math.max(10, Math.min(500, optimalQuantity_g));
+    
+    // Convert to ounces first, then back to grams for consistency
+    const quantity_oz = optimalQuantity_g / 28.35;
+    const finalQuantity_g = Math.round(quantity_oz * 28.35);
+    
+    // Calculate nutritional values
+    const calories = (foodItem.calories_per_100g * finalQuantity_g) / 100;
+    const protein = (foodItem.protein_per_100g * finalQuantity_g) / 100;
+    const carbs = (foodItem.carbs_per_100g * finalQuantity_g) / 100;
+    const fat = (foodItem.fat_per_100g * finalQuantity_g) / 100;
+
+    const newFood: MealFood = {
+      food_item_id: foodItem.id,
+      food_item: foodItem,
+      quantity_g: finalQuantity_g,
       quantity_oz: Math.round(quantity_oz * 10) / 10,
       calories: Math.round(calories * 100) / 100,
       protein_g: Math.round(protein * 100) / 100,
       carbs_g: Math.round(carbs * 100) / 100,
       fat_g: Math.round(fat * 100) / 100
-    });
-    setShowConfirmDialog(true);
-  };
-
-  const confirmAddFood = () => {
-    if (!pendingFood) return;
-
-    const newFood: MealFood = {
-      food_item_id: pendingFood.foodItem.id,
-      food_item: pendingFood.foodItem,
-      quantity_g: pendingFood.quantity_g,
-      quantity_oz: pendingFood.quantity_oz,
-      calories: pendingFood.calories,
-      protein_g: pendingFood.protein_g,
-      carbs_g: pendingFood.carbs_g,
-      fat_g: pendingFood.fat_g
     };
 
     const updatedMeals = [...meals];
-    updatedMeals[pendingFood.mealIndex].foods.push(newFood);
+    updatedMeals[mealIndex].foods.push(newFood);
     
     // Update actual totals
-    updatedMeals[pendingFood.mealIndex].actual_calories += newFood.calories;
-    updatedMeals[pendingFood.mealIndex].actual_protein_g += newFood.protein_g;
-    updatedMeals[pendingFood.mealIndex].actual_carbs_g += newFood.carbs_g;
-    updatedMeals[pendingFood.mealIndex].actual_fat_g += newFood.fat_g;
+    updatedMeals[mealIndex].actual_calories += newFood.calories;
+    updatedMeals[mealIndex].actual_protein_g += newFood.protein_g;
+    updatedMeals[mealIndex].actual_carbs_g += newFood.carbs_g;
+    updatedMeals[mealIndex].actual_fat_g += newFood.fat_g;
 
     setMeals(updatedMeals);
     setShowFoodSelector(false);
     setSelectedMeal(null);
-    setShowConfirmDialog(false);
-    setPendingFood(null);
-  };
-
-  const cancelAddFood = () => {
-    setShowConfirmDialog(false);
-    setPendingFood(null);
   };
 
   const removeFoodFromMeal = (mealIndex: number, foodIndex: number) => {
@@ -693,10 +699,10 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
                     setSelectedMeal(mealIndex);
                     setShowFoodSelector(true);
                   }}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   <Plus className="w-4 h-4" />
-                  Add Food
+                  Select Food
                 </button>
               </div>
             </div>
@@ -807,7 +813,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
           foodItems={foodItems}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          onAddFood={(foodItem, quantity) => addFoodToMeal(selectedMeal, foodItem, quantity)}
+          onAddFood={(foodItem) => addFoodToMeal(selectedMeal, foodItem, 0)}
           onClose={() => {
             setShowFoodSelector(false);
             setSelectedMeal(null);
@@ -819,63 +825,6 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
         />
       )}
 
-      {/* Food Confirmation Dialog */}
-      {showConfirmDialog && pendingFood && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-[#2C3E50]">Confirm Food Addition</h3>
-            </div>
-            
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <div className="bg-[#52C878]/10 p-4 rounded-xl mb-4">
-                  <h4 className="font-semibold text-[#2C3E50] mb-2">{pendingFood.foodItem.name}</h4>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {pendingFood.quantity_g}g ({pendingFood.quantity_oz} oz)
-                  </p>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <p className="text-gray-600">Calories</p>
-                      <p className="font-bold text-[#2C3E50]">{Math.round(pendingFood.calories)}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Protein</p>
-                      <p className="font-bold text-green-600">{Math.round(pendingFood.protein_g)}g</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Carbs</p>
-                      <p className="font-bold text-yellow-600">{Math.round(pendingFood.carbs_g)}g</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Fat</p>
-                      <p className="font-bold text-purple-600">{Math.round(pendingFood.fat_g)}g</p>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-600">
-                  Add this food to your {getMealTypeLabel(meals[pendingFood.mealIndex]?.meal_type || 'meal', pendingFood.mealIndex)}?
-                </p>
-              </div>
-              
-              <div className="flex gap-4">
-                <button
-                  onClick={cancelAddFood}
-                  className="flex-1 px-4 py-3 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmAddFood}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
-                >
-                  Confirm & Add
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -885,7 +834,7 @@ interface FoodSelectorModalProps {
   foodItems: FoodItem[];
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  onAddFood: (foodItem: FoodItem, quantity: number) => void;
+  onAddFood: (foodItem: FoodItem) => void;
   onClose: () => void;
   onUSDASearch: (query: string) => void;
   usdaSearchResults: USDAFoodItem[];
@@ -905,8 +854,6 @@ function FoodSelectorModal({
   onAddUSDAFood
 }: FoodSelectorModalProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
-  const [quantity, setQuantity] = useState(100);
   const [showUSDAResults, setShowUSDAResults] = useState(false);
 
   const categories = ['all', ...Array.from(new Set(foodItems.map(item => item.category)))];
@@ -917,11 +864,6 @@ function FoodSelectorModal({
     return matchesCategory && matchesSearch;
   });
 
-  const handleAddFood = () => {
-    if (selectedFood && quantity > 0) {
-      onAddFood(selectedFood, quantity);
-    }
-  };
 
   const handleUSDASearch = () => {
     if (searchTerm.trim()) {
@@ -932,7 +874,7 @@ function FoodSelectorModal({
 
   const handleAddUSDAFood = async (usdaFood: USDAFoodItem) => {
     const newFoodItem = await onAddUSDAFood(usdaFood);
-    setSelectedFood(newFoodItem);
+    onAddFood(newFoodItem);
     setShowUSDAResults(false);
   };
 
@@ -1035,7 +977,7 @@ function FoodSelectorModal({
                       <span className="text-yellow-600">C:{food.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0}g</span>
                       <span className="text-purple-600">F:{food.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0}g</span>
                     </div>
-                    <p className="text-xs text-blue-600 mt-1">Click to add to local database</p>
+                    <p className="text-xs text-blue-600 mt-1">Click to add to meal (auto-calculated portion)</p>
                   </button>
                 ))
               ) : (
@@ -1043,12 +985,8 @@ function FoodSelectorModal({
                 filteredFoods.map(food => (
                   <button
                     key={food.id}
-                    onClick={() => setSelectedFood(food)}
-                    className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
-                      selectedFood?.id === food.id
-                        ? 'border-[#52C878] bg-[#52C878]/10'
-                        : 'border-gray-200 hover:border-[#52C878]/50 hover:bg-[#52C878]/5'
-                    }`}
+                    onClick={() => onAddFood(food)}
+                    className="w-full text-left p-4 rounded-xl border border-gray-200 hover:border-[#52C878]/50 hover:bg-[#52C878]/5 transition-all duration-200"
                   >
                     <p className="font-semibold text-[#2C3E50]">{food.name}</p>
                     <p className="text-sm text-gray-600 capitalize mb-1">{food.category}</p>
@@ -1061,97 +999,27 @@ function FoodSelectorModal({
                     {food.usda_fdc_id && (
                       <p className="text-xs text-blue-600 mt-1">USDA Verified</p>
                     )}
+                    <p className="text-xs text-[#52C878] mt-1 font-medium">Click to add to meal (auto-calculated portion)</p>
                   </button>
                 ))
               )}
             </div>
 
-            {/* Food Details and Quantity */}
-            {selectedFood && !showUSDAResults && (
-              <div className="space-y-6">
-                <div className="p-6 bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 rounded-xl border border-[#52C878]/20">
-                  <h4 className="font-bold text-[#2C3E50] text-lg mb-4">{selectedFood.name}</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="bg-white p-3 rounded-lg">
-                      <p className="text-gray-600">Calories</p>
-                      <p className="font-bold text-[#2C3E50]">{selectedFood.calories_per_100g}/100g</p>
-                    </div>
-                    <div className="bg-white p-3 rounded-lg">
-                      <p className="text-gray-600">Protein</p>
-                      <p className="font-bold text-green-600">{selectedFood.protein_per_100g}g/100g</p>
-                    </div>
-                    <div className="bg-white p-3 rounded-lg">
-                      <p className="text-gray-600">Carbs</p>
-                      <p className="font-bold text-yellow-600">{selectedFood.carbs_per_100g}g/100g</p>
-                    </div>
-                    <div className="bg-white p-3 rounded-lg">
-                      <p className="text-gray-600">Fat</p>
-                      <p className="font-bold text-purple-600">{selectedFood.fat_per_100g}g/100g</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Quantity Selection
-                    </label>
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <input
-                          type="number"
-                          value={quantity}
-                          onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
-                          min="1"
-                          placeholder="100"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">grams</p>
-                      </div>
-                      <div className="flex-1">
-                        <input
-                          type="number"
-                          value={Math.round((quantity / 28.35) * 10) / 10}
-                          onChange={(e) => setQuantity(Math.round((parseFloat(e.target.value) || 0) * 28.35))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
-                          min="0.1"
-                          step="0.1"
-                          placeholder="3.5"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">ounces</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {quantity > 0 && (
-                    <div className="p-4 bg-[#4A90E2]/10 rounded-xl border border-[#4A90E2]/20">
-                      <h5 className="font-semibold text-[#2C3E50] mb-3 flex items-center gap-2">
-                        <Calculator className="w-4 h-4" />
-                        Nutrition for {quantity}g ({(quantity / 28.35).toFixed(1)} oz):
-                      </h5>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className="flex justify-between">
-                          <span>Calories:</span>
-                          <span className="font-bold">{Math.round((selectedFood.calories_per_100g * quantity) / 100)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-green-600">Protein:</span>
-                          <span className="font-bold text-green-600">{Math.round((selectedFood.protein_per_100g * quantity) / 100 * 10) / 10}g</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-yellow-600">Carbs:</span>
-                          <span className="font-bold text-yellow-600">{Math.round((selectedFood.carbs_per_100g * quantity) / 100 * 10) / 10}g</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-purple-600">Fat:</span>
-                          <span className="font-bold text-purple-600">{Math.round((selectedFood.fat_per_100g * quantity) / 100 * 10) / 10}g</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+            {/* Automatic Calculation Info */}
+            <div className="space-y-4">
+              <div className="p-6 bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 rounded-xl border border-[#52C878]/20">
+                <h4 className="font-bold text-[#2C3E50] text-lg mb-3 flex items-center gap-2">
+                  <Calculator className="w-5 h-5" />
+                  Automatic Portion Calculation
+                </h4>
+                <div className="space-y-2 text-sm text-gray-600">
+                  <p>• The system automatically calculates the optimal portion size</p>
+                  <p>• Quantities are calculated in ounces, then converted to grams</p>
+                  <p>• Portions are based on your meal's remaining macro targets</p>
+                  <p>• Simply click on any food to add it to your meal</p>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -1160,17 +1028,8 @@ function FoodSelectorModal({
             onClick={onClose}
             className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
           >
-            Cancel
+            Close
           </button>
-          {selectedFood && !showUSDAResults && (
-            <button
-              onClick={handleAddFood}
-              disabled={quantity <= 0}
-              className="px-8 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              Review & Add Food
-            </button>
-          )}
         </div>
       </div>
     </div>
