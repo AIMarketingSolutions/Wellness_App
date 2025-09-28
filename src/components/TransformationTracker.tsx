@@ -363,140 +363,139 @@ function TransformationTracker() {
 
       {/* Bottom Section - Total Daily Calories (Full Width) */}
       <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
-        <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
-          <div className="border-b border-gray-200 pb-6 mb-8">
-            <h2 className="text-2xl font-bold text-[#2C3E50] mb-2">TOTAL DAILY CALORIES BREAKDOWN</h2>
-            <p className="text-gray-600">Your complete calorie calculation from maintenance to weight loss target</p>
+        <div className="border-b border-gray-200 pb-6 mb-8">
+          <h2 className="text-2xl font-bold text-[#2C3E50] mb-2">TOTAL DAILY CALORIES BREAKDOWN</h2>
+          <p className="text-gray-600">Your complete calorie calculation from maintenance to weight loss target</p>
+        </div>
+
+        <div className="space-y-8">
+          {/* 1. Maintenance Calories */}
+          <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-500 p-3 rounded-full">
+                <Home className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Maintenance Calories</h3>
+                <p className="text-gray-600">Your body's baseline calorie needs for daily activities</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-blue-600 mb-1">{maintenanceCalories.toLocaleString()}</div>
+              <p className="text-sm text-gray-600">calories</p>
+            </div>
           </div>
 
-          <div className="space-y-8">
-            {/* 1. Maintenance Calories */}
-            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+          {/* 2. Daily Exercise Calories */}
+          <div className="flex items-center justify-between p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+            <div className="flex items-center gap-4">
+              <div className="bg-orange-500 p-3 rounded-full">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Daily Exercise Calories</h3>
+                <p className="text-gray-600">Additional calories burned from planned workouts</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-orange-600 mb-1">{exerciseCalories.toLocaleString()}</div>
+              <p className="text-sm text-gray-600">calories</p>
+            </div>
+          </div>
+
+          {/* 3. Total Daily Calories */}
+          <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#52C878]/10 to-[#52C878]/20 rounded-xl border border-[#52C878]/30">
+            <div className="flex items-center gap-4">
+              <div className="bg-[#52C878] p-3 rounded-full">
+                <Plus className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Total Daily Calories</h3>
+                <p className="text-gray-600">Complete calorie expenditure for the day</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-4xl font-bold text-[#52C878] mb-1">{totalDailyCalories.toLocaleString()}</div>
+              <p className="text-sm text-gray-600">calories</p>
+            </div>
+          </div>
+
+          {/* 4. Weight Loss Reduction */}
+          {profile?.weight_loss_goal && profile.weight_loss_goal !== 'maintain' && (
+            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-red-50 to-red-100 rounded-xl border border-red-200">
               <div className="flex items-center gap-4">
-                <div className="bg-blue-500 p-3 rounded-full">
-                  <Home className="w-6 h-6 text-white" />
+                <div className="bg-red-500 p-3 rounded-full">
+                  <Minus className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Maintenance Calories</h3>
-                  <p className="text-gray-600">Your body's baseline calorie needs for daily activities</p>
+                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Weight Loss Reduction</h3>
+                  <p className="text-gray-600">Calorie deficit needed to reach weight loss goal</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-blue-600 mb-1">{maintenanceCalories.toLocaleString()}</div>
-                <p className="text-sm text-gray-600">calories</p>
+                <div className="text-3xl font-bold text-red-600 mb-1">-{weightLossReduction.toLocaleString()}</div>
+                <p className="text-sm text-gray-600">calories ({getWeightLossGoalText(profile.weight_loss_goal)})</p>
               </div>
             </div>
+          )}
 
-            {/* 2. Daily Exercise Calories */}
-            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl border border-orange-200">
-              <div className="flex items-center gap-4">
-                <div className="bg-orange-500 p-3 rounded-full">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Daily Exercise Calories</h3>
-                  <p className="text-gray-600">Additional calories burned from planned workouts</p>
-                </div>
+          {/* 5. Daily Calorie Target */}
+          <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#4A90E2]/10 to-[#4A90E2]/20 rounded-xl border border-[#4A90E2]/30">
+            <div className="flex items-center gap-4">
+              <div className="bg-[#4A90E2] p-3 rounded-full">
+                <Target className="w-6 h-6 text-white" />
               </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-orange-600 mb-1">{exerciseCalories.toLocaleString()}</div>
-                <p className="text-sm text-gray-600">calories</p>
+              <div>
+                <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Daily Calorie Target</h3>
+                <p className="text-gray-600">Your personalized eating goal</p>
               </div>
             </div>
+            <div className="text-right">
+              <div className="text-4xl font-bold text-[#4A90E2] mb-1">{dailyCalorieTarget.toLocaleString()}</div>
+              <p className="text-sm text-gray-600">calories</p>
+            </div>
+          </div>
 
-            {/* 3. Total Daily Calories */}
-            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#52C878]/10 to-[#52C878]/20 rounded-xl border border-[#52C878]/30">
-              <div className="flex items-center gap-4">
-                <div className="bg-[#52C878] p-3 rounded-full">
-                  <Plus className="w-6 h-6 text-white" />
+          {/* Safety Notice */}
+          {dailyCalorieTarget <= (profile?.gender === 'male' ? 1500 : 1200) && weightLossReduction > 0 && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs font-bold">!</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Total Daily Calories</h3>
-                  <p className="text-gray-600">Complete calorie expenditure for the day</p>
+                  <p className="font-medium text-yellow-800">Minimum Calorie Safety Limit</p>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Your target has been set to the minimum safe level ({profile?.gender === 'male' ? '1,500' : '1,200'} calories). 
+                    Consider adding more exercise to create additional deficit safely.
+                  </p>
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-4xl font-bold text-[#52C878] mb-1">{totalDailyCalories.toLocaleString()}</div>
-                <p className="text-sm text-gray-600">calories</p>
               </div>
             </div>
+          )}
 
-            {/* 4. Weight Loss Reduction */}
-            {profile?.weight_loss_goal && profile.weight_loss_goal !== 'maintain' && (
-              <div className="flex items-center justify-between p-6 bg-gradient-to-r from-red-50 to-red-100 rounded-xl border border-red-200">
-                <div className="flex items-center gap-4">
-                  <div className="bg-red-500 p-3 rounded-full">
-                    <Minus className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Weight Loss Reduction</h3>
-                    <p className="text-gray-600">Calorie deficit needed to reach weight loss goal</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-red-600 mb-1">-{weightLossReduction.toLocaleString()}</div>
-                  <p className="text-sm text-gray-600">calories ({getWeightLossGoalText(profile.weight_loss_goal)})</p>
-                </div>
+          {/* Educational Component */}
+          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+            <h4 className="font-semibold text-[#2C3E50] mb-4">Understanding Your Calorie Breakdown</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="font-medium text-gray-800 mb-1">Maintenance Calories</p>
+                <p className="text-gray-600">This represents the calories your body naturally burns through basic functions and daily activities</p>
               </div>
-            )}
-
-            {/* 5. Daily Calorie Target */}
-            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-[#4A90E2]/10 to-[#4A90E2]/20 rounded-xl border border-[#4A90E2]/30">
-              <div className="flex items-center gap-4">
-                <div className="bg-[#4A90E2] p-3 rounded-full">
-                  <Target className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-[#2C3E50] mb-1">Daily Calorie Target</h3>
-                  <p className="text-gray-600">Your personalized eating goal</p>
-                </div>
+              <div>
+                <p className="font-medium text-gray-800 mb-1">Exercise Addition</p>
+                <p className="text-gray-600">Planned workouts add extra calorie burn on top of your maintenance level</p>
               </div>
-              <div className="text-right">
-                <div className="text-4xl font-bold text-[#4A90E2] mb-1">{dailyCalorieTarget.toLocaleString()}</div>
-                <p className="text-sm text-gray-600">calories</p>
-              </div>
-            </div>
-
-            {/* Safety Notice */}
-            {dailyCalorieTarget <= (profile?.gender === 'male' ? 1500 : 1200) && weightLossReduction > 0 && (
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs font-bold">!</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-yellow-800">Minimum Calorie Safety Limit</p>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Your target has been set to the minimum safe level ({profile?.gender === 'male' ? '1,500' : '1,200'} calories). 
-                      Consider adding more exercise to create additional deficit safely.
-                    </p>
-                  </div>
+              {weightLossReduction > 0 && (
+                <div className="md:col-span-2">
+                  <p className="font-medium text-gray-800 mb-1">Weight Loss Science</p>
+                  <p className="text-gray-600">A deficit of 3,500 calories typically equals 1 pound of weight loss</p>
                 </div>
-              </div>
-            )}
-
-            {/* Educational Component */}
-            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-              <h4 className="font-semibold text-[#2C3E50] mb-4">Understanding Your Calorie Breakdown</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-medium text-gray-800 mb-1">Maintenance Calories</p>
-                  <p className="text-gray-600">This represents the calories your body naturally burns through basic functions and daily activities</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800 mb-1">Exercise Addition</p>
-                  <p className="text-gray-600">Planned workouts add extra calorie burn on top of your maintenance level</p>
-                </div>
-                {weightLossReduction > 0 && (
-                  <div className="md:col-span-2">
-                    <p className="font-medium text-gray-800 mb-1">Weight Loss Science</p>
-                    <p className="text-gray-600">A deficit of 3,500 calories typically equals 1 pound of weight loss</p>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </div>
+      </div>
     </div>
   );
 }
