@@ -546,10 +546,43 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
               <p className="text-xs text-gray-500">
                 P:{userProfile.protein_percentage}% C:{userProfile.carb_percentage}% F:{userProfile.fat_percentage}%
               </p>
+              {userProfile.weight_loss_goal && userProfile.weight_loss_goal !== 'maintain' && (
+                <p className="text-xs text-purple-600 font-medium mt-1">
+                  Goal: {userProfile.weight_loss_goal.replace('lose_', '').replace('_', '.')} lbs/week
+                </p>
+              )}
             </div>
           </div>
         </div>
 
+        {/* Profile Integration Notice */}
+        <div className="bg-white/70 p-4 rounded-xl border border-white/50 mb-4">
+          <h3 className="font-semibold text-[#2C3E50] mb-2 flex items-center gap-2">
+            <Target className="w-4 h-4" />
+            Your Personalized Nutrition Profile is Active
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <p className="text-gray-600">Metabolic Type:</p>
+              <p className="font-semibold text-[#2C3E50]">
+                {userProfile.metabolic_profile === 'fast_oxidizer' ? 'Fast Oxidizer' :
+                 userProfile.metabolic_profile === 'slow_oxidizer' ? 'Slow Oxidizer' :
+                 userProfile.metabolic_profile === 'medium_oxidizer' ? 'Medium Oxidizer' :
+                 'Custom Profile'}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-600">Daily Calorie Target:</p>
+              <p className="font-semibold text-[#52C878]">{userProfile.tee_calories} calories</p>
+            </div>
+            <div>
+              <p className="text-gray-600">Macro Distribution:</p>
+              <p className="font-semibold text-[#4A90E2]">
+                {userProfile.protein_percentage}%P / {userProfile.carb_percentage}%C / {userProfile.fat_percentage}%F
+              </p>
+            </div>
+          </div>
+        </div>
         <p className="text-gray-600">
           Build a nutritional meal planning application that allows members to select up to 5 meals per 
           day that collectively equal their Total Energy Expenditure (TEE) based on their individual metabolic profile.

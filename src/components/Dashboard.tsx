@@ -7,6 +7,143 @@ import MealPlanningSystem from './MealPlanningSystem';
 import FitnessSystem from './FitnessSystem';
 import TransformationTracker from './TransformationTracker';
 
+// Wrapper component to load user profile data for meal planning
+function MealPlanningSystemWrapper() {
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      
+      if (user) {
+        // Load user profile
+        const { data: profile, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profile && !error) {
+          // Calculate TEE based on profile
+          const teeCalories = calculateTEE(profile);
+          
+          // Get metabolic macros
+          const metabolicMacros = {
+            fast_oxidizer: { protein: 25, carb: 35, fat: 40 },
+            slow_oxidizer: { protein: 35, carb: 25, fat: 40 },
+            medium_oxidizer: { protein: 30, carb: 30, fat: 40 }
+          };
+          
+          let macros;
+          if (profile.metabolic_profile === 'custom' && 
+              profile.custom_protein_percentage && 
+              profile.custom_carb_percentage && 
+              profile.custom_fat_percentage) {
+            macros = {
+              protein: profile.custom_protein_percentage,
+              carb: profile.custom_carb_percentage,
+              fat: profile.custom_fat_percentage
+            };
+          } else {
+            macros = metabolicMacros[profile.metabolic_profile] || metabolicMacros.medium_oxidizer;
+          }
+
+          // Apply weight loss deficit
+          const weightLossDeficits = {
+            maintain: 0,
+            lose_0_5: 250,
+            lose_1: 500,
+            lose_1_5: 750,
+            lose_2: 1000
+          };
+          
+          const dailyDeficit = weightLossDeficits[profile.weight_loss_goal] || 0;
+          const dailyCalorieTarget = Math.max(
+            teeCalories - dailyDeficit,
+            profile.gender === 'male' ? 1500 : 1200
+          );
+
+          setUserProfile({
+            tee_calories: dailyCalorieTarget,
+            protein_percentage: macros.protein,
+            carb_percentage: macros.carb,
+            fat_percentage: macros.fat,
+            metabolic_profile: profile.metabolic_profile,
+            gender: profile.gender,
+            weight_loss_goal: profile.weight_loss_goal,
+            full_profile: profile
+          });
+        }
+      }
+      setLoading(false);
+    };
+
+    loadUserData();
+  }, []);
+
+  const calculateTEE = (profile) => {
+    if (!profile.weight_lbs || !profile.height_inches || !profile.age) {
+      return 2000; // Default fallback
+    }
+
+    // Calculate BMR
+    let bmr;
+    if (profile.gender === 'male') {
+      bmr = 66.47 + (6.24 * profile.weight_lbs) + (12.7 * profile.height_inches) - (6.76 * profile.age);
+    } else {
+      bmr = 65.51 + (4.34 * profile.weight_lbs) + (4.7 * profile.height_inches) - (4.7 * profile.age);
+    }
+
+    // Apply activity factor
+    const activityFactors = {
+      sedentary: 1.2,
+      lightly_active: 1.375,
+      moderately_active: 1.55,
+      very_active: 1.725,
+      extremely_active: 1.9
+    };
+    
+    const activityFactor = activityFactors[profile.activity_level] || 1.55;
+    return Math.round(bmr * activityFactor);
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#52C878] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your nutrition profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-8">
+        <div className="text-center">
+          <Target className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Complete Your Profile First</h2>
+          <p className="text-gray-600 mb-6">
+            Please complete your profile assessment to get personalized meal recommendations.
+          </p>
+          <button
+            onClick={() => window.location.hash = 'profile-assessment'}
+            className="px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-semibold rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            Complete Profile Assessment
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <MealPlanningSystem userProfile={userProfile} />;
+}
+
 interface DashboardProps {
   onLogout: () => void;
 }
