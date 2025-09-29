@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Search, Clock, Target, Utensils, Droplets, ChefHat, BookOpen, ShoppingCart, AlertTriangle, Check, Star, Coffee, Sun, Moon, Apple, Calculator, Database, Scale } from 'lucide-react';
+import { Plus, Trash2, Calculator, Target, Utensils, Scale, ChefHat, CheckCircle, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-
-interface USDAFoodItem {
-  fdcId: number;
-  description: string;
-  dataType: string;
-  foodCategory?: string;
-  foodNutrients: {
-    nutrientId: number;
-    nutrientName: string;
-    nutrientNumber: string;
-    unitName: string;
-    value: number;
-  }[];
-}
 
 interface FoodItem {
   id: string;
@@ -25,69 +11,65 @@ interface FoodItem {
   fat_per_100g: number;
   calories_per_100g: number;
   serving_size_g: number;
-  usda_fdc_id?: number;
 }
 
-interface MealFood {
-  id?: string;
-  food_item_id: string;
-  food_item?: FoodItem;
+interface SelectedFood {
+  food_item: FoodItem;
   quantity_g: number;
-  quantity_oz: number;
-  calories: number;
-  protein_g: number;
-  carbs_g: number;
-  fat_g: number;
-  food_type: 'carbohydrate' | 'protein' | 'fat';
-  calculation_order: number;
+  is_primary_carb?: boolean;
+  is_primary_protein?: boolean;
+  is_primary_fat?: boolean;
+}
+
+interface MealCalculation {
+  total_calories: number;
+  total_protein_g: number;
+  total_carbs_g: number;
+  total_fat_g: number;
+  adjusted_foods: {
+    food_item: FoodItem;
+    final_quantity_g: number;
+    calories: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+  }[];
+  adjustments_made: string[];
 }
 
 interface Meal {
   id?: string;
-  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack_1' | 'snack_2';
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   target_calories: number;
   target_protein_g: number;
   target_carbs_g: number;
   target_fat_g: number;
-  actual_calories: number;
-  actual_protein_g: number;
-  actual_carbs_g: number;
-  actual_fat_g: number;
-  foods: MealFood[];
-  time_slot?: string;
-}
-
-interface UserProfile {
-  tee_calories: number;
-  protein_percentage: number;
-  carb_percentage: number;
-  fat_percentage: number;
-  metabolic_profile: string;
-  gender: 'male' | 'female';
-}
-
-interface WaterIntake {
-  glasses_consumed: number;
-  target_glasses: number;
+  selected_foods: SelectedFood[];
+  calculation_result?: MealCalculation;
+  is_calculated: boolean;
 }
 
 interface MealPlanningSystemProps {
-  userProfile: UserProfile;
+  userProfile: {
+    tee_calories: number;
+    protein_percentage: number;
+    carb_percentage: number;
+    fat_percentage: number;
+    metabolic_profile: string;
+    gender: string;
+    weight_loss_goal?: string;
+    full_profile: any;
+  };
 }
 
 function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
-  const [planType, setPlanType] = useState<'three_meals' | 'four_meals' | 'five_meals'>('three_meals');
+  const [planType, setPlanType] = useState<'three_meals' | 'three_meals_one_snack' | 'three_meals_two_snacks'>('three_meals');
   const [meals, setMeals] = useState<Meal[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [selectedMeal, setSelectedMeal] = useState<number | null>(null);
+  const [selectedMealIndex, setSelectedMealIndex] = useState<number | null>(null);
   const [showFoodSelector, setShowFoodSelector] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [waterIntake, setWaterIntake] = useState<WaterIntake>({ glasses_consumed: 0, target_glasses: 8 });
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [usdaSearchResults, setUsdaSearchResults] = useState<USDAFoodItem[]>([]);
-  const [showUSDASearch, setShowUSDASearch] = useState(false);
-  const [usdaLoading, setUsdaLoading] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -96,667 +78,357 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
     };
     getUser();
     loadFoodItems();
-    loadWaterIntake();
   }, []);
 
   useEffect(() => {
-    if (userProfile.tee_calories > 0) {
+    if (userProfile?.tee_calories > 0) {
       generateMealPlan();
     }
   }, [planType, userProfile]);
 
   const loadFoodItems = async () => {
-    const { data, error } = await supabase
-      .from('food_items')
-      .select('*')
-      .order('category', { ascending: true })
-      .order('name', { ascending: true });
+    // Sample food data with detailed nutritional information
+    const sampleFoods: FoodItem[] = [
+      // Carbohydrate Sources
+      { id: '1', name: 'Brown Rice (cooked)', category: 'carbohydrates', protein_per_100g: 2.6, carbs_per_100g: 23, fat_per_100g: 0.9, calories_per_100g: 111, serving_size_g: 150 },
+      { id: '2', name: 'Sweet Potato (baked)', category: 'carbohydrates', protein_per_100g: 2.0, carbs_per_100g: 20.1, fat_per_100g: 0.1, calories_per_100g: 90, serving_size_g: 200 },
+      { id: '3', name: 'Quinoa (cooked)', category: 'carbohydrates', protein_per_100g: 4.4, carbs_per_100g: 21.3, fat_per_100g: 1.9, calories_per_100g: 120, serving_size_g: 150 },
+      { id: '4', name: 'Oatmeal (cooked)', category: 'carbohydrates', protein_per_100g: 2.4, carbs_per_100g: 12, fat_per_100g: 1.4, calories_per_100g: 68, serving_size_g: 200 },
+      
+      // Protein Sources
+      { id: '5', name: 'Chicken Breast (grilled)', category: 'proteins', protein_per_100g: 31, carbs_per_100g: 0, fat_per_100g: 3.6, calories_per_100g: 165, serving_size_g: 150 },
+      { id: '6', name: 'Salmon (baked)', category: 'proteins', protein_per_100g: 25, carbs_per_100g: 0, fat_per_100g: 12, calories_per_100g: 206, serving_size_g: 150 },
+      { id: '7', name: 'Lean Ground Turkey', category: 'proteins', protein_per_100g: 27, carbs_per_100g: 0, fat_per_100g: 8, calories_per_100g: 189, serving_size_g: 150 },
+      { id: '8', name: 'Greek Yogurt (plain)', category: 'proteins', protein_per_100g: 10, carbs_per_100g: 3.6, fat_per_100g: 0.4, calories_per_100g: 59, serving_size_g: 200 },
+      { id: '9', name: 'Eggs (whole)', category: 'proteins', protein_per_100g: 13, carbs_per_100g: 1.1, fat_per_100g: 11, calories_per_100g: 155, serving_size_g: 100 },
+      
+      // Healthy Fats
+      { id: '10', name: 'Avocado', category: 'fats', protein_per_100g: 2, carbs_per_100g: 8.5, fat_per_100g: 14.7, calories_per_100g: 160, serving_size_g: 100 },
+      { id: '11', name: 'Olive Oil', category: 'fats', protein_per_100g: 0, carbs_per_100g: 0, fat_per_100g: 100, calories_per_100g: 884, serving_size_g: 15 },
+      { id: '12', name: 'Almonds', category: 'fats', protein_per_100g: 21, carbs_per_100g: 22, fat_per_100g: 49, calories_per_100g: 579, serving_size_g: 30 },
+      { id: '13', name: 'Walnuts', category: 'fats', protein_per_100g: 15, carbs_per_100g: 14, fat_per_100g: 65, calories_per_100g: 654, serving_size_g: 30 },
+      
+      // Vegetables (low calorie, nutrient dense)
+      { id: '14', name: 'Broccoli (steamed)', category: 'vegetables', protein_per_100g: 2.8, carbs_per_100g: 7, fat_per_100g: 0.4, calories_per_100g: 34, serving_size_g: 150 },
+      { id: '15', name: 'Spinach (raw)', category: 'vegetables', protein_per_100g: 2.9, carbs_per_100g: 3.6, fat_per_100g: 0.4, calories_per_100g: 23, serving_size_g: 100 },
+      { id: '16', name: 'Bell Peppers', category: 'vegetables', protein_per_100g: 1, carbs_per_100g: 7, fat_per_100g: 0.3, calories_per_100g: 31, serving_size_g: 150 }
+    ];
 
-    if (data && !error) {
-      setFoodItems(data);
-    }
-  };
-
-  const loadWaterIntake = async () => {
-    if (!user?.id) return;
-    
-    const { data, error } = await supabase
-      .from('water_intake')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('intake_date', new Date().toISOString().split('T')[0])
-      .single();
-
-    if (data && !error) {
-      setWaterIntake({
-        glasses_consumed: data.glasses_consumed,
-        target_glasses: data.target_glasses
-      });
-    }
-  };
-
-  // USDA Food Data Central Integration
-  const searchUSDAFoods = async (query: string) => {
-    if (!query.trim()) return;
-    
-    setUsdaLoading(true);
-    try {
-      // Note: In production, you would use a real USDA API key
-      // For demo purposes, we'll simulate the API response
-      const mockUSDAResults: USDAFoodItem[] = [
-        {
-          fdcId: 171688,
-          description: "Chicken, broilers or fryers, breast, meat only, cooked, roasted",
-          dataType: "SR Legacy",
-          foodCategory: "Poultry Products",
-          foodNutrients: [
-            { nutrientId: 1008, nutrientName: "Energy", nutrientNumber: "208", unitName: "kcal", value: 165 },
-            { nutrientId: 1003, nutrientName: "Protein", nutrientNumber: "203", unitName: "g", value: 31.02 },
-            { nutrientId: 1005, nutrientName: "Carbohydrate, by difference", nutrientNumber: "205", unitName: "g", value: 0 },
-            { nutrientId: 1004, nutrientName: "Total lipid (fat)", nutrientNumber: "204", unitName: "g", value: 3.57 }
-          ]
-        },
-        {
-          fdcId: 168874,
-          description: "Rice, white, long-grain, regular, cooked",
-          dataType: "SR Legacy",
-          foodCategory: "Cereal Grains and Pasta",
-          foodNutrients: [
-            { nutrientId: 1008, nutrientName: "Energy", nutrientNumber: "208", unitName: "kcal", value: 130 },
-            { nutrientId: 1003, nutrientName: "Protein", nutrientNumber: "203", unitName: "g", value: 2.69 },
-            { nutrientId: 1005, nutrientName: "Carbohydrate, by difference", nutrientNumber: "205", unitName: "g", value: 28.17 },
-            { nutrientId: 1004, nutrientName: "Total lipid (fat)", nutrientNumber: "204", unitName: "g", value: 0.28 }
-          ]
-        },
-        {
-          fdcId: 170379,
-          description: "Broccoli, cooked, boiled, drained, without salt",
-          dataType: "SR Legacy",
-          foodCategory: "Vegetables and Vegetable Products",
-          foodNutrients: [
-            { nutrientId: 1008, nutrientName: "Energy", nutrientNumber: "208", unitName: "kcal", value: 35 },
-            { nutrientId: 1003, nutrientName: "Protein", nutrientNumber: "203", unitName: "g", value: 2.38 },
-            { nutrientId: 1005, nutrientName: "Carbohydrate, by difference", nutrientNumber: "205", unitName: "g", value: 7.18 },
-            { nutrientId: 1004, nutrientName: "Total lipid (fat)", nutrientNumber: "204", unitName: "g", value: 0.41 }
-          ]
-        }
-      ];
-
-      // Filter results based on search query
-      const filteredResults = mockUSDAResults.filter(item =>
-        item.description.toLowerCase().includes(query.toLowerCase())
-      );
-
-      setUsdaSearchResults(filteredResults);
-    } catch (error) {
-      console.error('Error searching USDA foods:', error);
-    } finally {
-      setUsdaLoading(false);
-    }
-  };
-
-  const addUSDAFoodToDatabase = async (usdaFood: USDAFoodItem) => {
-    const calories = usdaFood.foodNutrients.find(n => n.nutrientName === "Energy")?.value || 0;
-    const protein = usdaFood.foodNutrients.find(n => n.nutrientName === "Protein")?.value || 0;
-    const carbs = usdaFood.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0;
-    const fat = usdaFood.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0;
-
-    const newFoodItem: FoodItem = {
-      id: `usda_${usdaFood.fdcId}`,
-      name: usdaFood.description,
-      category: usdaFood.foodCategory || 'Other',
-      protein_per_100g: protein,
-      carbs_per_100g: carbs,
-      fat_per_100g: fat,
-      calories_per_100g: calories,
-      serving_size_g: 100,
-      usda_fdc_id: usdaFood.fdcId
-    };
-
-    // Add to local state
-    setFoodItems(prev => [...prev, newFoodItem]);
-    
-    // Save to database if user is logged in
-    if (user?.id) {
-      await supabase.from('food_items').insert({
-        ...newFoodItem,
-        created_by: user.id,
-        is_custom: true
-      });
-    }
-
-    return newFoodItem;
+    setFoodItems(sampleFoods);
   };
 
   const generateMealPlan = () => {
-    const minCalories = userProfile.gender === 'male' ? 1500 : 1200;
+    const minCalories = userProfile?.gender === 'male' ? 1500 : 1200;
     const dailyCalories = Math.max(userProfile.tee_calories, minCalories);
     
     let mealDistribution: { [key: string]: number } = {};
     
     switch (planType) {
       case 'three_meals':
-        mealDistribution = {
-          breakfast: 0.3333,
-          lunch: 0.3333,
-          dinner: 0.3334
-        };
+        mealDistribution = { breakfast: 0.3333, lunch: 0.3333, dinner: 0.3334 };
         break;
-      case 'four_meals':
-        mealDistribution = {
-          breakfast: 0.25,
-          lunch: 0.30,
-          dinner: 0.35,
-          snack_1: 0.10
-        };
+      case 'three_meals_one_snack':
+        mealDistribution = { breakfast: 0.3, lunch: 0.3, dinner: 0.3, snack: 0.1 };
         break;
-      case 'five_meals':
-        mealDistribution = {
-          breakfast: 0.20,
-          lunch: 0.25,
-          dinner: 0.30,
-          snack_1: 0.125,
-          snack_2: 0.125
-        };
+      case 'three_meals_two_snacks':
+        mealDistribution = { breakfast: 0.2667, lunch: 0.2667, dinner: 0.2666, snack: 0.2 };
         break;
     }
 
     const newMeals: Meal[] = [];
     
     Object.entries(mealDistribution).forEach(([mealType, percentage]) => {
-      const calories = Math.round(dailyCalories * percentage);
-      const protein = Math.round((calories * userProfile.protein_percentage / 100) / 4);
-      const carbs = Math.round((calories * userProfile.carb_percentage / 100) / 4);
-      const fat = Math.round((calories * userProfile.fat_percentage / 100) / 9);
+      if (mealType === 'snack' && planType === 'three_meals_two_snacks') {
+        // Create two snacks
+        for (let i = 1; i <= 2; i++) {
+          const calories = Math.round(dailyCalories * (percentage / 2));
+          const protein = Math.round((calories * userProfile.protein_percentage / 100) / 4);
+          const carbs = Math.round((calories * userProfile.carb_percentage / 100) / 4);
+          const fat = Math.round((calories * userProfile.fat_percentage / 100) / 9);
 
-      const timeSlot = getTimeSlot(mealType);
+          newMeals.push({
+            meal_type: 'snack',
+            target_calories: calories,
+            target_protein_g: protein,
+            target_carbs_g: carbs,
+            target_fat_g: fat,
+            selected_foods: [],
+            is_calculated: false
+          });
+        }
+      } else if (mealType !== 'snack' || planType !== 'three_meals_two_snacks') {
+        const calories = Math.round(dailyCalories * percentage);
+        const protein = Math.round((calories * userProfile.protein_percentage / 100) / 4);
+        const carbs = Math.round((calories * userProfile.carb_percentage / 100) / 4);
+        const fat = Math.round((calories * userProfile.fat_percentage / 100) / 9);
 
-      newMeals.push({
-        meal_type: mealType as any,
-        target_calories: calories,
-        target_protein_g: protein,
-        target_carbs_g: carbs,
-        target_fat_g: fat,
-        actual_calories: 0,
-        actual_protein_g: 0,
-        actual_carbs_g: 0,
-        actual_fat_g: 0,
-        foods: [],
-        time_slot: timeSlot
-      });
+        newMeals.push({
+          meal_type: mealType as any,
+          target_calories: calories,
+          target_protein_g: protein,
+          target_carbs_g: carbs,
+          target_fat_g: fat,
+          selected_foods: [],
+          is_calculated: false
+        });
+      }
     });
 
     setMeals(newMeals);
   };
 
-  const getTimeSlot = (mealType: string) => {
-    const timeSlots = {
-      breakfast: '7:00 AM - 9:00 AM',
-      lunch: '12:00 PM - 2:00 PM',
-      dinner: '6:00 PM - 8:00 PM',
-      snack_1: '10:00 AM - 11:00 AM',
-      snack_2: '3:00 PM - 4:00 PM'
-    };
-    return timeSlots[mealType as keyof typeof timeSlots] || '';
-  };
-
-  const getMealIcon = (mealType: string) => {
-    switch (mealType) {
-      case 'breakfast': return <Coffee className="w-5 h-5" />;
-      case 'lunch': return <Sun className="w-5 h-5" />;
-      case 'dinner': return <Moon className="w-5 h-5" />;
-      case 'snack_1':
-      case 'snack_2': return <Apple className="w-5 h-5" />;
-      default: return <Utensils className="w-5 h-5" />;
-    }
-  };
-
-  const addFoodToMeal = (mealIndex: number, foodItem: FoodItem, quantity_g: number) => {
-    // Sequential macro calculation system
-    const meal = meals[mealIndex];
-    
-    // Determine food type based on dominant macro
-    const foodType = determineFoodType(foodItem);
-    
-    let optimalQuantity_g = 0;
-    let calculationOrder = 0;
-    
-    // Step 1: Calculate carbohydrates first (in ounces, then convert to grams)
-    if (foodType === 'carbohydrate') {
-      calculationOrder = 1;
-      const remainingCarbs = meal.target_carbs_g - meal.actual_carbs_g;
-      if (remainingCarbs > 0 && foodItem.carbs_per_100g > 0) {
-        const carbsNeeded_oz = (remainingCarbs * 100) / foodItem.carbs_per_100g / 28.35;
-        optimalQuantity_g = Math.round(carbsNeeded_oz * 28.35);
-      }
-    }
-    
-    // Step 2: Calculate protein (subtract protein found in carbohydrates first)
-    else if (foodType === 'protein') {
-      calculationOrder = 2;
-      const proteinFromCarbs = meal.foods
-        .filter(f => f.food_type === 'carbohydrate')
-        .reduce((sum, f) => sum + f.protein_g, 0);
-      
-      const adjustedProteinTarget = meal.target_protein_g - proteinFromCarbs;
-      const remainingProtein = adjustedProteinTarget - meal.foods
-        .filter(f => f.food_type === 'protein')
-        .reduce((sum, f) => sum + f.protein_g, 0);
-      
-      if (remainingProtein > 0 && foodItem.protein_per_100g > 0) {
-        const proteinNeeded_oz = (remainingProtein * 100) / foodItem.protein_per_100g / 28.35;
-        optimalQuantity_g = Math.round(proteinNeeded_oz * 28.35);
-      }
-    }
-    
-    // Step 3: Calculate fats (subtract fats found in carbs and proteins first)
-    else if (foodType === 'fat') {
-      calculationOrder = 3;
-      const fatFromCarbsAndProteins = meal.foods
-        .filter(f => f.food_type === 'carbohydrate' || f.food_type === 'protein')
-        .reduce((sum, f) => sum + f.fat_g, 0);
-      
-      const adjustedFatTarget = meal.target_fat_g - fatFromCarbsAndProteins;
-      const remainingFat = adjustedFatTarget - meal.foods
-        .filter(f => f.food_type === 'fat')
-        .reduce((sum, f) => sum + f.fat_g, 0);
-      
-      if (remainingFat > 0 && foodItem.fat_per_100g > 0) {
-        const fatNeeded_oz = (remainingFat * 100) / foodItem.fat_per_100g / 28.35;
-        optimalQuantity_g = Math.round(fatNeeded_oz * 28.35);
-      }
-    }
-    
-    // Ensure reasonable portion size (minimum 10g, maximum 500g)
-    optimalQuantity_g = Math.max(10, Math.min(500, optimalQuantity_g || 100));
-    
-    // Final conversion: ounces to grams for display
-    const quantity_oz = optimalQuantity_g / 28.35;
-    const finalQuantity_g = Math.round(quantity_oz * 28.35);
-    
-    // Calculate nutritional values
-    const calories = (foodItem.calories_per_100g * finalQuantity_g) / 100;
-    const protein = (foodItem.protein_per_100g * finalQuantity_g) / 100;
-    const carbs = (foodItem.carbs_per_100g * finalQuantity_g) / 100;
-    const fat = (foodItem.fat_per_100g * finalQuantity_g) / 100;
-
-    const newFood: MealFood = {
-      food_item_id: foodItem.id,
-      food_item: foodItem,
-      quantity_g: finalQuantity_g,
-      quantity_oz: Math.round(quantity_oz * 10) / 10,
-      calories: Math.round(calories * 100) / 100,
-      protein_g: Math.round(protein * 100) / 100,
-      carbs_g: Math.round(carbs * 100) / 100,
-      fat_g: Math.round(fat * 100) / 100,
-      food_type: foodType,
-      calculation_order: calculationOrder
-    };
-
+  const addFoodToMeal = (mealIndex: number, foodItem: FoodItem, quantity: number, foodRole?: 'primary_carb' | 'primary_protein' | 'primary_fat') => {
     const updatedMeals = [...meals];
-    updatedMeals[mealIndex].foods.push(newFood);
-    
-    // Update actual totals
-    updatedMeals[mealIndex].actual_calories += newFood.calories;
-    updatedMeals[mealIndex].actual_protein_g += newFood.protein_g;
-    updatedMeals[mealIndex].actual_carbs_g += newFood.carbs_g;
-    updatedMeals[mealIndex].actual_fat_g += newFood.fat_g;
-
-    setMeals(updatedMeals);
-    setShowFoodSelector(false);
-    setSelectedMeal(null);
-  };
-
-  // Determine food type based on dominant macronutrient
-  const determineFoodType = (foodItem: FoodItem): 'carbohydrate' | 'protein' | 'fat' => {
-    const protein = foodItem.protein_per_100g;
-    const carbs = foodItem.carbs_per_100g;
-    const fat = foodItem.fat_per_100g;
-    
-    // Determine dominant macro
-    if (carbs >= protein && carbs >= fat) {
-      return 'carbohydrate';
-    } else if (protein >= carbs && protein >= fat) {
-      return 'protein';
-    } else {
-      return 'fat';
-    }
-  };
-
-  // Get remaining macros after sequential calculation
-  const getRemainingMacros = (meal: Meal) => {
-    // Step 1: Carbs are calculated first
-    const remainingCarbs = meal.target_carbs_g - meal.actual_carbs_g;
-    
-    // Step 2: Protein calculation (subtract protein from carbs)
-    const proteinFromCarbs = meal.foods
-      .filter(f => f.food_type === 'carbohydrate')
-      .reduce((sum, f) => sum + f.protein_g, 0);
-    const adjustedProteinTarget = meal.target_protein_g - proteinFromCarbs;
-    const proteinFromProteinFoods = meal.foods
-      .filter(f => f.food_type === 'protein')
-      .reduce((sum, f) => sum + f.protein_g, 0);
-    const remainingProtein = adjustedProteinTarget - proteinFromProteinFoods;
-    
-    // Step 3: Fat calculation (subtract fats from carbs and proteins)
-    const fatFromCarbsAndProteins = meal.foods
-      .filter(f => f.food_type === 'carbohydrate' || f.food_type === 'protein')
-      .reduce((sum, f) => sum + f.fat_g, 0);
-    const adjustedFatTarget = meal.target_fat_g - fatFromCarbsAndProteins;
-    const fatFromFatFoods = meal.foods
-      .filter(f => f.food_type === 'fat')
-      .reduce((sum, f) => sum + f.fat_g, 0);
-    const remainingFat = adjustedFatTarget - fatFromFatFoods;
-    
-    return {
-      carbs: Math.max(0, remainingCarbs),
-      protein: Math.max(0, remainingProtein),
-      fat: Math.max(0, remainingFat),
-      adjustedProteinTarget,
-      adjustedFatTarget
+    const selectedFood: SelectedFood = {
+      food_item: foodItem,
+      quantity_g: quantity,
+      is_primary_carb: foodRole === 'primary_carb',
+      is_primary_protein: foodRole === 'primary_protein',
+      is_primary_fat: foodRole === 'primary_fat'
     };
+
+    updatedMeals[mealIndex].selected_foods.push(selectedFood);
+    updatedMeals[mealIndex].is_calculated = false; // Reset calculation status
+    setMeals(updatedMeals);
   };
 
   const removeFoodFromMeal = (mealIndex: number, foodIndex: number) => {
     const updatedMeals = [...meals];
-    const removedFood = updatedMeals[mealIndex].foods[foodIndex];
-    
-    // Update actual totals
-    updatedMeals[mealIndex].actual_calories -= removedFood.calories;
-    updatedMeals[mealIndex].actual_protein_g -= removedFood.protein_g;
-    updatedMeals[mealIndex].actual_carbs_g -= removedFood.carbs_g;
-    updatedMeals[mealIndex].actual_fat_g -= removedFood.fat_g;
-    
-    updatedMeals[mealIndex].foods.splice(foodIndex, 1);
+    updatedMeals[mealIndex].selected_foods.splice(foodIndex, 1);
+    updatedMeals[mealIndex].is_calculated = false; // Reset calculation status
+    updatedMeals[mealIndex].calculation_result = undefined;
     setMeals(updatedMeals);
   };
 
-  const updateWaterIntake = async (glasses: number) => {
-    if (!user?.id) return;
+  // CORE CALCULATION SYSTEM - Processes complete meal after all foods are selected
+  const calculateCompleteMeal = (mealIndex: number) => {
+    const meal = meals[mealIndex];
+    if (meal.selected_foods.length === 0) return;
 
-    const newIntake = Math.min(Math.max(glasses, 0), 20);
-    setWaterIntake(prev => ({ ...prev, glasses_consumed: newIntake }));
+    const targets = {
+      calories: meal.target_calories,
+      protein: meal.target_protein_g,
+      carbs: meal.target_carbs_g,
+      fat: meal.target_fat_g
+    };
 
-    await supabase
-      .from('water_intake')
-      .upsert({
-        user_id: user.id,
-        glasses_consumed: newIntake,
-        target_glasses: waterIntake.target_glasses,
-        intake_date: new Date().toISOString().split('T')[0]
-      }, { onConflict: 'user_id,intake_date' });
-  };
+    // Step 1: Calculate initial nutritional values for all foods
+    let totalNutrition = {
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0
+    };
 
-  const getTotalActuals = () => {
-    return meals.reduce((totals, meal) => ({
-      calories: totals.calories + meal.actual_calories,
-      protein: totals.protein + meal.actual_protein_g,
-      carbs: totals.carbs + meal.actual_carbs_g,
-      fat: totals.fat + meal.actual_fat_g
-    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-  };
+    const foodCalculations = meal.selected_foods.map(selectedFood => {
+      const food = selectedFood.food_item;
+      const quantity = selectedFood.quantity_g;
+      
+      return {
+        food_item: food,
+        original_quantity_g: quantity,
+        calories: (food.calories_per_100g * quantity) / 100,
+        protein_g: (food.protein_per_100g * quantity) / 100,
+        carbs_g: (food.carbs_per_100g * quantity) / 100,
+        fat_g: (food.fat_per_100g * quantity) / 100,
+        is_primary_carb: selectedFood.is_primary_carb,
+        is_primary_protein: selectedFood.is_primary_protein,
+        is_primary_fat: selectedFood.is_primary_fat
+      };
+    });
 
-  const getProgressPercentage = (actual: number, target: number) => {
-    return Math.min((actual / target) * 100, 100);
-  };
+    // Calculate initial totals
+    foodCalculations.forEach(calc => {
+      totalNutrition.calories += calc.calories;
+      totalNutrition.protein += calc.protein_g;
+      totalNutrition.carbs += calc.carbs_g;
+      totalNutrition.fat += calc.fat_g;
+    });
 
-  const getProgressColor = (actual: number, target: number) => {
-    const percentage = (actual / target) * 100;
-    if (percentage < 50) return 'bg-red-500';
-    if (percentage < 80) return 'bg-yellow-500';
-    if (percentage <= 100) return 'bg-green-500';
-    return 'bg-blue-500';
+    // Step 2: Apply meal-based adjustments
+    const adjustments: string[] = [];
+    const adjustedFoods = [...foodCalculations];
+
+    // Adjustment Phase 1: Handle Carbohydrate Sources
+    const carbSources = adjustedFoods.filter(food => 
+      food.is_primary_carb || food.food_item.category === 'carbohydrates'
+    );
+    
+    if (carbSources.length > 0 && totalNutrition.carbs !== targets.carbs) {
+      const carbAdjustmentFactor = targets.carbs / totalNutrition.carbs;
+      carbSources.forEach(food => {
+        const oldQuantity = food.original_quantity_g;
+        const newQuantity = oldQuantity * carbAdjustmentFactor;
+        const quantityDiff = newQuantity - oldQuantity;
+        
+        // Adjust all macros proportionally for carb sources
+        food.calories += (food.food_item.calories_per_100g * quantityDiff) / 100;
+        food.protein_g += (food.food_item.protein_per_100g * quantityDiff) / 100;
+        food.carbs_g += (food.food_item.carbs_per_100g * quantityDiff) / 100;
+        food.fat_g += (food.food_item.fat_per_100g * quantityDiff) / 100;
+        
+        if (Math.abs(quantityDiff) > 5) {
+          adjustments.push(`Adjusted ${food.food_item.name} by ${quantityDiff > 0 ? '+' : ''}${Math.round(quantityDiff)}g to meet carb target`);
+        }
+      });
+    }
+
+    // Recalculate totals after carb adjustments
+    totalNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    adjustedFoods.forEach(calc => {
+      totalNutrition.calories += calc.calories;
+      totalNutrition.protein += calc.protein_g;
+      totalNutrition.carbs += calc.carbs_g;
+      totalNutrition.fat += calc.fat_g;
+    });
+
+    // Adjustment Phase 2: Handle Protein Sources
+    const proteinSources = adjustedFoods.filter(food => 
+      food.is_primary_protein || food.food_item.category === 'proteins'
+    );
+    
+    if (proteinSources.length > 0 && Math.abs(totalNutrition.protein - targets.protein) > 2) {
+      const proteinDeficit = targets.protein - totalNutrition.protein;
+      const proteinPerGram = proteinSources.reduce((sum, food) => 
+        sum + food.food_item.protein_per_100g, 0) / proteinSources.length / 100;
+      
+      const additionalProteinNeeded = proteinDeficit / proteinPerGram / proteinSources.length;
+      
+      proteinSources.forEach(food => {
+        // Adjust protein sources to meet protein target
+        food.calories += (food.food_item.calories_per_100g * additionalProteinNeeded) / 100;
+        food.protein_g += (food.food_item.protein_per_100g * additionalProteinNeeded) / 100;
+        food.carbs_g += (food.food_item.carbs_per_100g * additionalProteinNeeded) / 100;
+        food.fat_g += (food.food_item.fat_per_100g * additionalProteinNeeded) / 100;
+        
+        if (Math.abs(additionalProteinNeeded) > 5) {
+          adjustments.push(`Adjusted ${food.food_item.name} by ${additionalProteinNeeded > 0 ? '+' : ''}${Math.round(additionalProteinNeeded)}g to meet protein target`);
+        }
+      });
+    }
+
+    // Recalculate totals after protein adjustments
+    totalNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    adjustedFoods.forEach(calc => {
+      totalNutrition.calories += calc.calories;
+      totalNutrition.protein += calc.protein_g;
+      totalNutrition.carbs += calc.carbs_g;
+      totalNutrition.fat += calc.fat_g;
+    });
+
+    // Adjustment Phase 3: Handle Fat Sources (calculated last for flexibility)
+    const fatDeficit = targets.fat - totalNutrition.fat;
+    
+    if (Math.abs(fatDeficit) > 1) {
+      const fatSources = adjustedFoods.filter(food => 
+        food.is_primary_fat || food.food_item.category === 'fats'
+      );
+      
+      if (fatSources.length > 0) {
+        const fatPerGram = fatSources.reduce((sum, food) => 
+          sum + food.food_item.fat_per_100g, 0) / fatSources.length / 100;
+        
+        const additionalFatNeeded = fatDeficit / fatPerGram / fatSources.length;
+        
+        fatSources.forEach(food => {
+          food.calories += (food.food_item.calories_per_100g * additionalFatNeeded) / 100;
+          food.protein_g += (food.food_item.protein_per_100g * additionalFatNeeded) / 100;
+          food.carbs_g += (food.food_item.carbs_per_100g * additionalFatNeeded) / 100;
+          food.fat_g += (food.food_item.fat_per_100g * additionalFatNeeded) / 100;
+          
+          if (Math.abs(additionalFatNeeded) > 3) {
+            adjustments.push(`Adjusted ${food.food_item.name} by ${additionalFatNeeded > 0 ? '+' : ''}${Math.round(additionalFatNeeded)}g to meet fat target`);
+          }
+        });
+      } else {
+        // Add healthy fat recommendation if no fat sources present
+        adjustments.push(`Consider adding ${Math.round(fatDeficit)}g of healthy fats (olive oil, avocado, nuts) to meet fat target`);
+      }
+    }
+
+    // Final totals calculation
+    const finalTotals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    adjustedFoods.forEach(calc => {
+      finalTotals.calories += calc.calories;
+      finalTotals.protein += calc.protein_g;
+      finalTotals.carbs += calc.carbs_g;
+      finalTotals.fat += calc.fat_g;
+    });
+
+    // Create final calculation result
+    const calculationResult: MealCalculation = {
+      total_calories: Math.round(finalTotals.calories),
+      total_protein_g: Math.round(finalTotals.protein * 10) / 10,
+      total_carbs_g: Math.round(finalTotals.carbs * 10) / 10,
+      total_fat_g: Math.round(finalTotals.fat * 10) / 10,
+      adjusted_foods: adjustedFoods.map(food => ({
+        food_item: food.food_item,
+        final_quantity_g: Math.round(food.original_quantity_g * 10) / 10,
+        calories: Math.round(food.calories),
+        protein_g: Math.round(food.protein_g * 10) / 10,
+        carbs_g: Math.round(food.carbs_g * 10) / 10,
+        fat_g: Math.round(food.fat_g * 10) / 10
+      })),
+      adjustments_made: adjustments
+    };
+
+    // Update meal with calculation result
+    const updatedMeals = [...meals];
+    updatedMeals[mealIndex].calculation_result = calculationResult;
+    updatedMeals[mealIndex].is_calculated = true;
+    setMeals(updatedMeals);
   };
 
   const getMealTypeLabel = (mealType: string, index: number) => {
-    const labels = {
-      breakfast: 'Breakfast',
-      lunch: 'Lunch',
-      dinner: 'Dinner',
-      snack_1: 'Morning Snack',
-      snack_2: 'Afternoon Snack'
-    };
-    return labels[mealType as keyof typeof labels] || `Meal ${index + 1}`;
+    if (mealType === 'snack' && planType === 'three_meals_two_snacks') {
+      const snackCount = meals.slice(0, index).filter(m => m.meal_type === 'snack').length + 1;
+      return `Snack ${snackCount}`;
+    }
+    return mealType.charAt(0).toUpperCase() + mealType.slice(1);
   };
 
-  const totals = getTotalActuals();
-  const dailyTargets = {
-    calories: userProfile.tee_calories,
-    protein: Math.round((userProfile.tee_calories * userProfile.protein_percentage / 100) / 4),
-    carbs: Math.round((userProfile.tee_calories * userProfile.carb_percentage / 100) / 4),
-    fat: Math.round((userProfile.tee_calories * userProfile.fat_percentage / 100) / 9)
+  const getTargetVsActual = (target: number, actual: number) => {
+    const diff = actual - target;
+    const percentage = target > 0 ? (diff / target) * 100 : 0;
+    return { diff, percentage };
   };
-
-  // Safety check for minimum calories
-  const isUnderMinimum = userProfile.tee_calories < (userProfile.gender === 'male' ? 1500 : 1200);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* Header with TEE Integration */}
+    <div className="space-y-6">
+      {/* User Profile Display */}
       <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 rounded-2xl p-6 border border-[#52C878]/20">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-[#2C3E50] flex items-center gap-3">
-            <ChefHat className="w-8 h-8 text-[#52C878]" />
-            Comprehensive Meal Planning System
-          </h1>
-          <div className="text-right">
-            <div className="bg-white/50 p-3 rounded-lg">
-              <p className="text-sm text-gray-600">Total Energy Expenditure (TEE)</p>
-              <p className="text-2xl font-bold text-[#52C878]">{userProfile.tee_calories}</p>
-              <p className="text-xs text-gray-500">
-                P:{userProfile.protein_percentage}% C:{userProfile.carb_percentage}% F:{userProfile.fat_percentage}%
-              </p>
-              {userProfile.weight_loss_goal && userProfile.weight_loss_goal !== 'maintain' && (
-                <p className="text-xs text-purple-600 font-medium mt-1">
-                  Goal: {userProfile.weight_loss_goal.replace('lose_', '').replace('_', '.')} lbs/week
-                </p>
-              )}
-            </div>
+        <h2 className="text-2xl font-bold text-[#2C3E50] mb-4">Your Active Nutrition Profile</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-white/50 rounded-xl">
+            <p className="text-sm text-gray-600">Daily Calories</p>
+            <p className="text-2xl font-bold text-[#2C3E50]">{userProfile.tee_calories}</p>
+          </div>
+          <div className="text-center p-4 bg-white/50 rounded-xl">
+            <p className="text-sm text-gray-600">Protein</p>
+            <p className="text-2xl font-bold text-[#52C878]">{userProfile.protein_percentage}%</p>
+          </div>
+          <div className="text-center p-4 bg-white/50 rounded-xl">
+            <p className="text-sm text-gray-600">Carbs</p>
+            <p className="text-2xl font-bold text-[#4A90E2]">{userProfile.carb_percentage}%</p>
+          </div>
+          <div className="text-center p-4 bg-white/50 rounded-xl">
+            <p className="text-sm text-gray-600">Fat</p>
+            <p className="text-2xl font-bold text-purple-600">{userProfile.fat_percentage}%</p>
           </div>
         </div>
-
-        {/* Profile Integration Notice */}
-        <div className="bg-white/70 p-4 rounded-xl border border-white/50 mb-4">
-          <h3 className="font-semibold text-[#2C3E50] mb-2 flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            Your Personalized Nutrition Profile is Active
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <p className="text-gray-600">Metabolic Type:</p>
-              <p className="font-semibold text-[#2C3E50]">
-                {userProfile.metabolic_profile === 'fast_oxidizer' ? 'Fast Oxidizer' :
-                 userProfile.metabolic_profile === 'slow_oxidizer' ? 'Slow Oxidizer' :
-                 userProfile.metabolic_profile === 'medium_oxidizer' ? 'Medium Oxidizer' :
-                 'Custom Profile'}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-600">Daily Calorie Target:</p>
-              <p className="font-semibold text-[#52C878]">{userProfile.tee_calories} calories</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Macro Distribution:</p>
-              <p className="font-semibold text-[#4A90E2]">
-                {userProfile.protein_percentage}%P / {userProfile.carb_percentage}%C / {userProfile.fat_percentage}%F
-              </p>
-            </div>
-          </div>
-        </div>
-        <p className="text-gray-600">
-          Build a nutritional meal planning application that allows members to select up to 5 meals per 
-          day that collectively equal their Total Energy Expenditure (TEE) based on their individual metabolic profile.
+        <p className="text-center text-sm text-gray-600 mt-4">
+          Metabolic Profile: <span className="font-semibold">{userProfile.metabolic_profile.replace('_', ' ').toUpperCase()}</span>
         </p>
-
-        {/* Safety Warning */}
-        {isUnderMinimum && (
-          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mt-4">
-            <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-red-800">
-                Calorie Intake Below Recommended Minimum
-              </p>
-              <p className="text-xs text-red-600">
-                Your TEE ({userProfile.tee_calories} cal) is below the minimum recommended daily intake 
-                ({userProfile.gender === 'male' ? '1500' : '1200'} cal). Please consult with a nutritionist.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Running Total Dashboard */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-        <h2 className="text-xl font-bold text-[#2C3E50] mb-6 flex items-center gap-2">
-          <Target className="w-5 h-5" />
-          Daily Progress Dashboard
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Calories */}
-          <div className="text-center">
-            <div className="relative w-24 h-24 mx-auto mb-3">
-              <svg className="w-24 h-24 transform -rotate-90">
-                <circle cx="48" cy="48" r="40" stroke="#E5E7EB" strokeWidth="8" fill="none" />
-                <circle 
-                  cx="48" cy="48" r="40" 
-                  stroke="#52C878" 
-                  strokeWidth="8" 
-                  fill="none"
-                  strokeDasharray={`${2 * Math.PI * 40}`}
-                  strokeDashoffset={`${2 * Math.PI * 40 * (1 - getProgressPercentage(totals.calories, dailyTargets.calories) / 100)}`}
-                  className="transition-all duration-500"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-lg font-bold text-[#2C3E50]">
-                  {Math.round(getProgressPercentage(totals.calories, dailyTargets.calories))}%
-                </span>
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">Calories</p>
-            <p className="text-2xl font-bold text-[#2C3E50]">{Math.round(totals.calories)}</p>
-            <p className="text-sm text-gray-500">/ {dailyTargets.calories}</p>
-          </div>
-
-          {/* Protein */}
-          <div className="text-center">
-            <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
-              <div 
-                className={`h-4 rounded-full transition-all duration-500 ${getProgressColor(totals.protein, dailyTargets.protein)}`}
-                style={{ width: `${getProgressPercentage(totals.protein, dailyTargets.protein)}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">Protein</p>
-            <p className="text-2xl font-bold text-green-600">{Math.round(totals.protein)}g</p>
-            <p className="text-sm text-gray-500">/ {dailyTargets.protein}g</p>
-          </div>
-
-          {/* Carbs */}
-          <div className="text-center">
-            <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
-              <div 
-                className={`h-4 rounded-full transition-all duration-500 ${getProgressColor(totals.carbs, dailyTargets.carbs)}`}
-                style={{ width: `${getProgressPercentage(totals.carbs, dailyTargets.carbs)}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">Carbohydrates</p>
-            <p className="text-2xl font-bold text-yellow-600">{Math.round(totals.carbs)}g</p>
-            <p className="text-sm text-gray-500">/ {dailyTargets.carbs}g</p>
-          </div>
-
-          {/* Fat */}
-          <div className="text-center">
-            <div className="w-full bg-gray-200 rounded-full h-4 mb-3">
-              <div 
-                className={`h-4 rounded-full transition-all duration-500 ${getProgressColor(totals.fat, dailyTargets.fat)}`}
-                style={{ width: `${getProgressPercentage(totals.fat, dailyTargets.fat)}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">Fat</p>
-            <p className="text-2xl font-bold text-purple-600">{Math.round(totals.fat)}g</p>
-            <p className="text-sm text-gray-500">/ {dailyTargets.fat}g</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Water Tracking */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
-        <h3 className="text-lg font-bold text-[#2C3E50] mb-4 flex items-center gap-2">
-          <Droplets className="w-5 h-5 text-blue-500" />
-          Daily Hydration Tracker
-        </h3>
-        
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <div className="flex gap-1">
-              {Array.from({ length: waterIntake.target_glasses }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => updateWaterIntake(i + 1)}
-                  className={`w-8 h-10 rounded-lg border-2 transition-all duration-200 ${
-                    i < waterIntake.glasses_consumed
-                      ? 'bg-blue-500 border-blue-500 text-white'
-                      : 'bg-white border-blue-200 hover:border-blue-400'
-                  }`}
-                >
-                  <Droplets className="w-4 h-4 mx-auto" />
-                </button>
-              ))}
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{waterIntake.glasses_consumed}</p>
-              <p className="text-sm text-gray-600">/ {waterIntake.target_glasses} glasses</p>
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <button
-              onClick={() => updateWaterIntake(waterIntake.glasses_consumed - 1)}
-              className="px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-            >
-              -1
-            </button>
-            <button
-              onClick={() => updateWaterIntake(waterIntake.glasses_consumed + 1)}
-              className="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
-            >
-              +1
-            </button>
-          </div>
-        </div>
-        
-        {waterIntake.glasses_consumed >= waterIntake.target_glasses && (
-          <div className="flex items-center gap-2 text-green-600">
-            <Check className="w-4 h-4" />
-            <span className="text-sm font-medium">Great job! You've reached your daily hydration goal!</span>
-          </div>
-        )}
-      </div>
-
-      {/* Meal Plan Structure Selection */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-        <h3 className="text-xl font-bold text-[#2C3E50] mb-4">Meal Plan Structure (Up to 5 Meals Per Day)</h3>
+      {/* Plan Type Selection */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <h3 className="text-xl font-bold text-gray-800 mb-4">Meal Plan Type</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { 
-              value: 'three_meals', 
-              label: 'Three Meals', 
-              description: 'Breakfast, Lunch, Dinner',
-              distribution: '33.33% each meal'
-            },
-            { 
-              value: 'four_meals', 
-              label: 'Four Meals', 
-              description: '3 meals + 1 snack',
-              distribution: '25%, 30%, 35%, 10%'
-            },
-            { 
-              value: 'five_meals', 
-              label: 'Five Meals', 
-              description: '3 meals + 2 snacks',
-              distribution: '20%, 25%, 30%, 12.5%, 12.5%'
-            }
+            { value: 'three_meals', label: '3 Meals', description: 'Breakfast, Lunch, Dinner' },
+            { value: 'three_meals_one_snack', label: '3 Meals + 1 Snack', description: '3 meals + 1 snack' },
+            { value: 'three_meals_two_snacks', label: '3 Meals + 2 Snacks', description: '3 meals + 2 snacks' }
           ].map((option) => (
             <button
               key={option.value}
@@ -767,241 +439,214 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
                   : 'border-gray-200 hover:border-[#52C878]/50'
               }`}
             >
-              <h4 className="font-semibold text-[#2C3E50] mb-2">{option.label}</h4>
-              <p className="text-sm text-gray-600 mb-1">{option.description}</p>
-              <p className="text-xs text-[#52C878] font-medium">{option.distribution}</p>
+              <h4 className="font-semibold text-gray-800">{option.label}</h4>
+              <p className="text-sm text-gray-600 mt-1">{option.description}</p>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Meals Section */}
+      {/* Meals */}
       <div className="space-y-6">
         {meals.map((meal, mealIndex) => (
           <div key={mealIndex} className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <Utensils className="w-5 h-5" />
+                {getMealTypeLabel(meal.meal_type, mealIndex)}
+              </h3>
               <div className="flex items-center gap-4">
-                <div className="bg-[#52C878]/10 p-3 rounded-full">
-                  {getMealIcon(meal.meal_type)}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-[#2C3E50]">
-                    {getMealTypeLabel(meal.meal_type, mealIndex)}
-                  </h3>
-                  {meal.time_slot && (
-                    <p className="text-sm text-gray-600 flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      {meal.time_slot}
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-[#2C3E50]">{meal.target_calories}</p>
-                  <p className="text-sm text-gray-600">target calories</p>
-                </div>
                 <button
                   onClick={() => {
-                    setSelectedMeal(mealIndex);
+                    setSelectedMealIndex(mealIndex);
                     setShowFoodSelector(true);
                   }}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white rounded-xl hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#52C878] text-white rounded-lg hover:bg-[#52C878]/90 transition-colors duration-200"
                 >
                   <Plus className="w-4 h-4" />
-                  Select Food
+                  Add Food
                 </button>
+                {meal.selected_foods.length > 0 && (
+                  <button
+                    onClick={() => calculateCompleteMeal(mealIndex)}
+                    disabled={meal.is_calculated}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
+                      meal.is_calculated
+                        ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                        : 'bg-[#4A90E2] text-white hover:bg-[#4A90E2]/90'
+                    }`}
+                  >
+                    {meal.is_calculated ? <CheckCircle className="w-4 h-4" /> : <Calculator className="w-4 h-4" />}
+                    {meal.is_calculated ? 'Calculated' : 'Calculate Meal'}
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Meal Targets */}
             <div className="grid grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
               <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Target Calories</p>
-                <p className="font-bold text-[#2C3E50]">{meal.target_calories}</p>
+                <p className="text-xs text-gray-600">Target Calories</p>
+                <p className="font-semibold text-gray-800">{meal.target_calories}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Protein (g)</p>
-                <p className="font-bold text-green-600">{meal.target_protein_g}</p>
+                <p className="text-xs text-gray-600">Protein (g)</p>
+                <p className="font-semibold text-[#52C878]">{meal.target_protein_g}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Carbs (g)</p>
-                <p className="font-bold text-yellow-600">{meal.target_carbs_g}</p>
+                <p className="text-xs text-gray-600">Carbs (g)</p>
+                <p className="font-semibold text-[#4A90E2]">{meal.target_carbs_g}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Fat (g)</p>
-                <p className="font-bold text-purple-600">{meal.target_fat_g}</p>
+                <p className="text-xs text-gray-600">Fat (g)</p>
+                <p className="font-semibold text-purple-600">{meal.target_fat_g}</p>
               </div>
             </div>
 
-            {/* Foods in Meal */}
+            {/* Selected Foods */}
             <div className="space-y-3 mb-6">
-              {meal.foods.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Utensils className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No foods added yet. Click "Select Food" to start building your meal.</p>
-                </div>
+              <h4 className="font-semibold text-gray-800">Selected Foods:</h4>
+              {meal.selected_foods.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">No foods selected yet</p>
               ) : (
-                meal.foods
-                  .sort((a, b) => a.calculation_order - b.calculation_order)
-                  .map((food, foodIndex) => (
-                  <div key={foodIndex} className="flex items-center justify-between p-4 bg-[#52C878]/5 rounded-xl border border-[#52C878]/10">
+                meal.selected_foods.map((selectedFood, foodIndex) => (
+                  <div key={foodIndex} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-[#2C3E50]">{food.food_item?.name}</p>
-                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                          food.food_type === 'carbohydrate' ? 'bg-yellow-100 text-yellow-800' :
-                          food.food_type === 'protein' ? 'bg-green-100 text-green-800' :
-                          'bg-purple-100 text-purple-800'
-                        }`}>
-                          {food.food_type}
-                        </span>
-                      </div>
+                      <p className="font-medium text-gray-800">{selectedFood.food_item.name}</p>
                       <p className="text-sm text-gray-600">
-                        {food.quantity_g}g ({food.quantity_oz} oz) • Auto-calculated
+                        {selectedFood.quantity_g}g
+                        {selectedFood.is_primary_carb && <span className="ml-2 px-2 py-1 bg-[#4A90E2] text-white text-xs rounded">Primary Carb</span>}
+                        {selectedFood.is_primary_protein && <span className="ml-2 px-2 py-1 bg-[#52C878] text-white text-xs rounded">Primary Protein</span>}
+                        {selectedFood.is_primary_fat && <span className="ml-2 px-2 py-1 bg-purple-500 text-white text-xs rounded">Primary Fat</span>}
                       </p>
                     </div>
-                    <div className="flex items-center gap-6 text-sm">
-                      <span className="font-medium">{Math.round(food.calories)} cal</span>
-                      <span className="text-green-600 font-medium">{Math.round(food.protein_g)}p</span>
-                      <span className="text-yellow-600 font-medium">{Math.round(food.carbs_g)}c</span>
-                      <span className="text-purple-600 font-medium">{Math.round(food.fat_g)}f</span>
-                      <button
-                        onClick={() => removeFoodFromMeal(mealIndex, foodIndex)}
-                        className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => removeFoodFromMeal(mealIndex, foodIndex)}
+                      className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 ))
               )}
             </div>
 
-            {/* Sequential Calculation Display */}
-            {meal.foods.length > 0 && (
-              <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <h5 className="font-semibold text-[#2C3E50] mb-3">Sequential Macro Calculation</h5>
-                {(() => {
-                  const remaining = getRemainingMacros(meal);
-                  return (
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-yellow-700 font-medium">1. Carbs Remaining</p>
-                        <p className="text-lg font-bold text-yellow-600">{Math.round(remaining.carbs)}g</p>
-                      </div>
-                      <div>
-                        <p className="text-green-700 font-medium">2. Protein Remaining</p>
-                        <p className="text-lg font-bold text-green-600">{Math.round(remaining.protein)}g</p>
-                        <p className="text-xs text-gray-500">After carb protein: {Math.round(remaining.adjustedProteinTarget)}g target</p>
-                      </div>
-                      <div>
-                        <p className="text-purple-700 font-medium">3. Fat Remaining</p>
-                        <p className="text-lg font-bold text-purple-600">{Math.round(remaining.fat)}g</p>
-                        <p className="text-xs text-gray-500">After carb/protein fat: {Math.round(remaining.adjustedFatTarget)}g target</p>
-                      </div>
+            {/* Calculation Results */}
+            {meal.calculation_result && (
+              <div className="space-y-4">
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <ChefHat className="w-4 h-4" />
+                    Complete Meal Calculation Results
+                  </h4>
+                  
+                  {/* Final Nutritional Totals */}
+                  <div className="grid grid-cols-4 gap-4 mb-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl">
+                    <div className="text-center">
+                      <p className="text-xs text-gray-600">Final Calories</p>
+                      <p className="font-bold text-gray-800">{meal.calculation_result.total_calories}</p>
+                      <p className="text-xs text-gray-500">
+                        {getTargetVsActual(meal.target_calories, meal.calculation_result.total_calories).diff > 0 ? '+' : ''}
+                        {Math.round(getTargetVsActual(meal.target_calories, meal.calculation_result.total_calories).diff)}
+                      </p>
                     </div>
-                  );
-                })()}
+                    <div className="text-center">
+                      <p className="text-xs text-gray-600">Final Protein</p>
+                      <p className="font-bold text-[#52C878]">{meal.calculation_result.total_protein_g}g</p>
+                      <p className="text-xs text-gray-500">
+                        {getTargetVsActual(meal.target_protein_g, meal.calculation_result.total_protein_g).diff > 0 ? '+' : ''}
+                        {Math.round(getTargetVsActual(meal.target_protein_g, meal.calculation_result.total_protein_g).diff * 10) / 10}g
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-gray-600">Final Carbs</p>
+                      <p className="font-bold text-[#4A90E2]">{meal.calculation_result.total_carbs_g}g</p>
+                      <p className="text-xs text-gray-500">
+                        {getTargetVsActual(meal.target_carbs_g, meal.calculation_result.total_carbs_g).diff > 0 ? '+' : ''}
+                        {Math.round(getTargetVsActual(meal.target_carbs_g, meal.calculation_result.total_carbs_g).diff * 10) / 10}g
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-gray-600">Final Fat</p>
+                      <p className="font-bold text-purple-600">{meal.calculation_result.total_fat_g}g</p>
+                      <p className="text-xs text-gray-500">
+                        {getTargetVsActual(meal.target_fat_g, meal.calculation_result.total_fat_g).diff > 0 ? '+' : ''}
+                        {Math.round(getTargetVsActual(meal.target_fat_g, meal.calculation_result.total_fat_g).diff * 10) / 10}g
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Adjusted Food Quantities */}
+                  <div className="space-y-2">
+                    <h5 className="font-medium text-gray-700">Final Food Quantities:</h5>
+                    {meal.calculation_result.adjusted_foods.map((food, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800">{food.food_item.name}</p>
+                          <p className="text-sm text-gray-600">{food.final_quantity_g}g</p>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span>{food.calories} cal</span>
+                          <span className="text-[#52C878]">{food.protein_g}p</span>
+                          <span className="text-[#4A90E2]">{food.carbs_g}c</span>
+                          <span className="text-purple-600">{food.fat_g}f</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Adjustments Made */}
+                  {meal.calculation_result.adjustments_made.length > 0 && (
+                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                      <h5 className="font-medium text-yellow-800 mb-2 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4" />
+                        Meal Adjustments Made:
+                      </h5>
+                      <ul className="text-sm text-yellow-700 space-y-1">
+                        {meal.calculation_result.adjustments_made.map((adjustment, index) => (
+                          <li key={index}>• {adjustment}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-
-            {/* Meal Progress */}
-            <div className="grid grid-cols-4 gap-4 p-4 bg-[#4A90E2]/5 rounded-xl">
-              <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Actual Calories</p>
-                <p className="font-bold text-[#2C3E50]">{Math.round(meal.actual_calories)}</p>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                  <div 
-                    className="bg-[#2C3E50] h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min((meal.actual_calories / meal.target_calories) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Protein (g)</p>
-                <p className="font-bold text-green-600">{Math.round(meal.actual_protein_g)}</p>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min((meal.actual_protein_g / meal.target_protein_g) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Carbs (g)</p>
-                <p className="font-bold text-yellow-600">{Math.round(meal.actual_carbs_g)}</p>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                  <div 
-                    className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min((meal.actual_carbs_g / meal.target_carbs_g) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-600 mb-1">Fat (g)</p>
-                <p className="font-bold text-purple-600">{Math.round(meal.actual_fat_g)}</p>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                  <div 
-                    className="bg-purple-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min((meal.actual_fat_g / meal.target_fat_g) * 100, 100)}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
           </div>
         ))}
       </div>
 
-      {/* Food Selector Modal with USDA Integration */}
-      {showFoodSelector && selectedMeal !== null && (
+      {/* Food Selector Modal */}
+      {showFoodSelector && selectedMealIndex !== null && (
         <FoodSelectorModal
           foodItems={foodItems}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onAddFood={(foodItem) => addFoodToMeal(selectedMeal, foodItem, 0)}
+          onAddFood={(foodItem, quantity, role) => {
+            addFoodToMeal(selectedMealIndex, foodItem, quantity, role);
+            setShowFoodSelector(false);
+            setSelectedMealIndex(null);
+          }}
           onClose={() => {
             setShowFoodSelector(false);
-            setSelectedMeal(null);
+            setSelectedMealIndex(null);
           }}
-          onUSDASearch={searchUSDAFoods}
-          usdaSearchResults={usdaSearchResults}
-          usdaLoading={usdaLoading}
-          onAddUSDAFood={addUSDAFoodToDatabase}
         />
       )}
-
     </div>
   );
 }
 
-// Enhanced Food Selector Modal with USDA Integration
 interface FoodSelectorModalProps {
   foodItems: FoodItem[];
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  onAddFood: (foodItem: FoodItem) => void;
+  onAddFood: (foodItem: FoodItem, quantity: number, role?: 'primary_carb' | 'primary_protein' | 'primary_fat') => void;
   onClose: () => void;
-  onUSDASearch: (query: string) => void;
-  usdaSearchResults: USDAFoodItem[];
-  usdaLoading: boolean;
-  onAddUSDAFood: (usdaFood: USDAFoodItem) => Promise<FoodItem>;
 }
 
-function FoodSelectorModal({ 
-  foodItems, 
-  searchTerm, 
-  setSearchTerm, 
-  onAddFood, 
-  onClose,
-  onUSDASearch,
-  usdaSearchResults,
-  usdaLoading,
-  onAddUSDAFood
-}: FoodSelectorModalProps) {
+function FoodSelectorModal({ foodItems, onAddFood, onClose }: FoodSelectorModalProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [showUSDAResults, setShowUSDAResults] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  const [quantity, setQuantity] = useState(100);
+  const [foodRole, setFoodRole] = useState<'primary_carb' | 'primary_protein' | 'primary_fat' | 'none'>('none');
 
   const categories = ['all', ...Array.from(new Set(foodItems.map(item => item.category)))];
   
@@ -1011,178 +656,140 @@ function FoodSelectorModal({
     return matchesCategory && matchesSearch;
   });
 
-
-  const handleUSDASearch = () => {
-    if (searchTerm.trim()) {
-      onUSDASearch(searchTerm);
-      setShowUSDAResults(true);
+  const handleAddFood = () => {
+    if (selectedFood && quantity > 0) {
+      onAddFood(selectedFood, quantity, foodRole === 'none' ? undefined : foodRole);
     }
-  };
-
-  const handleAddUSDAFood = async (usdaFood: USDAFoodItem) => {
-    const newFoodItem = await onAddUSDAFood(usdaFood);
-    onAddFood(newFoodItem);
-    setShowUSDAResults(false);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
         <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-bold text-[#2C3E50] flex items-center gap-2">
-              <Database className="w-6 h-6" />
-              Food Selection & Database Integration
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+          <h3 className="text-xl font-bold text-gray-800">Add Food to Meal</h3>
+          <p className="text-sm text-gray-600 mt-1">Select foods that will be calculated together as a complete meal</p>
         </div>
         
         <div className="p-6 space-y-6">
-          {/* Search and Filter with USDA Integration */}
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search foods (e.g., chicken breast, rice, broccoli)..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
-                />
-              </div>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {category === 'all' ? 'All Categories' : category.charAt(0).toUpperCase() + category.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* USDA Search Integration */}
-            <div className="flex gap-4">
-              <button
-                onClick={handleUSDASearch}
-                disabled={!searchTerm.trim() || usdaLoading}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              >
-                <Database className="w-4 h-4" />
-                {usdaLoading ? 'Searching USDA...' : 'Search USDA Database'}
-              </button>
-              <button
-                onClick={() => setShowUSDAResults(!showUSDAResults)}
-                className="px-4 py-3 text-blue-600 border border-blue-300 rounded-xl hover:bg-blue-50 transition-colors"
-              >
-                {showUSDAResults ? 'Show Local Foods' : 'Show USDA Results'}
-              </button>
-            </div>
+          {/* Search and Filter */}
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="Search foods..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+            />
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>
+                  {category === 'all' ? 'All Categories' : category.charAt(0).toUpperCase() + category.slice(1)}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Food List */}
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              <h4 className="font-semibold text-[#2C3E50] mb-3 flex items-center gap-2">
-                {showUSDAResults ? (
-                  <>
-                    <Database className="w-4 h-4" />
-                    USDA Food Database ({usdaSearchResults.length} results)
-                  </>
-                ) : (
-                  <>
-                    <BookOpen className="w-4 h-4" />
-                    Local Food Database ({filteredFoods.length} items)
-                  </>
-                )}
-              </h4>
-
-              {showUSDAResults ? (
-                // USDA Search Results
-                usdaSearchResults.map(food => (
-                  <button
-                    key={food.fdcId}
-                    onClick={() => handleAddUSDAFood(food)}
-                    className="w-full text-left p-4 rounded-xl border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200"
-                  >
-                    <p className="font-semibold text-[#2C3E50]">{food.description}</p>
-                    <p className="text-sm text-gray-600 capitalize mb-1">{food.foodCategory}</p>
-                    <div className="flex gap-4 text-xs text-gray-500">
-                      <span>{food.foodNutrients.find(n => n.nutrientName === "Energy")?.value || 0} cal/100g</span>
-                      <span className="text-green-600">P:{food.foodNutrients.find(n => n.nutrientName === "Protein")?.value || 0}g</span>
-                      <span className="text-yellow-600">C:{food.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0}g</span>
-                      <span className="text-purple-600">F:{food.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0}g</span>
-                    </div>
-                    <p className="text-xs text-blue-600 mt-1">Click to add - portion auto-calculated by macro sequence</p>
-                  </button>
-                ))
-              ) : (
-                // Local Food Database
-                filteredFoods.map(food => (
-                  <button
-                    key={food.id}
-                    onClick={() => onAddFood(food)}
-                    className="w-full text-left p-4 rounded-xl border border-gray-200 hover:border-[#52C878]/50 hover:bg-[#52C878]/5 transition-all duration-200"
-                  >
-                    <p className="font-semibold text-[#2C3E50]">{food.name}</p>
-                    <p className="text-sm text-gray-600 capitalize mb-1">{food.category}</p>
-                    <div className="flex gap-4 text-xs text-gray-500">
-                      <span>{food.calories_per_100g} cal/100g</span>
-                      <span className="text-green-600">P:{food.protein_per_100g}g</span>
-                      <span className="text-yellow-600">C:{food.carbs_per_100g}g</span>
-                      <span className="text-purple-600">F:{food.fat_per_100g}g</span>
-                    </div>
-                    {food.usda_fdc_id && (
-                      <p className="text-xs text-blue-600 mt-1">USDA Verified</p>
-                    )}
-                    <p className="text-xs text-[#52C878] mt-1 font-medium">Click to add - portion calculated by macro sequence</p>
-                  </button>
-                ))
-              )}
+              <h4 className="font-semibold text-gray-800 mb-3">Available Foods ({filteredFoods.length})</h4>
+              {filteredFoods.map(food => (
+                <button
+                  key={food.id}
+                  onClick={() => setSelectedFood(food)}
+                  className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ${
+                    selectedFood?.id === food.id
+                      ? 'border-[#52C878] bg-[#52C878]/10'
+                      : 'border-gray-200 hover:border-[#52C878]/50'
+                  }`}
+                >
+                  <p className="font-medium text-gray-800">{food.name}</p>
+                  <p className="text-sm text-gray-600 capitalize">{food.category}</p>
+                  <p className="text-xs text-gray-500">
+                    {food.calories_per_100g} cal/100g • P:{food.protein_per_100g}g • C:{food.carbs_per_100g}g • F:{food.fat_per_100g}g
+                  </p>
+                </button>
+              ))}
             </div>
 
-            {/* Automatic Calculation Info */}
-            <div className="space-y-4">
-              <div className="p-6 bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 rounded-xl border border-[#52C878]/20">
-                <h4 className="font-bold text-[#2C3E50] text-lg mb-3 flex items-center gap-2">
-                  <Calculator className="w-5 h-5" />
-                  Sequential Macro Calculation System
-                </h4>
-                <div className="space-y-2 text-sm text-gray-600">
-                  <p><strong>1. Carbohydrates First:</strong> Calculates ounces needed, converts to grams</p>
-                  <p><strong>2. Protein Second:</strong> Subtracts protein from carbs, calculates remaining protein needed</p>
-                  <p><strong>3. Fats Last:</strong> Subtracts fats from carbs & proteins, calculates remaining fat needed</p>
-                  <p><strong>No Buttons:</strong> Simply click any food to add with auto-calculated portions</p>
+            {/* Food Configuration */}
+            {selectedFood && (
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-semibold text-gray-800 mb-2">{selectedFood.name}</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>Calories: {selectedFood.calories_per_100g}/100g</div>
+                    <div>Protein: {selectedFood.protein_per_100g}g/100g</div>
+                    <div>Carbs: {selectedFood.carbs_per_100g}g/100g</div>
+                    <div>Fat: {selectedFood.fat_per_100g}g/100g</div>
+                  </div>
                 </div>
-                
-                <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <p className="text-sm text-yellow-800 font-medium">Example Calculation:</p>
-                  <p className="text-xs text-yellow-700 mt-1">
-                    If you need 54g protein but carbs contain 6g protein, system calculates protein food for remaining 48g only.
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Quantity (grams)
+                  </label>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+                    min="1"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Food Role in Meal
+                  </label>
+                  <select
+                    value={foodRole}
+                    onChange={(e) => setFoodRole(e.target.value as any)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#52C878] focus:border-[#52C878]"
+                  >
+                    <option value="none">Regular Food Item</option>
+                    <option value="primary_carb">Primary Carbohydrate Source</option>
+                    <option value="primary_protein">Primary Protein Source</option>
+                    <option value="primary_fat">Primary Fat Source</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Primary sources will be adjusted first to meet macro targets
                   </p>
                 </div>
+
+                {quantity > 0 && (
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h5 className="font-medium text-gray-800 mb-2">Nutrition for {quantity}g:</h5>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Calories: {Math.round((selectedFood.calories_per_100g * quantity) / 100)}</div>
+                      <div>Protein: {Math.round((selectedFood.protein_per_100g * quantity) / 100 * 10) / 10}g</div>
+                      <div>Carbs: {Math.round((selectedFood.carbs_per_100g * quantity) / 100 * 10) / 10}g</div>
+                      <div>Fat: {Math.round((selectedFood.fat_per_100g * quantity) / 100 * 10) / 10}g</div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
           </div>
         </div>
 
         <div className="p-6 border-t border-gray-200 flex justify-end gap-4">
           <button
             onClick={onClose}
-            className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+            className="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
           >
-            Close
+            Cancel
+          </button>
+          <button
+            onClick={handleAddFood}
+            disabled={!selectedFood || quantity <= 0}
+            className="px-6 py-2 bg-[#52C878] text-white rounded-lg hover:bg-[#52C878]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            Add to Meal
           </button>
         </div>
       </div>
