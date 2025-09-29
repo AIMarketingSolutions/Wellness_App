@@ -1048,6 +1048,44 @@ function WellnessCalculator() {
                 Your profile is complete! Now you can create a customized meal plan based on your {results.dailyCalorieTarget} daily calorie target 
                 and {results.proteinPercentage}%/{results.carbPercentage}%/{results.fatPercentage}% macro split.
               </p>
+              
+              {/* Profile Summary for Meal Planning */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                <h5 className="font-semibold text-[#2C3E50] mb-3">Your Nutrition Profile Summary</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Metabolic Profile:</p>
+                    <p className="font-semibold text-[#2C3E50]">
+                      {profile.metabolic_profile === 'custom' ? 'Custom Profile' :
+                       profile.metabolic_profile === 'fast_oxidizer' ? 'Fast Oxidizer' :
+                       profile.metabolic_profile === 'slow_oxidizer' ? 'Slow Oxidizer' :
+                       'Medium Oxidizer'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Daily Calorie Target:</p>
+                    <p className="font-semibold text-[#52C878]">{results.dailyCalorieTarget} calories</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Macro Split:</p>
+                    <p className="font-semibold text-[#4A90E2]">
+                      {results.proteinPercentage}%P / {results.carbPercentage}%C / {results.fatPercentage}%F
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Weight Goal:</p>
+                    <p className="font-semibold text-purple-600">
+                      {profile.weight_loss_goal === 'maintain' ? 'Maintain Weight' :
+                       profile.weight_loss_goal === 'lose_0_5' ? 'Lose 0.5 lbs/week' :
+                       profile.weight_loss_goal === 'lose_1' ? 'Lose 1 lb/week' :
+                       profile.weight_loss_goal === 'lose_1_5' ? 'Lose 1.5 lbs/week' :
+                       profile.weight_loss_goal === 'lose_2' ? 'Lose 2 lbs/week' :
+                       'Not Set'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
               <div className="flex gap-4">
                 <button
                   onClick={() => {

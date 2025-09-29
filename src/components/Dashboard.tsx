@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, LogOut, Dumbbell, Target, TrendingUp, Calendar, Settings, Home, Utensils, Activity, Pill, Droplets, BookOpen } from 'lucide-react';
 import { signOut, getCurrentUser } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import WellnessCalculator from './WellnessCalculator';
 import MealPlanningSystem from './MealPlanningSystem';
 import FitnessSystem from './FitnessSystem';
@@ -193,16 +194,7 @@ function Dashboard({ onLogout }: DashboardProps) {
         <TransformationTracker />
       ) : activeView === 'meal-plan' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <MealPlanningSystem 
-            userProfile={{
-              tee_calories: 2150, // This should come from actual user profile
-              protein_percentage: 30,
-              carb_percentage: 30,
-              fat_percentage: 40,
-              metabolic_profile: 'medium_oxidizer',
-              gender: 'male'
-            }}
-          />
+          <MealPlanningSystemWrapper />
         </main>
       ) : activeView === 'fitness' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
