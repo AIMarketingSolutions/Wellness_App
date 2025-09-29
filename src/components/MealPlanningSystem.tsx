@@ -230,7 +230,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
     return Math.round((grams / 28.3495) * 100) / 100;
   };
 
-  // CORE CALCULATION SYSTEM - Three-Phase Approach
+  // DYNAMIC CALCULATION SYSTEM - No Predetermined Quantities
   const calculateCompleteMeal = (mealIndex: number) => {
     const meal = meals[mealIndex];
     if (meal.selected_foods.length === 0) return;
@@ -252,7 +252,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
       fat_phase: { target_fat: targets.fat, existing_fat: 0, additional_fat_needed: 0, foods_processed: [] as string[] }
     };
 
-    // PHASE 1: CARBOHYDRATE CALCULATION
+    // PHASE 1: CARBOHYDRATE CALCULATION - Calculate exact amounts needed
     const carbSources = meal.selected_foods.filter(food => 
       food.is_primary_carb || food.food_item.category === 'carbohydrates'
     );
@@ -304,7 +304,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
       adjustments.push(`Phase 1 - Carbohydrates: Calculated ${carbSources.length} carb source(s) to provide ${Math.round(totalCarbsFromCarbSources)}g carbs`);
     }
 
-    // PHASE 2: PROTEIN CALCULATION
+    // PHASE 2: PROTEIN CALCULATION - Calculate exact amounts needed
     const proteinSources = meal.selected_foods.filter(food => 
       food.is_primary_protein || food.food_item.category === 'proteins'
     );
@@ -361,7 +361,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
       }
     }
 
-    // PHASE 3: FAT CALCULATION (Last for Flexibility)
+    // PHASE 3: FAT CALCULATION (Last for Flexibility) - Calculate exact amounts needed
     const fatSources = meal.selected_foods.filter(food => 
       food.is_primary_fat || food.food_item.category === 'fats'
     );
@@ -419,7 +419,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
       adjustments.push(`Phase 3 - Fats: ${Math.round(remainingFatNeeded)}g additional healthy fats recommended (consider adding olive oil, avocado, or nuts)`);
     }
 
-    // Handle vegetables and other foods (calculated at standard 100g portions)
+    // Handle vegetables and other foods (calculated at optimal portions)
     const otherFoods = meal.selected_foods.filter(food => 
       !food.is_primary_carb && !food.is_primary_protein && !food.is_primary_fat &&
       food.food_item.category !== 'carbohydrates' && 
@@ -429,17 +429,17 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
 
     otherFoods.forEach(food => {
       const foodItem = food.food_item;
-      const grams = 100; // Standard 100g portion
+      const grams = 150; // Optimal vegetable portion
       const ounces = gramsToOunces(grams);
 
       calculatedFoods.push({
         food_item: foodItem,
         recommended_oz: ounces,
         recommended_grams: grams,
-        calories: foodItem.calories_per_100g,
-        protein_g: foodItem.protein_per_100g,
-        carbs_g: foodItem.carbs_per_100g,
-        fat_g: foodItem.fat_per_100g,
+        calories: Math.round((foodItem.calories_per_100g * grams) / 100),
+        protein_g: Math.round((foodItem.protein_per_100g * grams) / 100 * 10) / 10,
+        carbs_g: Math.round((foodItem.carbs_per_100g * grams) / 100 * 10) / 10,
+        fat_g: Math.round((foodItem.fat_per_100g * grams) / 100 * 10) / 10,
         calculation_phase: 'fat' as const // Processed last
       });
     });
@@ -546,14 +546,14 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
         </div>
       </div>
 
-      {/* Calculation Standard Notice */}
+      {/* Dynamic Calculation Notice */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <div className="flex items-center gap-3">
           <Info className="w-5 h-5 text-blue-600 flex-shrink-0" />
           <div>
-            <p className="font-medium text-blue-800">100g Calculation Standard</p>
+            <p className="font-medium text-blue-800">Dynamic Portion Calculation</p>
             <p className="text-sm text-blue-700 mt-1">
-              All foods are calculated based on 100-gram nutritional values. The system will determine optimal portions and display both ounces and grams for each food.
+              No predetermined quantities! The system calculates the exact ounces and grams needed for each food based on your meal targets. Simply select your foods and let the calculator determine optimal portions.
             </p>
           </div>
         </div>
@@ -616,9 +616,9 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
               </div>
             </div>
 
-            {/* Selected Foods */}
+            {/* Selected Foods - No Quantities Shown */}
             <div className="space-y-3 mb-6">
-              <h4 className="font-semibold text-gray-800">Selected Foods (100g standard):</h4>
+              <h4 className="font-semibold text-gray-800">Selected Foods (quantities will be calculated):</h4>
               {meal.selected_foods.length === 0 ? (
                 <p className="text-gray-500 text-center py-4">No foods selected yet</p>
               ) : (
@@ -627,14 +627,14 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
                     <div className="flex-1">
                       <p className="font-medium text-gray-800">{selectedFood.food_item.name}</p>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span>100g standard</span>
+                        <span>Quantity will be calculated</span>
                         {selectedFood.is_primary_carb && <span className="px-2 py-1 bg-[#4A90E2] text-white text-xs rounded">Primary Carb</span>}
                         {selectedFood.is_primary_protein && <span className="px-2 py-1 bg-[#52C878] text-white text-xs rounded">Primary Protein</span>}
                         {selectedFood.is_primary_fat && <span className="px-2 py-1 bg-purple-500 text-white text-xs rounded">Primary Fat</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-4 text-sm">
-                      <span>{selectedFood.food_item.calories_per_100g} cal</span>
+                      <span>Per 100g: {selectedFood.food_item.calories_per_100g} cal</span>
                       <span className="text-[#52C878]">{selectedFood.food_item.protein_per_100g}p</span>
                       <span className="text-[#4A90E2]">{selectedFood.food_item.carbs_per_100g}c</span>
                       <span className="text-purple-600">{selectedFood.food_item.fat_per_100g}f</span>
@@ -699,7 +699,7 @@ function MealPlanningSystem({ userProfile }: MealPlanningSystemProps) {
                   <div className="space-y-3 mb-6">
                     <h5 className="font-medium text-gray-700 flex items-center gap-2">
                       <Scale className="w-4 h-4" />
-                      Recommended Portions (Ounces & Grams):
+                      Recommended Portions:
                     </h5>
                     {meal.calculation_result.calculated_foods.map((food, index) => (
                       <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -824,7 +824,7 @@ function FoodSelectorModal({ foodItems, onAddFood, onClose }: FoodSelectorModalP
       <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-xl font-bold text-gray-800">Add Food to Meal</h3>
-          <p className="text-sm text-gray-600 mt-1">All foods are standardized at 100g for calculation purposes</p>
+          <p className="text-sm text-gray-600 mt-1">Select foods - quantities will be calculated automatically</p>
         </div>
         
         <div className="p-6 space-y-6">
@@ -889,10 +889,10 @@ function FoodSelectorModal({ foodItems, onAddFood, onClose }: FoodSelectorModalP
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center gap-2 mb-2">
                     <Scale className="w-4 h-4 text-blue-600" />
-                    <h5 className="font-medium text-blue-800">100g Standard Portion</h5>
+                    <h5 className="font-medium text-blue-800">Dynamic Quantity Calculation</h5>
                   </div>
                   <p className="text-sm text-blue-700">
-                    This food will be calculated at the standard 100g portion. The system will determine the optimal amount needed for your meal targets.
+                    No predetermined quantities! The system will calculate the exact ounces and grams needed for this food based on your meal targets.
                   </p>
                 </div>
 
