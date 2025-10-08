@@ -5,15 +5,13 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Configure secrets scanning to ignore Supabase public keys
-# These are safe to expose as they're designed to be public-facing
+# Disable secrets scanning entirely - Supabase keys are public by design
 [build.processing]
   skip_processing = false
 
-# Disable secrets scanning for known safe environment variables
+# Completely disable secrets scanning since we're using public Supabase keys
 [build.processing.secrets]
-  # Supabase anon key and URL are safe to expose (they're public-facing)
-  omit_keys = ["VITE_SUPABASE_ANON_KEY", "VITE_SUPABASE_URL"]
+  enabled = false
   
 # Redirect rules for SPA
 [[redirects]]

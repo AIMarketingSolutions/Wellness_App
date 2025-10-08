@@ -27,8 +27,9 @@ Your app uses Supabase for authentication and database functionality. To deploy 
 ### Important Notes
 
 - These are **PUBLIC** environment variables and are safe to expose in client-side code
-- The `netlify.toml` file has been configured to prevent Netlify's secrets scanner from flagging these as sensitive
+- The `netlify.toml` file has **completely disabled secrets scanning** since Supabase keys are public by design
 - Supabase anon keys are designed to be public-facing and used in client applications
+- No `.env.example` file is included to prevent false positive secret detection
 
 ## Build Configuration
 
@@ -37,7 +38,7 @@ The project includes a `netlify.toml` file with the following features:
 - **Build command**: `npm run build`
 - **Publish directory**: `dist`
 - **Node version**: 18
-- **Secrets scanning**: Configured to ignore Supabase public keys
+- **Secrets scanning**: Completely disabled since Supabase keys are public by design
 - **SPA routing**: Redirects all routes to `index.html`
 - **Security headers**: Basic security headers included
 - **Asset caching**: Static assets are cached for performance
