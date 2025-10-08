@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Clock, Target, Zap, Calendar, Trophy, Play, Pause, Plus, Search, Filter, BookOpen, Heart, Dumbbell, Timer } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { WebContainerUtils, useWebContainerEffect } from '../utils/webcontainer';
 
 
 interface Exercise {
@@ -89,8 +88,8 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
     loadWorkoutHistory();
   }, []);
 
-  // WebContainer-safe cleanup effect to prevent memory leaks
-  useWebContainerEffect(() => {
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
     return () => {
       setShowConfirmDialog(false);
       setPendingExercise(null);
@@ -345,8 +344,8 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
       // Show success message without using alert (which can cause iframe issues)
       setError(null);
       
-      // Use a more stable notification method
-      WebContainerUtils.showNotification('🎉 Workout completed! Great job!', 'success');
+      // Show success notification
+      alert('🎉 Workout completed! Great job!');
 
     } catch (error) {
       console.error('Error completing workout:', error);
@@ -391,17 +390,14 @@ function FitnessSystem({ userProfile, onTEEUpdate }: FitnessSystemProps) {
 
   // Safe state updates to prevent race conditions
   const safeSetState = <T,>(setter: React.Dispatch<React.SetStateAction<T>>, value: T) => {
-    WebContainerUtils.safeStateUpdate(setter, value);
+    setter(value);
   };
 
   const completeWorkoutSafe = async () => {
-    const result = await WebContainerUtils.safeAsyncOperation(
-      completeWorkout,
-      'Failed to complete workout'
-    );
-    
-    if (!result.success && result.error) {
-      setError(result.error);
+    try {
+      await completeWorkout();
+    } catch (error) {
+      setError('Failed to complete workout');
     }
   };
 

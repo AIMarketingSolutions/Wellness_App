@@ -1,55 +1,44 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { Dumbbell, Heart, Target } from 'lucide-react';
 import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignupPage';
-import Dashboard from './components/Dashboard';
+import DashboardNew from './components/routes/DashboardNew';
+import ProfileAssessment from './components/routes/ProfileAssessment';
+import TransformationTrackerRoute from './components/routes/TransformationTracker';
+import MealPlan from './components/routes/MealPlan';
+import Fitness from './components/routes/Fitness';
+import Supplement from './components/routes/Supplement';
+import NutritionalProtocol from './components/routes/NutritionalProtocol';
+import Article from './components/routes/Article';
 import { supabase } from './lib/supabase';
 import { WebContainerErrorBoundary } from './utils/webcontainer';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'login' | 'signup' | 'dashboard'>('home');
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      if (user) {
-        setCurrentPage('dashboard');
-      }
       setLoading(false);
     };
 
     checkUser();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state change:', event, session?.user?.email);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setCurrentPage('dashboard');
-      } else {
-        setCurrentPage('home');
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const handleLoginSuccess = () => {
-    setCurrentPage('dashboard');
+    window.location.href = '/main-page';
   };
 
   const handleSignupSuccess = () => {
-    setCurrentPage('dashboard');
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    setCurrentPage('home');
+    window.location.href = '/main-page';
   };
 
   if (loading) {
@@ -63,17 +52,68 @@ function App() {
     );
   }
 
-  if (currentPage === 'login') {
-    return <LoginPage onBack={() => setCurrentPage('home')} onLoginSuccess={handleLoginSuccess} />;
+  return (
+    <WebContainerErrorBoundary>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage onBack={() => window.history.back()} onLoginSuccess={handleLoginSuccess} />} />
+          <Route path="/signup" element={<SignupPage onBack={() => window.history.back()} onSignupSuccess={handleSignupSuccess} />} />
+          
+          {/* Protected Routes - All 7 sections */}
+          <Route path="/main-page" element={<ProtectedRoute><DashboardNew /></ProtectedRoute>} />
+          <Route path="/profile-assessment" element={<ProtectedRoute><ProfileAssessment /></ProtectedRoute>} />
+          <Route path="/transformation-tracker" element={<ProtectedRoute><TransformationTrackerRoute /></ProtectedRoute>} />
+          <Route path="/meal-plan" element={<ProtectedRoute><MealPlan /></ProtectedRoute>} />
+          <Route path="/fitness" element={<ProtectedRoute><Fitness /></ProtectedRoute>} />
+          <Route path="/supplement" element={<ProtectedRoute><Supplement /></ProtectedRoute>} />
+          <Route path="/nutritional-protocol" element={<ProtectedRoute><NutritionalProtocol /></ProtectedRoute>} />
+          <Route path="/article" element={<ProtectedRoute><Article /></ProtectedRoute>} />
+          
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </WebContainerErrorBoundary>
+  );
+}
+
+// Protected Route Component
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+
+    checkUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (currentPage === 'signup') {
-    return <SignupPage onBack={() => setCurrentPage('home')} onSignupSuccess={handleSignupSuccess} />;
+  if (!user) {
+    return <Navigate to="/" replace />;
   }
 
-  if (currentPage === 'dashboard') {
-    return <Dashboard onLogout={handleLogout} />;
-  }
+  return <>{children}</>;
+}
+
+// Home Page Component
+function HomePage() {
 
   return (
     <WebContainerErrorBoundary>
@@ -101,18 +141,19 @@ function App() {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-lg mx-auto">
-          <button 
-            onClick={() => setCurrentPage('login')}
+          <Link 
+            to="/login"
             className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50"
           >
             Login
-          </button>
+          </Link>
           
-          <button 
-            onClick={() => setCurrentPage('signup')}
-            className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-opacity-50">
+          <Link 
+            to="/signup"
+            className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-opacity-50"
+          >
             Signup
-          </button>
+          </Link>
         </div>
 
         {/* Feature Highlights */}
