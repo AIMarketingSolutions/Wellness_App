@@ -1,18 +1,20 @@
-import { Route, Switch } from "wouter";
+import { Route, Switch, Redirect } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
+import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
+import SignupPage from "@/pages/SignupPage";
 import Dashboard from "@/pages/Dashboard";
 
-function AppRoutes() {
+function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#52C878] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -20,20 +22,28 @@ function AppRoutes() {
   }
 
   if (!user) {
-    return <LoginPage />;
+    return <Redirect to="/login" />;
   }
 
+  return <Component />;
+}
+
+function AppRoutes() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/dashboard" component={Dashboard} />
+      {/* Public Routes */}
+      <Route path="/" component={HomePage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/signup" component={SignupPage} />
+      
+      {/* Protected Routes */}
+      <Route path="/dashboard">
+        {() => <ProtectedRoute component={Dashboard} />}
+      </Route>
+      
+      {/* Default redirect for unknown routes */}
       <Route>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
-            <p className="text-gray-600">Page not found</p>
-          </div>
-        </div>
+        <Redirect to="/" />
       </Route>
     </Switch>
   );
