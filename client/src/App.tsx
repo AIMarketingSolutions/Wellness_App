@@ -7,6 +7,11 @@ import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import Dashboard from "@/pages/Dashboard";
 import ProfileAssessment from "@/pages/ProfileAssessment";
+import TransformationTracker from "@/pages/TransformationTracker";
+import MealPlan from "@/pages/MealPlan";
+import Fitness from "@/pages/Fitness";
+import Supplement from "@/pages/Supplement";
+import NutritionalProtocol from "@/pages/NutritionalProtocol";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, isLoading } = useAuth();
@@ -43,6 +48,21 @@ function AppRoutes() {
       </Route>
       <Route path="/profile-assessment">
         {() => <ProtectedRoute component={ProfileAssessment} />}
+      </Route>
+      <Route path="/transformation-tracker">
+        {() => <ProtectedRoute component={TransformationTracker} />}
+      </Route>
+      <Route path="/meal-plan">
+        {() => <ProtectedRoute component={MealPlan} />}
+      </Route>
+      <Route path="/fitness">
+        {() => <ProtectedRoute component={Fitness} />}
+      </Route>
+      <Route path="/supplement">
+        {() => <ProtectedRoute component={Supplement} />}
+      </Route>
+      <Route path="/nutritional-protocol">
+        {() => <ProtectedRoute component={NutritionalProtocol} />}
       </Route>
       
       {/* Default redirect for unknown routes */}
