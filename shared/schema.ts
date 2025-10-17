@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, numeric, integer, date, timestamptz, boolean, check, unique } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, numeric, integer, date, timestamp, boolean, check, unique } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -9,7 +9,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   fullName: text("full_name"),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // User Profiles Table
@@ -35,8 +35,8 @@ export const userProfiles = pgTable("user_profiles", {
   weightLossGoal: text("weight_loss_goal").$type<'maintain' | 'lose_0_5' | 'lose_1' | 'lose_1_5' | 'lose_2'>(),
   deficitMethod: text("deficit_method").$type<'diet_only' | 'exercise_only' | 'combined'>(),
   targetWeight: numeric("target_weight", { precision: 5, scale: 2 }),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
-  updatedAt: timestamptz("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // TEE Calculations Table
@@ -47,7 +47,7 @@ export const teeCalculations = pgTable("tee_calculations", {
   activityFactor: numeric("activity_factor", { precision: 3, scale: 2 }).notNull(),
   teeCalories: numeric("tee_calories", { precision: 7, scale: 2 }).notNull(),
   calculationDate: date("calculation_date").defaultNow().notNull(),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Body Fat Calculations Table
@@ -57,7 +57,7 @@ export const bodyFatCalculations = pgTable("body_fat_calculations", {
   bmi: numeric("bmi", { precision: 4, scale: 2 }).notNull(),
   bodyFatPercentage: numeric("body_fat_percentage", { precision: 4, scale: 2 }).notNull(),
   calculationDate: date("calculation_date").defaultNow().notNull(),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Food Items Master Table
@@ -72,7 +72,7 @@ export const foodItems = pgTable("food_items", {
   servingSizeG: numeric("serving_size_g", { precision: 6, scale: 2 }).default("100"),
   isCustom: boolean("is_custom").default(false),
   createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Meal Plans Table
@@ -85,7 +85,7 @@ export const mealPlans = pgTable("meal_plans", {
   carbPercentage: numeric("carb_percentage", { precision: 4, scale: 2 }).notNull(),
   fatPercentage: numeric("fat_percentage", { precision: 4, scale: 2 }).notNull(),
   planDate: date("plan_date").defaultNow().notNull(),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Meals Table
@@ -104,7 +104,7 @@ export const meals = pgTable("meals", {
   actualFatG: numeric("actual_fat_g", { precision: 6, scale: 2 }).default("0"),
   isCompleted: boolean("is_completed").default(false),
   mealDate: date("meal_date").defaultNow().notNull(),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Meal Foods Junction Table
@@ -117,7 +117,7 @@ export const mealFoods = pgTable("meal_foods", {
   proteinG: numeric("protein_g", { precision: 5, scale: 2 }).notNull(),
   carbsG: numeric("carbs_g", { precision: 5, scale: 2 }).notNull(),
   fatG: numeric("fat_g", { precision: 5, scale: 2 }).notNull(),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Water Intake Table
@@ -127,7 +127,7 @@ export const waterIntake = pgTable("water_intake", {
   glassesConsumed: integer("glasses_consumed").default(0),
   targetGlasses: integer("target_glasses").default(8),
   intakeDate: date("intake_date").defaultNow().notNull(),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => ({
   uniqueUserDate: unique().on(table.userId, table.intakeDate),
 }));
@@ -139,7 +139,7 @@ export const exerciseTypes = pgTable("exercise_types", {
   category: text("category").notNull(),
   caloriesPerMinute: numeric("calories_per_minute", { precision: 4, scale: 2 }).notNull(),
   description: text("description"),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Exercise Plans Table
@@ -149,7 +149,7 @@ export const exercisePlans = pgTable("exercise_plans", {
   planName: text("plan_name").notNull(),
   weekStartDate: date("week_start_date").defaultNow().notNull(),
   isActive: boolean("is_active").default(true),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Daily Exercises Table
@@ -164,7 +164,7 @@ export const dailyExercises = pgTable("daily_exercises", {
   isRestDay: boolean("is_rest_day").default(false),
   isCompleted: boolean("is_completed").default(false),
   notes: text("notes"),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Supplements Master Table
@@ -176,7 +176,7 @@ export const supplements = pgTable("supplements", {
   timing: text("timing").$type<'morning' | 'afternoon' | 'evening' | 'with_meal' | 'empty_stomach' | 'before_workout' | 'after_workout'>(),
   canTakeTogether: text("can_take_together").array(),
   description: text("description"),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Nutrition Questionnaire Table
@@ -193,8 +193,8 @@ export const nutritionQuestionnaire = pgTable("nutrition_questionnaire", {
   dietaryRestrictions: text("dietary_restrictions").array(),
   healthGoals: text("health_goals").array(),
   currentMedications: text("current_medications").array(),
-  completedAt: timestamptz("completed_at").defaultNow(),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }).defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // User Supplements Table
@@ -207,7 +207,7 @@ export const userSupplements = pgTable("user_supplements", {
   isActive: boolean("is_active").default(true),
   startDate: date("start_date").defaultNow().notNull(),
   notes: text("notes"),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Grocery Lists Table
@@ -217,7 +217,7 @@ export const groceryLists = pgTable("grocery_lists", {
   listName: text("list_name").notNull(),
   weekStartDate: date("week_start_date").defaultNow().notNull(),
   isGenerated: boolean("is_generated").default(true),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Grocery List Items Table
@@ -228,7 +228,7 @@ export const groceryListItems = pgTable("grocery_list_items", {
   quantityNeeded: numeric("quantity_needed", { precision: 8, scale: 2 }).notNull(),
   unit: text("unit").notNull(),
   isPurchased: boolean("is_purchased").default(false),
-  createdAt: timestamptz("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Types
