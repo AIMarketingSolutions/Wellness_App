@@ -3,12 +3,13 @@ import { useAuth } from "@/lib/auth";
 import { Dumbbell, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,9 +17,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
+      await signUp(email, password, fullName);
     } catch (err: any) {
-      setError(err.message || "Invalid email or password");
+      setError(err.message || "An error occurred during signup");
     } finally {
       setLoading(false);
     }
@@ -37,9 +38,9 @@ export default function LoginPage() {
             <div className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] p-4 rounded-full">
               <Dumbbell className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-[#2C3E50]">Welcome Back</h1>
+            <h1 className="text-3xl font-bold text-[#2C3E50]">Create Your Account</h1>
             <p className="text-gray-600 text-center">
-              Continue your wellness journey
+              Start your wellness journey today
             </p>
           </div>
 
@@ -49,6 +50,23 @@ export default function LoginPage() {
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
+
+            <div className="space-y-2">
+              <label htmlFor="fullName" className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                Full Name
+              </label>
+              <input
+                type="text"
+                id="fullName"
+                data-testid="input-fullname"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#52C878]/20 focus:border-[#52C878] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
+                placeholder="Enter your full name"
+                disabled={loading}
+                required
+              />
+            </div>
 
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-semibold text-[#2C3E50] mb-2">
@@ -78,7 +96,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#52C878]/20 focus:border-[#52C878] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
-                placeholder="Enter your password"
+                placeholder="Create a secure password"
                 disabled={loading}
                 required
               />
@@ -91,16 +109,16 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-[#52C878]/30"
               >
-                {loading ? "Signing in..." : "Login"}
+                {loading ? "Creating Account..." : "Sign Up"}
               </button>
             </div>
           </form>
 
           <div className="text-center pt-4 border-t border-gray-100">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
-              <Link href="/signup" className="text-[#52C878] hover:text-[#4A90E2] font-semibold transition-colors duration-200">
-                Sign up here
+              Already have an account?{" "}
+              <Link href="/login" className="text-[#52C878] hover:text-[#4A90E2] font-semibold transition-colors duration-200">
+                Login here
               </Link>
             </p>
           </div>
