@@ -22,7 +22,14 @@ router.post("/api/auth/signup", async (req, res) => {
     await storage.createUserProfile({ userId: user.id });
 
     req.session.userId = user.id;
-    res.json({ id: user.id, email: user.email, fullName: user.fullName });
+    
+    // Save session before responding
+    req.session.save((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Session error" });
+      }
+      res.json({ id: user.id, email: user.email, fullName: user.fullName });
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -43,7 +50,14 @@ router.post("/api/auth/signin", async (req, res) => {
     }
 
     req.session.userId = user.id;
-    res.json({ id: user.id, email: user.email, fullName: user.fullName });
+    
+    // Save session before responding
+    req.session.save((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Session error" });
+      }
+      res.json({ id: user.id, email: user.email, fullName: user.fullName });
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
