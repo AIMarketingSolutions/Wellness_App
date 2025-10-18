@@ -19,10 +19,11 @@ export default function SignupPage() {
 
     try {
       await signUp(email, password, fullName);
-      setLocation("/dashboard");
+      // Small delay to ensure session is established
+      await new Promise(resolve => setTimeout(resolve, 100));
+      window.location.href = "/dashboard";
     } catch (err: any) {
       setError(err.message || "An error occurred during signup");
-    } finally {
       setLoading(false);
     }
   };

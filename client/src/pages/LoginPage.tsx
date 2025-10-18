@@ -18,10 +18,11 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      setLocation("/dashboard");
+      // Small delay to ensure session is established
+      await new Promise(resolve => setTimeout(resolve, 100));
+      window.location.href = "/dashboard";
     } catch (err: any) {
       setError(err.message || "Invalid email or password");
-    } finally {
       setLoading(false);
     }
   };
