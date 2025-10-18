@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Dumbbell, ArrowLeft } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -10,6 +10,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
+  const [, setLocation] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +19,7 @@ export default function SignupPage() {
 
     try {
       await signUp(email, password, fullName);
+      setLocation("/dashboard");
     } catch (err: any) {
       setError(err.message || "An error occurred during signup");
     } finally {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Dumbbell, ArrowLeft } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
+  const [, setLocation] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +18,7 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
+      setLocation("/dashboard");
     } catch (err: any) {
       setError(err.message || "Invalid email or password");
     } finally {
