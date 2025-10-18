@@ -17,9 +17,6 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      console.log("Starting login with:", email);
-      
-      // Direct API call for debugging
       const response = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
@@ -28,33 +25,17 @@ export default function LoginPage() {
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
-
-      console.log("Response status:", response.status);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: "Login failed" }));
-        throw new Error(errorData.error || "Invalid credentials");
+        throw new Error(errorData.error || "Invalid email or password");
       }
 
-      const userData = await response.json();
-      console.log("Login successful:", userData);
+      await response.json();
       
-      // Wait a moment for the session cookie to be fully set
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Verify session is set by checking /api/auth/me
-      const verifyResponse = await fetch("/api/auth/me", {
-        credentials: "include",
-      });
-      
-      console.log("Verify response:", verifyResponse.status);
-      
-      if (verifyResponse.ok) {
-        console.log("Session verified, redirecting to dashboard");
-        window.location.href = "/dashboard";
-      } else {
-        throw new Error("Session verification failed");
-      }
+      // Wait briefly for session to save then redirect
+      await new Promise(resolve => setTimeout(resolve, 300));
+      window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.message || "Invalid email or password");
