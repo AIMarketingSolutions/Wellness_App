@@ -17,11 +17,32 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      // Small delay to ensure session is established
-      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log("Starting login with:", email);
+      
+      // Direct API call for debugging
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      console.log("Response status:", response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Login failed" }));
+        throw new Error(errorData.error || "Invalid credentials");
+      }
+
+      const userData = await response.json();
+      console.log("Login successful:", userData);
+      
+      // Redirect to dashboard
       window.location.href = "/dashboard";
     } catch (err: any) {
+      console.error("Login error:", err);
       setError(err.message || "Invalid email or password");
       setLoading(false);
     }
