@@ -38,12 +38,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      return apiRequest("/api/auth/signin", {
+      const response = await fetch("/api/auth/signin", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: "Login failed" }));
+        throw new Error(error.error || "Login failed");
+      }
+      
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Store token in localStorage
+      if (data.token) {
+        localStorage.setItem("auth_token", data.token);
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
   });

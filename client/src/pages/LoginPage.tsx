@@ -17,29 +17,9 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Login failed" }));
-        throw new Error(errorData.error || "Invalid email or password");
-      }
-
-      const data = await response.json();
-      
-      // Store token in localStorage as backup for cookie auth
-      if (data.token) {
-        localStorage.setItem("auth_token", data.token);
-      }
-      
-      // Redirect to dashboard
-      window.location.href = "/dashboard";
+      await signIn(email, password);
+      // Use wouter navigation instead of full page reload
+      setLocation("/dashboard");
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.message || "Invalid email or password");
@@ -107,22 +87,20 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                data-testid="button-submit"
-                disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-[#52C878]/30"
-              >
-                {loading ? "Signing in..." : "Login"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              data-testid="button-login"
+              disabled={loading}
+              className="w-full py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-bold rounded-2xl hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {loading ? "Signing in..." : "Login"}
+            </button>
           </form>
 
-          <div className="text-center pt-4 border-t border-gray-100">
-            <p className="text-sm text-gray-600">
+          <div className="text-center">
+            <p className="text-gray-600">
               Don't have an account?{" "}
-              <Link href="/signup" className="text-[#52C878] hover:text-[#4A90E2] font-semibold transition-colors duration-200">
+              <Link href="/signup" className="text-[#52C878] font-semibold hover:text-[#4A90E2] transition-colors">
                 Sign up here
               </Link>
             </p>
