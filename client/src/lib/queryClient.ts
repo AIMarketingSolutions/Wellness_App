@@ -1,12 +1,20 @@
 import { QueryClient } from "@tanstack/react-query";
 
 async function apiRequest(url: string, options?: RequestInit) {
+  const token = localStorage.getItem("auth_token");
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...options?.headers as Record<string, string>,
+  };
+  
+  // Add token to Authorization header if it exists
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  
   const response = await fetch(url, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
+    headers,
     credentials: "include",
   });
 
@@ -25,7 +33,17 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: async ({ queryKey }) => {
         const url = queryKey[0] as string;
-        const response = await fetch(url, { credentials: "include" });
+        const token = localStorage.getItem("auth_token");
+        const headers: Record<string, string> = {};
+        
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(url, { 
+          credentials: "include",
+          headers 
+        });
         
         if (!response.ok) {
           throw new Error(await response.text());

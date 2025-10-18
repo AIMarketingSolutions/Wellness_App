@@ -25,7 +25,16 @@ declare global {
 }
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const userId = req.session?.userId;
+  // Check session first, then fall back to Authorization header
+  let userId = req.session?.userId;
+  
+  // If no session, check for token in Authorization header
+  if (!userId) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      userId = authHeader.substring(7);
+    }
+  }
   
   if (!userId) {
     return res.status(401).json({ error: "Unauthorized" });

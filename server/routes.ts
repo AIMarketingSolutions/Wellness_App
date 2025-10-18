@@ -26,9 +26,14 @@ router.post("/api/auth/signup", async (req, res) => {
     // Save session before responding
     req.session.save((err) => {
       if (err) {
-        return res.status(500).json({ error: "Session error" });
+        console.error("Session save error:", err);
       }
-      res.json({ id: user.id, email: user.email, fullName: user.fullName });
+      res.json({ 
+        id: user.id, 
+        email: user.email, 
+        fullName: user.fullName,
+        token: user.id 
+      });
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -49,14 +54,19 @@ router.post("/api/auth/signin", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    // Set both session and return user ID for token-based auth
     req.session.userId = user.id;
-    
-    // Save session before responding
     req.session.save((err) => {
       if (err) {
-        return res.status(500).json({ error: "Session error" });
+        console.error("Session save error:", err);
       }
-      res.json({ id: user.id, email: user.email, fullName: user.fullName });
+      // Return user data with ID that frontend can use as token
+      res.json({ 
+        id: user.id, 
+        email: user.email, 
+        fullName: user.fullName,
+        token: user.id // Use user ID as token for now
+      });
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

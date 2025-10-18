@@ -55,6 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onSuccess: () => {
+      // Clear token from localStorage
+      localStorage.removeItem("auth_token");
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
   });

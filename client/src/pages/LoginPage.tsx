@@ -31,10 +31,14 @@ export default function LoginPage() {
         throw new Error(errorData.error || "Invalid email or password");
       }
 
-      await response.json();
+      const data = await response.json();
       
-      // Wait briefly for session to save then redirect
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Store token in localStorage as backup for cookie auth
+      if (data.token) {
+        localStorage.setItem("auth_token", data.token);
+      }
+      
+      // Redirect to dashboard
       window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("Login error:", err);
