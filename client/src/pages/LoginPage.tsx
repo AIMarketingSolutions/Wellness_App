@@ -39,8 +39,22 @@ export default function LoginPage() {
       const userData = await response.json();
       console.log("Login successful:", userData);
       
-      // Redirect to dashboard
-      window.location.href = "/dashboard";
+      // Wait a moment for the session cookie to be fully set
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Verify session is set by checking /api/auth/me
+      const verifyResponse = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
+      
+      console.log("Verify response:", verifyResponse.status);
+      
+      if (verifyResponse.ok) {
+        console.log("Session verified, redirecting to dashboard");
+        window.location.href = "/dashboard";
+      } else {
+        throw new Error("Session verification failed");
+      }
     } catch (err: any) {
       console.error("Login error:", err);
       setError(err.message || "Invalid email or password");
