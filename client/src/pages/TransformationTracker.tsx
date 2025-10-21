@@ -1,6 +1,6 @@
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { ArrowLeft, TrendingUp, User, Scale, Activity, Target, Apple, TrendingDown, Ruler } from "lucide-react";
+import { ArrowLeft, TrendingUp, User, Scale, Activity, Target, Apple, TrendingDown, Ruler, ChefHat } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 export default function TransformationTracker() {
@@ -70,6 +70,127 @@ export default function TransformationTracker() {
     
     return metabolicProfileLabels[profile.metabolicProfile] || "Not set";
   };
+
+  // Calculate Daily Calorie Target and Macros
+  const calculateMacros = () => {
+    if (!profile?.weightLossGoal || !profile?.metabolicProfile || !profile?.mealPlanType) {
+      return null;
+    }
+
+    // Get deficit from weight loss goal
+    const deficits: Record<string, number> = {
+      maintain: 0,
+      lose_0_5: 250,
+      lose_1: 500,
+      lose_1_5: 750,
+      lose_2: 1000,
+    };
+
+    const deficit = deficits[profile.weightLossGoal] || 0;
+    
+    // Calculate DCT with safety minimums
+    const minimumCalories = profile.gender === 'male' ? 1500 : 1200;
+    const dct = Math.max(tee - deficit, minimumCalories);
+
+    // Get macro percentages
+    let proteinPercent = 30;
+    let carbPercent = 30;
+    let fatPercent = 40;
+
+    if (profile.metabolicProfile === 'fast_oxidizer') {
+      proteinPercent = 25;
+      carbPercent = 35;
+      fatPercent = 40;
+    } else if (profile.metabolicProfile === 'slow_oxidizer') {
+      proteinPercent = 35;
+      carbPercent = 25;
+      fatPercent = 40;
+    } else if (profile.metabolicProfile === 'medium_oxidizer') {
+      proteinPercent = 30;
+      carbPercent = 30;
+      fatPercent = 40;
+    } else if (profile.customProteinPercentage && profile.customCarbPercentage && profile.customFatPercentage) {
+      proteinPercent = parseFloat(profile.customProteinPercentage);
+      carbPercent = parseFloat(profile.customCarbPercentage);
+      fatPercent = parseFloat(profile.customFatPercentage);
+    }
+
+    // Calculate total daily macros in grams
+    const dailyProteinGrams = Math.round((dct * (proteinPercent / 100)) / 4);
+    const dailyCarbGrams = Math.round((dct * (carbPercent / 100)) / 4);
+    const dailyFatGrams = Math.round((dct * (fatPercent / 100)) / 9);
+
+    // Get meal distribution percentages
+    const mealDistributions: Record<string, { breakfast: number; lunch: number; dinner: number; snack1?: number; snack2?: number }> = {
+      three_meals: {
+        breakfast: 33.33,
+        lunch: 33.33,
+        dinner: 33.34,
+      },
+      three_meals_one_snack: {
+        breakfast: 30,
+        lunch: 30,
+        dinner: 30,
+        snack1: 10,
+      },
+      three_meals_two_snacks: {
+        breakfast: 26.67,
+        lunch: 26.67,
+        dinner: 26.66,
+        snack1: 10,
+        snack2: 10,
+      },
+    };
+
+    const distribution = mealDistributions[profile.mealPlanType];
+
+    // Calculate macros per meal
+    const meals = {
+      breakfast: {
+        calories: Math.round(dct * (distribution.breakfast / 100)),
+        protein: Math.round(dailyProteinGrams * (distribution.breakfast / 100)),
+        carbs: Math.round(dailyCarbGrams * (distribution.breakfast / 100)),
+        fat: Math.round(dailyFatGrams * (distribution.breakfast / 100)),
+      },
+      lunch: {
+        calories: Math.round(dct * (distribution.lunch / 100)),
+        protein: Math.round(dailyProteinGrams * (distribution.lunch / 100)),
+        carbs: Math.round(dailyCarbGrams * (distribution.lunch / 100)),
+        fat: Math.round(dailyFatGrams * (distribution.lunch / 100)),
+      },
+      dinner: {
+        calories: Math.round(dct * (distribution.dinner / 100)),
+        protein: Math.round(dailyProteinGrams * (distribution.dinner / 100)),
+        carbs: Math.round(dailyCarbGrams * (distribution.dinner / 100)),
+        fat: Math.round(dailyFatGrams * (distribution.dinner / 100)),
+      },
+      snack1: distribution.snack1 ? {
+        calories: Math.round(dct * (distribution.snack1 / 100)),
+        protein: Math.round(dailyProteinGrams * (distribution.snack1 / 100)),
+        carbs: Math.round(dailyCarbGrams * (distribution.snack1 / 100)),
+        fat: Math.round(dailyFatGrams * (distribution.snack1 / 100)),
+      } : undefined,
+      snack2: distribution.snack2 ? {
+        calories: Math.round(dct * (distribution.snack2 / 100)),
+        protein: Math.round(dailyProteinGrams * (distribution.snack2 / 100)),
+        carbs: Math.round(dailyCarbGrams * (distribution.snack2 / 100)),
+        fat: Math.round(dailyFatGrams * (distribution.snack2 / 100)),
+      } : undefined,
+    };
+
+    return {
+      dct,
+      dailyProteinGrams,
+      dailyCarbGrams,
+      dailyFatGrams,
+      proteinPercent,
+      carbPercent,
+      fatPercent,
+      meals,
+    };
+  };
+
+  const macros = calculateMacros();
 
   if (isLoading) {
     return (
@@ -303,6 +424,218 @@ export default function TransformationTracker() {
                 </p>
               </div>
             </div>
+
+            {/* Recommended Macros Per Meal Section */}
+            {macros && (
+              <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8">
+                <h2 className="text-2xl font-bold text-[#2C3E50] flex items-center gap-2 mb-6">
+                  <ChefHat className="w-6 h-6 text-[#52C878]" />
+                  Recommended Macros Per Meal
+                </h2>
+
+                {/* Daily Summary */}
+                <div className="mb-8 p-6 bg-gradient-to-br from-[#52C878]/10 to-[#4A90E2]/10 rounded-xl border-2 border-[#52C878]/30">
+                  <h3 className="text-lg font-bold text-[#2C3E50] mb-4">Daily Targets</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 mb-1">Calories</p>
+                      <p className="text-2xl font-bold text-[#2C3E50]" data-testid="text-dct">
+                        {macros.dct}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 mb-1">Protein</p>
+                      <p className="text-2xl font-bold text-[#52C878]" data-testid="text-daily-protein">
+                        {macros.dailyProteinGrams}g
+                      </p>
+                      <p className="text-xs text-gray-500">{macros.proteinPercent}%</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 mb-1">Carbs</p>
+                      <p className="text-2xl font-bold text-[#4A90E2]" data-testid="text-daily-carbs">
+                        {macros.dailyCarbGrams}g
+                      </p>
+                      <p className="text-xs text-gray-500">{macros.carbPercent}%</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 mb-1">Fat</p>
+                      <p className="text-2xl font-bold text-[#2C3E50]" data-testid="text-daily-fat">
+                        {macros.dailyFatGrams}g
+                      </p>
+                      <p className="text-xs text-gray-500">{macros.fatPercent}%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Per-Meal Breakdown */}
+                <div className="space-y-4">
+                  {/* Breakfast */}
+                  <div className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl border border-amber-200">
+                    <h4 className="text-lg font-bold text-amber-900 mb-4">Breakfast</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-xs text-amber-700 mb-1">Calories</p>
+                        <p className="text-xl font-bold text-amber-900" data-testid="text-breakfast-calories">
+                          {macros.meals.breakfast.calories}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-amber-700 mb-1">Protein</p>
+                        <p className="text-xl font-bold text-[#52C878]" data-testid="text-breakfast-protein">
+                          {macros.meals.breakfast.protein}g
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-amber-700 mb-1">Carbs</p>
+                        <p className="text-xl font-bold text-[#4A90E2]" data-testid="text-breakfast-carbs">
+                          {macros.meals.breakfast.carbs}g
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-amber-700 mb-1">Fat</p>
+                        <p className="text-xl font-bold text-amber-900" data-testid="text-breakfast-fat">
+                          {macros.meals.breakfast.fat}g
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Lunch */}
+                  <div className="p-6 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl border border-sky-200">
+                    <h4 className="text-lg font-bold text-sky-900 mb-4">Lunch</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-xs text-sky-700 mb-1">Calories</p>
+                        <p className="text-xl font-bold text-sky-900" data-testid="text-lunch-calories">
+                          {macros.meals.lunch.calories}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-sky-700 mb-1">Protein</p>
+                        <p className="text-xl font-bold text-[#52C878]" data-testid="text-lunch-protein">
+                          {macros.meals.lunch.protein}g
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-sky-700 mb-1">Carbs</p>
+                        <p className="text-xl font-bold text-[#4A90E2]" data-testid="text-lunch-carbs">
+                          {macros.meals.lunch.carbs}g
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-sky-700 mb-1">Fat</p>
+                        <p className="text-xl font-bold text-sky-900" data-testid="text-lunch-fat">
+                          {macros.meals.lunch.fat}g
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dinner */}
+                  <div className="p-6 bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl border border-rose-200">
+                    <h4 className="text-lg font-bold text-rose-900 mb-4">Dinner</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-xs text-rose-700 mb-1">Calories</p>
+                        <p className="text-xl font-bold text-rose-900" data-testid="text-dinner-calories">
+                          {macros.meals.dinner.calories}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-rose-700 mb-1">Protein</p>
+                        <p className="text-xl font-bold text-[#52C878]" data-testid="text-dinner-protein">
+                          {macros.meals.dinner.protein}g
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-rose-700 mb-1">Carbs</p>
+                        <p className="text-xl font-bold text-[#4A90E2]" data-testid="text-dinner-carbs">
+                          {macros.meals.dinner.carbs}g
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-rose-700 mb-1">Fat</p>
+                        <p className="text-xl font-bold text-rose-900" data-testid="text-dinner-fat">
+                          {macros.meals.dinner.fat}g
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Snack 1 (if applicable) */}
+                  {macros.meals.snack1 && (
+                    <div className="p-6 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+                      <h4 className="text-lg font-bold text-emerald-900 mb-4">Snack 1</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <p className="text-xs text-emerald-700 mb-1">Calories</p>
+                          <p className="text-xl font-bold text-emerald-900" data-testid="text-snack1-calories">
+                            {macros.meals.snack1.calories}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-emerald-700 mb-1">Protein</p>
+                          <p className="text-xl font-bold text-[#52C878]" data-testid="text-snack1-protein">
+                            {macros.meals.snack1.protein}g
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-emerald-700 mb-1">Carbs</p>
+                          <p className="text-xl font-bold text-[#4A90E2]" data-testid="text-snack1-carbs">
+                            {macros.meals.snack1.carbs}g
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-emerald-700 mb-1">Fat</p>
+                          <p className="text-xl font-bold text-emerald-900" data-testid="text-snack1-fat">
+                            {macros.meals.snack1.fat}g
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Snack 2 (if applicable) */}
+                  {macros.meals.snack2 && (
+                    <div className="p-6 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-200">
+                      <h4 className="text-lg font-bold text-purple-900 mb-4">Snack 2</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <p className="text-xs text-purple-700 mb-1">Calories</p>
+                          <p className="text-xl font-bold text-purple-900" data-testid="text-snack2-calories">
+                            {macros.meals.snack2.calories}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-purple-700 mb-1">Protein</p>
+                          <p className="text-xl font-bold text-[#52C878]" data-testid="text-snack2-protein">
+                            {macros.meals.snack2.protein}g
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-purple-700 mb-1">Carbs</p>
+                          <p className="text-xl font-bold text-[#4A90E2]" data-testid="text-snack2-carbs">
+                            {macros.meals.snack2.carbs}g
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-purple-700 mb-1">Fat</p>
+                          <p className="text-xl font-bold text-purple-900" data-testid="text-snack2-fat">
+                            {macros.meals.snack2.fat}g
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <p className="text-sm text-blue-800 text-center">
+                    💡 Use these macro targets in the Daily Meal Calculator to plan your meals
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Update Profile Button */}
             <div className="text-center mt-8">
