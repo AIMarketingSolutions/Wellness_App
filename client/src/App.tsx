@@ -8,7 +8,6 @@ import SignupPage from "@/pages/SignupPage";
 import Dashboard from "@/pages/Dashboard";
 import ProfileAssessment from "@/pages/ProfileAssessment";
 import TransformationTracker from "@/pages/TransformationTracker";
-import MealPlan from "@/pages/MealPlan";
 import MealPlanner from "@/pages/MealPlanner";
 import Fitness from "@/pages/Fitness";
 import Supplement from "@/pages/Supplement";
@@ -52,9 +51,6 @@ function AppRoutes() {
       </Route>
       <Route path="/transformation-tracker">
         {() => <ProtectedRoute component={TransformationTracker} />}
-      </Route>
-      <Route path="/meal-plan">
-        {() => <ProtectedRoute component={MealPlan} />}
       </Route>
       <Route path="/meal-planner">
         {() => <ProtectedRoute component={MealPlanner} />}

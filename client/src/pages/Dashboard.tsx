@@ -1,6 +1,6 @@
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { Dumbbell, LogOut, User, Target, TrendingUp, Utensils, Activity, Pill, BookOpen, Apple } from "lucide-react";
+import { Dumbbell, LogOut, User, Target, TrendingUp, Activity, Pill, BookOpen, Apple } from "lucide-react";
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -23,15 +23,6 @@ export default function Dashboard() {
       color: "from-[#4A90E2] to-[#52C878]",
       bgColor: "bg-[#4A90E2]/10",
       href: "/transformation-tracker"
-    },
-    {
-      id: "meals",
-      name: "Meal Planning",
-      description: "Personalized meal plans based on your macros",
-      icon: Utensils,
-      color: "from-[#52C878] to-[#4A90E2]",
-      bgColor: "bg-[#52C878]/10",
-      href: "/meal-plan"
     },
     {
       id: "meal-planner",
