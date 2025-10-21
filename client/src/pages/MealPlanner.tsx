@@ -3,10 +3,11 @@ import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
 import { 
   ArrowLeft, Apple, Utensils, Search, Plus, X, 
-  Flame, Droplet, TrendingUp, Scale, Activity
+  Flame, Droplet, TrendingUp
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { UserProfile, WaterIntake } from "@shared/schema";
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'snack2';
 
@@ -49,12 +50,12 @@ export default function MealPlanner() {
   const [waterGlasses, setWaterGlasses] = useState(0);
 
   // Fetch user profile for DCT calculation
-  const { data: profile } = useQuery({
+  const { data: profile } = useQuery<UserProfile>({
     queryKey: ["/api/profile"],
   });
 
   // Fetch today's exercises for calorie calculation
-  const { data: exercises } = useQuery({
+  const { data: exercises = [] } = useQuery<any[]>({
     queryKey: [`/api/daily-exercises/date/${selectedDate}`],
   });
 
@@ -64,7 +65,7 @@ export default function MealPlanner() {
   });
 
   // Fetch water intake for today
-  const { data: waterIntake } = useQuery({
+  const { data: waterIntake } = useQuery<WaterIntake | null>({
     queryKey: [`/api/water-intake/${selectedDate}`],
   });
 
@@ -148,18 +149,16 @@ export default function MealPlanner() {
     let carbPercent = 30;
     let fatPercent = 40;
 
-    if (profile.metabolicProfile === 'fast_oxidizer') {
+    const metabolicProfile = profile.metabolicProfile || 'medium_oxidizer';
+    
+    if (metabolicProfile === 'fast_oxidizer') {
       proteinPercent = 25;
       carbPercent = 35;
       fatPercent = 40;
-    } else if (profile.metabolicProfile === 'slow_oxidizer') {
+    } else if (metabolicProfile === 'slow_oxidizer') {
       proteinPercent = 35;
       carbPercent = 25;
       fatPercent = 40;
-    } else if (profile.metabolicProfile === 'custom') {
-      proteinPercent = parseFloat(profile.customProteinPercentage || "30");
-      carbPercent = parseFloat(profile.customCarbPercentage || "30");
-      fatPercent = parseFloat(profile.customFatPercentage || "40");
     }
 
     // Calculate meal distributions

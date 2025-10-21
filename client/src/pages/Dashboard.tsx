@@ -1,6 +1,6 @@
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { Dumbbell, LogOut, User, Target, TrendingUp, Utensils, Activity, Pill, BookOpen, FileText } from "lucide-react";
+import { Dumbbell, LogOut, User, Target, TrendingUp, Utensils, Activity, Pill, BookOpen, Apple } from "lucide-react";
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -32,6 +32,15 @@ export default function Dashboard() {
       color: "from-[#52C878] to-[#4A90E2]",
       bgColor: "bg-[#52C878]/10",
       href: "/meal-plan"
+    },
+    {
+      id: "meal-planner",
+      name: "Daily Meal Calculator",
+      description: "Track daily meals, macros, water & hit your targets",
+      icon: Apple,
+      color: "from-[#52C878] to-[#4A90E2]",
+      bgColor: "bg-[#52C878]/10",
+      href: "/meal-planner"
     },
     {
       id: "fitness",
