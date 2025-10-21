@@ -165,9 +165,21 @@ export default function MealPlanner() {
 
   // Waterfall calculation algorithm
   const calculateMeal = () => {
+    // Check if profile is complete
+    if (!profile || !profile.weightLossGoal || !profile.metabolicProfile || !profile.mealPlanType) {
+      alert('Please complete your Personal Profile Assessment first before using the meal calculator.');
+      return;
+    }
+
+    // Check if macro targets are valid
     const targetProteinG = mealTargets.proteinG;
     const targetCarbsG = mealTargets.carbsG;
     const targetFatG = mealTargets.fatG;
+
+    if (mealTargets.calories === 0 || (targetProteinG === 0 && targetCarbsG === 0 && targetFatG === 0)) {
+      alert('Unable to calculate macros. Please ensure your profile has valid age, weight, height, and activity level.');
+      return;
+    }
 
     const selectedCarbFoods = carbFoods.filter(f => selectedCarbIds.includes(f.id));
     const selectedProteinFoods = proteinFoods.filter(f => selectedProteinIds.includes(f.id));
