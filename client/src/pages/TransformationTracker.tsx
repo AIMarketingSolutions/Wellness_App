@@ -173,20 +173,65 @@ export default function TransformationTracker() {
                 Body Measurements
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl border border-orange-200">
-                  <p className="text-sm font-semibold text-orange-700 mb-2">Waist Measurement</p>
-                  <p className="text-2xl font-bold text-orange-900" data-testid="text-waist">
-                    {profile.waistCm ? `${profile.waistCm} cm` : "Not set"}
-                  </p>
+              <div className="space-y-6">
+                {/* Waist Measurements */}
+                <div>
+                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-3">Waist Measurement</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl border border-orange-200">
+                      <p className="text-sm font-semibold text-orange-700 mb-2">Current</p>
+                      <p className="text-2xl font-bold text-orange-900" data-testid="text-waist">
+                        {profile.waistCm ? `${profile.waistCm} cm` : "Not set"}
+                      </p>
+                    </div>
+                    <div className="p-6 bg-gradient-to-br from-orange-100 to-orange-200/50 rounded-xl border border-orange-300">
+                      <p className="text-sm font-semibold text-orange-800 mb-2">Goal</p>
+                      <p className="text-2xl font-bold text-orange-950" data-testid="text-goal-waist">
+                        {profile.goalWaistCm ? `${profile.goalWaistCm} cm` : "Not set"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="p-6 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-xl border border-teal-200">
-                  <p className="text-sm font-semibold text-teal-700 mb-2">Neck Measurement</p>
-                  <p className="text-2xl font-bold text-teal-900" data-testid="text-neck">
-                    {profile.neckCm ? `${profile.neckCm} cm` : "Not set"}
-                  </p>
+                {/* Neck Measurements */}
+                <div>
+                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-3">Neck Measurement</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-6 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-xl border border-teal-200">
+                      <p className="text-sm font-semibold text-teal-700 mb-2">Current</p>
+                      <p className="text-2xl font-bold text-teal-900" data-testid="text-neck">
+                        {profile.neckCm ? `${profile.neckCm} cm` : "Not set"}
+                      </p>
+                    </div>
+                    <div className="p-6 bg-gradient-to-br from-teal-100 to-teal-200/50 rounded-xl border border-teal-300">
+                      <p className="text-sm font-semibold text-teal-800 mb-2">Goal</p>
+                      <p className="text-2xl font-bold text-teal-950" data-testid="text-goal-neck">
+                        {profile.goalNeckCm ? `${profile.goalNeckCm} cm` : "Not set"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Hip Measurements (if available) */}
+                {(profile.hipCm || profile.goalHipCm) && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#2C3E50] mb-3">Hip Measurement</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-6 bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-xl border border-pink-200">
+                        <p className="text-sm font-semibold text-pink-700 mb-2">Current</p>
+                        <p className="text-2xl font-bold text-pink-900" data-testid="text-hip">
+                          {profile.hipCm ? `${profile.hipCm} cm` : "Not set"}
+                        </p>
+                      </div>
+                      <div className="p-6 bg-gradient-to-br from-pink-100 to-pink-200/50 rounded-xl border border-pink-300">
+                        <p className="text-sm font-semibold text-pink-800 mb-2">Goal</p>
+                        <p className="text-2xl font-bold text-pink-950" data-testid="text-goal-hip">
+                          {profile.goalHipCm ? `${profile.goalHipCm} cm` : "Not set"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

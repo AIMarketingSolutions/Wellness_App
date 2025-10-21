@@ -14,6 +14,9 @@ interface ProfileFormData {
   waistCm: string;
   neckCm: string;
   hipCm: string;
+  goalWaistCm: string;
+  goalNeckCm: string;
+  goalHipCm: string;
   startingWeightKg: string;
   currentWeightKg: string;
   goalWeightKg: string;
@@ -38,6 +41,9 @@ export default function ProfileAssessment() {
     waistCm: "",
     neckCm: "",
     hipCm: "",
+    goalWaistCm: "",
+    goalNeckCm: "",
+    goalHipCm: "",
     startingWeightKg: "",
     currentWeightKg: "",
     goalWeightKg: "",
@@ -71,6 +77,9 @@ export default function ProfileAssessment() {
         waistCm: profile.waistCm || "",
         neckCm: profile.neckCm || "",
         hipCm: profile.hipCm || "",
+        goalWaistCm: profile.goalWaistCm || "",
+        goalNeckCm: profile.goalNeckCm || "",
+        goalHipCm: profile.goalHipCm || "",
         startingWeightKg: profile.startingWeightKg || "",
         currentWeightKg: profile.currentWeightKg || "",
         goalWeightKg: profile.goalWeightKg || "",
@@ -137,6 +146,9 @@ export default function ProfileAssessment() {
         waistCm: formData.waistCm ? parseFloat(formData.waistCm) : null,
         neckCm: formData.neckCm ? parseFloat(formData.neckCm) : null,
         hipCm: formData.hipCm ? parseFloat(formData.hipCm) : null,
+        goalWaistCm: formData.goalWaistCm ? parseFloat(formData.goalWaistCm) : null,
+        goalNeckCm: formData.goalNeckCm ? parseFloat(formData.goalNeckCm) : null,
+        goalHipCm: formData.goalHipCm ? parseFloat(formData.goalHipCm) : null,
         startingWeightKg: formData.startingWeightKg ? parseFloat(formData.startingWeightKg) : null,
         currentWeightKg: formData.currentWeightKg ? parseFloat(formData.currentWeightKg) : null,
         goalWeightKg: formData.goalWeightKg ? parseFloat(formData.goalWeightKg) : null,
@@ -500,53 +512,119 @@ export default function ProfileAssessment() {
               Section 2: Body Measurements
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-6">
+              {/* Waist Measurements */}
               <div>
-                <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                  Waist Measurement (cm)
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-3">
+                  Waist Measurement
                   <span className="block text-xs font-normal text-gray-500 mt-1">At the belly button</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  data-testid="input-waist"
-                  value={formData.waistCm}
-                  onChange={(e) => setFormData({ ...formData, waistCm: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
-                  placeholder="Waist"
-                />
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                      Current Measurement (cm)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      data-testid="input-waist"
+                      value={formData.waistCm}
+                      onChange={(e) => setFormData({ ...formData, waistCm: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                      placeholder="Current waist"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                      Goal Measurement (cm)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      data-testid="input-goal-waist"
+                      value={formData.goalWaistCm}
+                      onChange={(e) => setFormData({ ...formData, goalWaistCm: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                      placeholder="Goal waist"
+                    />
+                  </div>
+                </div>
               </div>
 
+              {/* Neck Measurements */}
               <div>
-                <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                  Neck Measurement (cm)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  data-testid="input-neck"
-                  value={formData.neckCm}
-                  onChange={(e) => setFormData({ ...formData, neckCm: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
-                  placeholder="Neck"
-                />
+                <h3 className="text-lg font-semibold text-[#2C3E50] mb-3">
+                  Neck Measurement
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                      Current Measurement (cm)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      data-testid="input-neck"
+                      value={formData.neckCm}
+                      onChange={(e) => setFormData({ ...formData, neckCm: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                      placeholder="Current neck"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                      Goal Measurement (cm)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      data-testid="input-goal-neck"
+                      value={formData.goalNeckCm}
+                      onChange={(e) => setFormData({ ...formData, goalNeckCm: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                      placeholder="Goal neck"
+                    />
+                  </div>
+                </div>
               </div>
 
+              {/* Hip Measurements (Female Only) */}
               {formData.gender === "female" && (
                 <div>
-                  <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                    Hip Measurement (cm)
+                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-3">
+                    Hip Measurement
                     <span className="block text-xs font-normal text-gray-500 mt-1">At their widest point</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    data-testid="input-hip"
-                    value={formData.hipCm}
-                    onChange={(e) => setFormData({ ...formData, hipCm: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
-                    placeholder="Hip"
-                  />
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                        Current Measurement (cm)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        data-testid="input-hip"
+                        value={formData.hipCm}
+                        onChange={(e) => setFormData({ ...formData, hipCm: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                        placeholder="Current hip"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                        Goal Measurement (cm)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        data-testid="input-goal-hip"
+                        value={formData.goalHipCm}
+                        onChange={(e) => setFormData({ ...formData, goalHipCm: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                        placeholder="Goal hip"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
