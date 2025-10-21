@@ -481,4 +481,105 @@ router.patch("/api/grocery-list-items/:id", requireAuth, async (req, res) => {
   }
 });
 
+// CNF API Search route with database caching
+router.get("/api/cnf/search", requireAuth, async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q || typeof q !== 'string') {
+      return res.status(400).json({ error: "Search query required" });
+    }
+
+    // Search CNF API
+    const cnfResponse = await fetch(
+      `https://food-nutrition.canada.ca/api/canadian-nutrient-file/food/?lang=en&type=json&search=${encodeURIComponent(q)}`
+    );
+
+    if (!cnfResponse.ok) {
+      throw new Error(`CNF API error: ${cnfResponse.statusText}`);
+    }
+
+    const cnfData = await cnfResponse.json();
+
+    // Transform and persist CNF data to our database
+    const foods = await Promise.all(
+      (cnfData || []).slice(0, 10).map(async (item: any) => {
+        const cnfCode = item.food_code || item.FoodCode || null;
+        
+        // Check if this CNF food already exists in our database
+        if (cnfCode) {
+          const existing = await storage.getFoodItems();
+          const found = existing.find(f => f.cnfCode === cnfCode);
+          
+          if (found) {
+            return {
+              id: found.id,
+              name: found.name,
+              category: cnfCode,
+              proteinPer100g: found.proteinPer100g,
+              carbsPer100g: found.carbsPer100g,
+              fatPer100g: found.fatPer100g,
+              caloriesPer100g: found.caloriesPer100g,
+            };
+          }
+        }
+
+        // Create new food item from CNF data
+        const newFood = await storage.createFoodItem({
+          name: item.food_description || item.FoodDescription || 'Unknown Food',
+          cnfCode: cnfCode,
+          category: 'other',
+          proteinPer100g: item.protein || '0',
+          carbsPer100g: item.carbohydrate || '0',
+          fatPer100g: item.fat_total || '0',
+          caloriesPer100g: item.energy_kcal || '0',
+          servingSizeG: '100',
+          isCustom: false,
+          createdBy: null,
+        });
+
+        return {
+          id: newFood.id,
+          name: newFood.name,
+          category: cnfCode || 'other',
+          proteinPer100g: newFood.proteinPer100g,
+          carbsPer100g: newFood.carbsPer100g,
+          fatPer100g: newFood.fatPer100g,
+          caloriesPer100g: newFood.caloriesPer100g,
+        };
+      })
+    );
+
+    res.json(foods);
+  } catch (error: any) {
+    console.error("CNF API error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Custom Foods routes
+router.post("/api/custom-foods", requireAuth, async (req, res) => {
+  try {
+    const validated = schema.insertFoodItemSchema.parse({ 
+      ...req.body, 
+      isCustom: true, 
+      createdBy: req.userId 
+    });
+    const food = await storage.createFoodItem(validated);
+    res.json(food);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+router.get("/api/custom-foods", requireAuth, async (req, res) => {
+  try {
+    const foods = await storage.getFoodItems();
+    const customFoods = foods.filter(f => f.isCustom && f.createdBy === req.userId);
+    res.json(customFoods);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

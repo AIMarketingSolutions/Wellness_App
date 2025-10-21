@@ -293,13 +293,62 @@ export default function MealPlanner() {
     updateWaterMutation.mutate(clamped);
   };
 
-  // Filter foods based on search
+  // CNF API search state
+  const [cnfResults, setCnfResults] = useState<FoodItem[]>([]);
+  const [isSearchingCNF, setIsSearchingCNF] = useState(false);
+  const [lastCNFQuery, setLastCNFQuery] = useState("");
+
+  const searchCNFMutation = useMutation({
+    mutationFn: async (query: string) => {
+      const response = await fetch(`/api/cnf/search?q=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error('CNF search failed');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setCnfResults(data);
+      setIsSearchingCNF(false);
+    },
+    onError: () => {
+      setCnfResults([]);
+      setIsSearchingCNF(false);
+    }
+  });
+
+  // Filter foods based on search - pure function, no state updates
   const filteredFoods = useMemo(() => {
-    if (!searchQuery.trim()) return [];
+    if (!searchQuery.trim()) {
+      return [];
+    }
+    
     return foodItems.filter(food => 
       food.name.toLowerCase().includes(searchQuery.toLowerCase())
     ).slice(0, 10);
   }, [searchQuery, foodItems]);
+
+  // Handle CNF search when local results are empty
+  useEffect(() => {
+    // Clear CNF results when search query changes
+    if (!searchQuery.trim()) {
+      setCnfResults([]);
+      setLastCNFQuery("");
+      setIsSearchingCNF(false);
+      return;
+    }
+
+    // If we have local results, clear CNF results
+    if (filteredFoods.length > 0) {
+      setCnfResults([]);
+      setLastCNFQuery("");
+      return;
+    }
+
+    // Search CNF if query is long enough and we haven't searched this query yet
+    if (searchQuery.length >= 3 && searchQuery !== lastCNFQuery && !isSearchingCNF) {
+      setIsSearchingCNF(true);
+      setLastCNFQuery(searchQuery);
+      searchCNFMutation.mutate(searchQuery);
+    }
+  }, [searchQuery, filteredFoods.length, lastCNFQuery, isSearchingCNF]);
 
   // Calculate daily totals
   const dailyTotals = useMemo(() => {
@@ -569,10 +618,10 @@ export default function MealPlanner() {
               </div>
             </div>
 
-            {/* Food Search */}
+            {/* Food Search with CNF Integration */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                Search Foods
+                Search Foods (Database + Canadian Nutrient File)
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -581,14 +630,17 @@ export default function MealPlanner() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
-                  placeholder="Search for foods..."
+                  placeholder="Search local database or Canadian Nutrient File..."
                   data-testid="input-food-search"
                 />
               </div>
 
-              {/* Search Results */}
+              {/* Search Results - Local Foods */}
               {filteredFoods.length > 0 && (
                 <div className="mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  <div className="px-3 py-2 bg-gray-50 border-b sticky top-0">
+                    <p className="text-xs font-semibold text-gray-600">Local Database</p>
+                  </div>
                   {filteredFoods.map(food => (
                     <button
                       key={food.id}
@@ -605,6 +657,48 @@ export default function MealPlanner() {
                       <Plus className="w-5 h-5 text-[#52C878]" />
                     </button>
                   ))}
+                </div>
+              )}
+
+              {/* CNF Search Results */}
+              {cnfResults.length > 0 && (
+                <div className="mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                  <div className="px-3 py-2 bg-blue-50 border-b sticky top-0">
+                    <p className="text-xs font-semibold text-blue-700">Canadian Nutrient File Results</p>
+                  </div>
+                  {cnfResults.map((food, idx) => (
+                    <button
+                      key={`cnf-${idx}`}
+                      onClick={() => addFoodToMeal(food, activeMeal)}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b last:border-b-0 flex items-center justify-between"
+                      data-testid={`button-add-cnf-food-${idx}`}
+                    >
+                      <div>
+                        <p className="font-semibold text-[#2C3E50]">{food.name}</p>
+                        <p className="text-xs text-gray-600">
+                          {food.caloriesPer100g} cal | P: {food.proteinPer100g}g | C: {food.carbsPer100g}g | F: {food.fatPer100g}g (per 100g)
+                        </p>
+                        <p className="text-xs text-blue-600">CNF Code: {food.category}</p>
+                      </div>
+                      <Plus className="w-5 h-5 text-blue-500" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {isSearchingCNF && (
+                <div className="mt-2 p-4 bg-blue-50 rounded-xl text-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                  <p className="text-blue-700 text-sm">Searching Canadian Nutrient File...</p>
+                </div>
+              )}
+              
+              {searchQuery.length >= 3 && filteredFoods.length === 0 && cnfResults.length === 0 && !isSearchingCNF && (
+                <div className="mt-2 p-4 bg-gray-50 rounded-xl text-center">
+                  <p className="text-gray-700 text-sm">No results found in local database or CNF.</p>
+                  <p className="text-gray-600 text-xs mt-1">
+                    Try a different search term or add a custom food.
+                  </p>
                 </div>
               )}
             </div>
