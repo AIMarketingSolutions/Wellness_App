@@ -64,10 +64,28 @@ export default function MealPlanner() {
   const mealTargets = useMemo(() => {
     if (!profile) return { calories: 0, proteinG: 0, carbsG: 0, fatG: 0 };
 
-    // Get macro percentages
-    const proteinPercent = parseFloat(profile.customProteinPercentage || "30");
-    const carbPercent = parseFloat(profile.customCarbPercentage || "40");
-    const fatPercent = parseFloat(profile.customFatPercentage || "30");
+    // Get macro percentages based on metabolic profile (must match TransformationTracker)
+    let proteinPercent = 30;
+    let carbPercent = 30;
+    let fatPercent = 40;
+
+    if (profile.metabolicProfile === "fast_oxidizer") {
+      proteinPercent = 25;
+      carbPercent = 35;
+      fatPercent = 40;
+    } else if (profile.metabolicProfile === "slow_oxidizer") {
+      proteinPercent = 35;
+      carbPercent = 25;
+      fatPercent = 40;
+    } else if (profile.metabolicProfile === "medium_oxidizer") {
+      proteinPercent = 30;
+      carbPercent = 30;
+      fatPercent = 40;
+    } else if (profile.customProteinPercentage && profile.customCarbPercentage && profile.customFatPercentage) {
+      proteinPercent = parseFloat(profile.customProteinPercentage);
+      carbPercent = parseFloat(profile.customCarbPercentage);
+      fatPercent = parseFloat(profile.customFatPercentage);
+    }
 
     // Calculate TEE
     const age = profile.age || 0;
@@ -114,18 +132,21 @@ export default function MealPlanner() {
     let mealCalories = 0;
 
     if (mealPlanType === 'three_meals') {
-      mealCalories = activeMeal === 'breakfast' || activeMeal === 'lunch' || activeMeal === 'dinner' ? dct / 3 : 0;
+      // 33.33% per meal
+      mealCalories = activeMeal === 'breakfast' || activeMeal === 'lunch' || activeMeal === 'dinner' ? dct * (100 / 3 / 100) : 0;
     } else if (mealPlanType === 'three_meals_one_snack') {
+      // 30% per meal, 10% snack
       if (activeMeal === 'breakfast' || activeMeal === 'lunch' || activeMeal === 'dinner') {
         mealCalories = dct * 0.3;
       } else if (activeMeal === 'snack') {
         mealCalories = dct * 0.1;
       }
     } else if (mealPlanType === 'three_meals_two_snacks') {
+      // 26.67% per meal, 10% per snack
       if (activeMeal === 'breakfast' || activeMeal === 'lunch' || activeMeal === 'dinner') {
-        mealCalories = dct * 0.27;
+        mealCalories = dct * (80 / 3 / 100);
       } else if (activeMeal === 'snack' || activeMeal === 'snack2') {
-        mealCalories = dct * 0.095;
+        mealCalories = dct * 0.1;
       }
     }
 

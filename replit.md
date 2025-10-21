@@ -27,12 +27,23 @@ After users complete their Personal Profile Assessment, the system automatically
 - Automatic calculation triggered when profile data changes via React Query
 - Guards for incomplete profile data (returns null if TEE unavailable or required fields missing)
 - UI conditionally renders based on calculation result
+- **Integration with Daily Meal Calculator:** MealPlanner uses identical macro calculation logic to display per-meal targets, ensuring consistency across both views
 
-### Daily Meal Calculator - Waterfall Calculation System
-A sophisticated meal composition calculator that determines recommended food portions using a three-step waterfall algorithm:
+### Daily Meal Calculator - Waterfall Calculation System (Integrated with Macro Targets)
+A sophisticated meal composition calculator that determines recommended food portions using a three-step waterfall algorithm. The calculator displays personalized macro targets at the top, calculated using the same logic as the Transformation Tracker.
+
+**Macro Targets Display:**
+- Shows calories and macros (protein, carbs, fat in grams) for the selected meal tab
+- Automatically recalculates when switching between Breakfast/Lunch/Dinner/Snack tabs
+- Uses identical calculation logic as TransformationTracker:
+  - TEE (Total Energy Expenditure) based on BMR and activity level
+  - DCT (Daily Calorie Target) with weight loss deficit and safety minimums
+  - Metabolic profile macro ratios (Fast/Slow/Medium Oxidizer or custom)
+  - Meal-specific distribution based on meal plan type
 
 **Workflow:**
-1. **Food Selection**: Users select one or more foods from three required categories:
+1. **View Macro Targets**: Targets displayed prominently at top for selected meal
+2. **Food Selection**: Users select one or more foods from three required categories:
    - Carbohydrate sources (Brown Rice, Oats, Sweet Potato, etc.)
    - Protein sources (Chicken, Salmon, Eggs, Greek Yogurt, etc.)
    - Fat sources (Olive Oil, Avocado, Almonds, Butter, etc.)
