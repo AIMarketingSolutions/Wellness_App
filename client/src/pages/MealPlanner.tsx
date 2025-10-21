@@ -284,7 +284,7 @@ export default function MealPlanner() {
       const totalCalories = (totalProtein * 4) + (totalCarbs * 4) + (totalFat * 9);
 
       console.log('Setting calculation state...');
-      setCalculation({
+      const result = {
         carbFoods: calculatedCarbFoods,
         proteinFoods: calculatedProteinFoods,
         fatFoods: calculatedFatFoods,
@@ -292,9 +292,19 @@ export default function MealPlanner() {
         totalCarbs,
         totalFat,
         totalCalories,
-      });
+      };
+      console.log('Calculation result:', result);
+      setCalculation(result);
       
       console.log('Calculation complete!');
+      
+      // Scroll to results after a brief delay to ensure render
+      setTimeout(() => {
+        const resultsElement = document.getElementById('calculation-results');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     } catch (error) {
       console.error('ERROR during calculation:', error);
       alert('An error occurred during calculation: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -492,7 +502,7 @@ export default function MealPlanner() {
 
         {/* Calculation Results */}
         {calculation && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8">
+          <div id="calculation-results" className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8">
             <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Recommended Portions (in Ounces)</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
