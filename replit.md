@@ -2,6 +2,33 @@
 
 Nutrition One Fitness Inc. is a comprehensive wellness application that provides personalized nutrition planning, fitness tracking, and health assessment tools. The application helps users achieve their health goals through metabolic profiling, customized meal planning, exercise tracking, and progress monitoring.
 
+## Recent Updates (October 2025)
+
+### Daily Meal Planning Calculator
+A comprehensive meal tracking feature that helps users plan their daily meals with precision:
+
+**Key Features:**
+- **Daily Calorie Target (DCT) Calculation**: Automatically calculates calorie needs based on TEE (Total Energy Expenditure), daily exercise calories, and weight loss goals with safety minimums (1500 cal for men, 1200 cal for women)
+- **Meal Plan Type Support**: Dynamically adjusts meal distribution based on user's preferred meal plan (3 meals, 3 meals + 1 snack, or 3 meals + 2 snacks)
+- **Metabolic Profile Integration**: Uses Fast/Slow/Medium Oxidizer profiles to automatically set macro ratios
+- **Canadian Nutrient File (CNF) Integration**: Search over 5,000 Canadian foods via the CNF API with automatic database caching
+- **Food Search**: Local database → CNF API fallback → Custom foods workflow
+- **Real-Time Macro Tracking**: Running totals and progress bars for calories, protein, carbs, and fat (per meal and daily)
+- **Water Intake Tracking**: Visual tracker for daily water consumption (0-20 glasses) with database persistence
+- **Responsive UI**: Mobile-first design with brand colors and glass morphism effects
+
+**Technical Implementation:**
+- React Query for efficient API calls and caching
+- useEffect-based CNF search to prevent infinite re-renders
+- TypeScript typing throughout for type safety
+- Database persistence with CNF code deduplication
+- Backend routes: `/api/cnf/search`, `/api/custom-foods`, `/api/water-intake`
+
+**Database Tables:**
+- `food_items` with CNF code support
+- `water_intake` for hydration tracking
+- `favorite_meals` and `recipes` (schema ready for future features)
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -59,11 +86,11 @@ The application uses PostgreSQL with the following core tables:
 2. **user_profiles**: Extended user information (physical metrics, preferences, metabolic profile)
 3. **tee_calculations**: Total Energy Expenditure calculation history
 4. **body_fat_calculations**: Body composition tracking
-5. **food_items**: Nutrition database (macronutrients per 100g)
+5. **food_items**: Nutrition database (macronutrients per 100g, CNF codes for Canadian Nutrient File integration)
 6. **meal_plans**: User meal planning data
 7. **meals**: Individual meal entries with target macros
 8. **meal_foods**: Food items within meals with quantities
-9. **water_intake**: Daily hydration tracking
+9. **water_intake**: Daily hydration tracking (up to 20 glasses)
 10. **exercise_types**: Exercise database with calorie burn rates
 11. **exercise_plans**: Workout planning
 12. **daily_exercises**: Exercise log entries
@@ -71,6 +98,10 @@ The application uses PostgreSQL with the following core tables:
 14. **user_supplements**: User-specific supplement tracking
 15. **grocery_lists**: Shopping list generation
 16. **nutrition_questionnaire**: User health assessment data
+17. **favorite_meals**: Saved meal combinations with macros
+18. **favorite_meal_foods**: Food items in favorite meals
+19. **recipes**: Multi-ingredient recipes with per-serving macros
+20. **recipe_ingredients**: Ingredients in recipes
 
 ### Data Relationships
 - **Cascade Deletes**: User deletion cascades to all related records
