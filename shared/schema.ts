@@ -38,6 +38,10 @@ export const userProfiles = pgTable("user_profiles", {
   weightLossGoal: text("weight_loss_goal").$type<'maintain' | 'lose_0_5' | 'lose_1' | 'lose_1_5' | 'lose_2'>(),
   deficitMethod: text("deficit_method").$type<'diet_only' | 'exercise_only' | 'combined'>(),
   targetWeight: numeric("target_weight", { precision: 5, scale: 2 }),
+  startingWeightKg: numeric("starting_weight_kg", { precision: 5, scale: 2 }),
+  currentWeightKg: numeric("current_weight_kg", { precision: 5, scale: 2 }),
+  goalWeightKg: numeric("goal_weight_kg", { precision: 5, scale: 2 }),
+  mealPlanType: text("meal_plan_type").$type<'three_meals' | 'three_meals_one_snack' | 'three_meals_two_snacks'>(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

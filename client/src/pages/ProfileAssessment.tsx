@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { ArrowLeft, User, Scale, Ruler, Activity, Target, Check } from "lucide-react";
+import { ArrowLeft, User, Scale, Ruler, Activity, Target, Check, TrendingDown, Apple } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -14,11 +14,16 @@ interface ProfileFormData {
   waistCm: string;
   neckCm: string;
   hipCm: string;
+  startingWeightKg: string;
+  currentWeightKg: string;
+  goalWeightKg: string;
   activityLevel: "sedentary" | "lightly_active" | "moderately_active" | "very_active";
   metabolicProfile: "fast_oxidizer" | "slow_oxidizer" | "medium_oxidizer" | "custom";
   customProteinPercentage: string;
   customCarbPercentage: string;
   customFatPercentage: string;
+  weightLossGoal: "maintain" | "lose_0_5" | "lose_1" | "lose_1_5" | "lose_2";
+  mealPlanType: "three_meals" | "three_meals_one_snack" | "three_meals_two_snacks";
 }
 
 export default function ProfileAssessment() {
@@ -33,15 +38,21 @@ export default function ProfileAssessment() {
     waistCm: "",
     neckCm: "",
     hipCm: "",
+    startingWeightKg: "",
+    currentWeightKg: "",
+    goalWeightKg: "",
     activityLevel: "moderately_active",
     metabolicProfile: "medium_oxidizer",
     customProteinPercentage: "",
     customCarbPercentage: "",
     customFatPercentage: "",
+    weightLossGoal: "maintain",
+    mealPlanType: "three_meals",
   });
 
   const [bmr, setBmr] = useState<number>(0);
   const [tee, setTee] = useState<number>(0);
+  const [dailyCaloriesWithDeficit, setDailyCaloriesWithDeficit] = useState<number>(0);
 
   // Fetch existing profile
   const { data: profile, isLoading } = useQuery({
@@ -60,11 +71,16 @@ export default function ProfileAssessment() {
         waistCm: profile.waistCm || "",
         neckCm: profile.neckCm || "",
         hipCm: profile.hipCm || "",
+        startingWeightKg: profile.startingWeightKg || "",
+        currentWeightKg: profile.currentWeightKg || "",
+        goalWeightKg: profile.goalWeightKg || "",
         activityLevel: profile.activityLevel || "moderately_active",
         metabolicProfile: profile.metabolicProfile || "medium_oxidizer",
         customProteinPercentage: profile.customProteinPercentage || "",
         customCarbPercentage: profile.customCarbPercentage || "",
         customFatPercentage: profile.customFatPercentage || "",
+        weightLossGoal: profile.weightLossGoal || "maintain",
+        mealPlanType: profile.mealPlanType || "three_meals",
       });
     }
   }, [profile, user]);
@@ -95,8 +111,20 @@ export default function ProfileAssessment() {
 
       const calculatedTee = calculatedBmr * activityMultipliers[formData.activityLevel];
       setTee(calculatedTee);
+
+      // Calculate daily calories with deficit
+      const deficits = {
+        maintain: 0,
+        lose_0_5: 250,
+        lose_1: 500,
+        lose_1_5: 750,
+        lose_2: 1000,
+      };
+
+      const deficit = deficits[formData.weightLossGoal];
+      setDailyCaloriesWithDeficit(calculatedTee - deficit);
     }
-  }, [formData.age, formData.weightKg, formData.heightCm, formData.gender, formData.activityLevel]);
+  }, [formData.age, formData.weightKg, formData.heightCm, formData.gender, formData.activityLevel, formData.weightLossGoal]);
 
   // Save profile mutation
   const saveMutation = useMutation({
@@ -109,6 +137,9 @@ export default function ProfileAssessment() {
         waistCm: formData.waistCm ? parseFloat(formData.waistCm) : null,
         neckCm: formData.neckCm ? parseFloat(formData.neckCm) : null,
         hipCm: formData.hipCm ? parseFloat(formData.hipCm) : null,
+        startingWeightKg: formData.startingWeightKg ? parseFloat(formData.startingWeightKg) : null,
+        currentWeightKg: formData.currentWeightKg ? parseFloat(formData.currentWeightKg) : null,
+        goalWeightKg: formData.goalWeightKg ? parseFloat(formData.goalWeightKg) : null,
         customProteinPercentage: formData.customProteinPercentage ? parseFloat(formData.customProteinPercentage) : null,
         customCarbPercentage: formData.customCarbPercentage ? parseFloat(formData.customCarbPercentage) : null,
         customFatPercentage: formData.customFatPercentage ? parseFloat(formData.customFatPercentage) : null,
@@ -210,6 +241,65 @@ export default function ProfileAssessment() {
     },
   ];
 
+  const weightLossGoals = [
+    {
+      value: "maintain",
+      title: "Maintain Weight",
+      deficit: 0,
+      weeklyLoss: "0 lbs",
+      description: "No caloric deficit - maintain current weight",
+    },
+    {
+      value: "lose_0_5",
+      title: "Lose 0.5 lbs/week",
+      deficit: 250,
+      weeklyLoss: "0.5 lbs",
+      description: "1,750 calorie deficit per week",
+    },
+    {
+      value: "lose_1",
+      title: "Lose 1 lb/week",
+      deficit: 500,
+      weeklyLoss: "1 lb",
+      description: "3,500 calorie deficit per week",
+    },
+    {
+      value: "lose_1_5",
+      title: "Lose 1.5 lbs/week",
+      deficit: 750,
+      weeklyLoss: "1.5 lbs",
+      description: "5,250 calorie deficit per week",
+    },
+    {
+      value: "lose_2",
+      title: "Lose 2 lbs/week",
+      deficit: 1000,
+      weeklyLoss: "2 lbs",
+      description: "7,000 calorie deficit per week",
+    },
+  ];
+
+  const mealPlanTypes = [
+    {
+      value: "three_meals",
+      title: "Three Meals",
+      description: "Each meal = 33.33% of daily calories",
+      breakdown: "Breakfast, Lunch, Dinner (33.33% each)",
+    },
+    {
+      value: "three_meals_one_snack",
+      title: "Three Meals + One Snack",
+      description: "Snack = 10%, Meals = 30% each",
+      breakdown: "3 Meals at 30% + 1 Snack at 10%",
+    },
+    {
+      value: "three_meals_two_snacks",
+      title: "Three Meals + Two Snacks",
+      description: "Snacks = 10% each, Meals = 26.67% each",
+      breakdown: "3 Meals at 26.67% + 2 Snacks at 10% each",
+    },
+  ];
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white flex items-center justify-center">
@@ -226,7 +316,7 @@ export default function ProfileAssessment() {
       {/* Header */}
       <header className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white shadow-lg">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/dashboard" className="flex items-center gap-2 text-white/90 hover:text-white transition-colors group">
+          <Link href="/dashboard" data-testid="link-dashboard" className="flex items-center gap-2 text-white/90 hover:text-white transition-colors group">
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back to Dashboard</span>
           </Link>
@@ -352,6 +442,54 @@ export default function ProfileAssessment() {
                   />
                 </div>
               </div>
+
+              {/* Weight Tracking Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div>
+                  <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                    Starting Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    data-testid="input-starting-weight"
+                    value={formData.startingWeightKg}
+                    onChange={(e) => setFormData({ ...formData, startingWeightKg: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                    placeholder="Starting weight"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                    Current Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    data-testid="input-current-weight"
+                    value={formData.currentWeightKg}
+                    onChange={(e) => setFormData({ ...formData, currentWeightKg: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                    placeholder="Current weight"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                    Goal Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    data-testid="input-goal-weight"
+                    value={formData.goalWeightKg}
+                    onChange={(e) => setFormData({ ...formData, goalWeightKg: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
+                    placeholder="Goal weight"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -365,7 +503,7 @@ export default function ProfileAssessment() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                  Waist Circumference (cm)
+                  Waist Measurement (cm)
                   <span className="block text-xs font-normal text-gray-500 mt-1">At the belly button</span>
                 </label>
                 <input
@@ -381,7 +519,7 @@ export default function ProfileAssessment() {
 
               <div>
                 <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                  Neck Circumference (cm)
+                  Neck Measurement (cm)
                 </label>
                 <input
                   type="number"
@@ -397,7 +535,7 @@ export default function ProfileAssessment() {
               {formData.gender === "female" && (
                 <div>
                   <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                    Hip Circumference (cm)
+                    Hip Measurement (cm)
                     <span className="block text-xs font-normal text-gray-500 mt-1">At their widest point</span>
                   </label>
                   <input
@@ -427,12 +565,12 @@ export default function ProfileAssessment() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-gray-600">Basal Metabolic Rate (BMR)</p>
-                    <p className="text-3xl font-bold text-[#2C3E50]">{Math.round(bmr)} calories/day</p>
+                    <p className="text-3xl font-bold text-[#2C3E50]" data-testid="text-bmr">{Math.round(bmr)} calories/day</p>
                   </div>
                   {tee > 0 && (
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-600">Total Energy Expenditure (TEE)</p>
-                      <p className="text-3xl font-bold text-[#52C878]">{Math.round(tee)} calories/day</p>
+                      <p className="text-sm font-semibold text-gray-600">Total Daily Calories</p>
+                      <p className="text-3xl font-bold text-[#52C878]" data-testid="text-tee">{Math.round(tee)} calories/day</p>
                     </div>
                   )}
                 </div>
@@ -467,11 +605,108 @@ export default function ProfileAssessment() {
             </div>
           </div>
 
-          {/* Section 4: Metabolic Profile */}
+          {/* Section 4: Weekly Weight Loss Goal */}
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8">
+            <h2 className="text-2xl font-bold text-[#2C3E50] flex items-center gap-2 mb-6">
+              <TrendingDown className="w-6 h-6 text-[#52C878]" />
+              Section 4: Weekly Weight Loss Goal
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-6">
+              Select your target weight loss per week. Each pound of fat equals 3,500 calories.
+            </p>
+
+            <div className="space-y-3">
+              {weightLossGoals.map((goal) => (
+                <button
+                  key={goal.value}
+                  type="button"
+                  data-testid={`button-weightloss-${goal.value}`}
+                  onClick={() => setFormData({ ...formData, weightLossGoal: goal.value as any })}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                    formData.weightLossGoal === goal.value
+                      ? "border-[#52C878] bg-[#52C878]/10"
+                      : "border-gray-200 hover:border-[#52C878]/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <h4 className="font-bold text-[#2C3E50]">{goal.title}</h4>
+                        {goal.deficit > 0 && (
+                          <span className="text-sm font-semibold text-red-600">-{goal.deficit} cal/day</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{goal.description}</p>
+                    </div>
+                    {formData.weightLossGoal === goal.value && (
+                      <Check className="w-6 h-6 text-[#52C878] ml-4 flex-shrink-0" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Daily Calories with Deficit */}
+            {dailyCaloriesWithDeficit > 0 && formData.weightLossGoal !== "maintain" && (
+              <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-200">
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-gray-600">Your Target Daily Calories</p>
+                  <p className="text-3xl font-bold text-orange-600" data-testid="text-daily-calories">
+                    {Math.round(dailyCaloriesWithDeficit)} calories/day
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    (TEE: {Math.round(tee)} - Deficit: {weightLossGoals.find(g => g.value === formData.weightLossGoal)?.deficit})
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 5: Meal Plan Type */}
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8">
+            <h2 className="text-2xl font-bold text-[#2C3E50] flex items-center gap-2 mb-6">
+              <Apple className="w-6 h-6 text-[#52C878]" />
+              Section 5: Meal Plan Type
+            </h2>
+
+            <p className="text-sm text-gray-600 mb-6">
+              Choose how you want to distribute your daily calories across meals and snacks.
+            </p>
+
+            <div className="space-y-4">
+              {mealPlanTypes.map((plan) => (
+                <button
+                  key={plan.value}
+                  type="button"
+                  data-testid={`button-mealplan-${plan.value}`}
+                  onClick={() => setFormData({ ...formData, mealPlanType: plan.value as any })}
+                  className={`w-full p-5 rounded-xl border-2 text-left transition-all ${
+                    formData.mealPlanType === plan.value
+                      ? "border-[#52C878] bg-[#52C878]/10"
+                      : "border-gray-200 hover:border-[#52C878]/50"
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-bold text-[#2C3E50] mb-1">{plan.title}</h4>
+                      <p className="text-sm text-gray-600 mb-2">{plan.description}</p>
+                      <p className="text-xs text-gray-500">{plan.breakdown}</p>
+                    </div>
+                    {formData.mealPlanType === plan.value && (
+                      <Check className="w-6 h-6 text-[#52C878] ml-4 flex-shrink-0" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 6: Metabolic Profile */}
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8">
             <h2 className="text-2xl font-bold text-[#2C3E50] flex items-center gap-2 mb-6">
               <Target className="w-6 h-6 text-[#52C878]" />
-              Section 4: Metabolic Profile Selection
+              Section 6: Metabolic Profile Selection
             </h2>
 
             <div className="space-y-4 mb-6">
@@ -611,7 +846,7 @@ export default function ProfileAssessment() {
           </div>
 
           {saveMutation.isSuccess && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-center" data-testid="text-success">
               <p className="text-green-700 font-semibold">Profile saved successfully!</p>
             </div>
           )}
