@@ -4,30 +4,42 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 
 ## Recent Updates (October 2025)
 
-### Daily Meal Planning Calculator
-A comprehensive meal tracking feature that helps users plan their daily meals with precision:
+### Daily Meal Calculator - Waterfall Calculation System
+A sophisticated meal composition calculator that determines recommended food portions using a three-step waterfall algorithm:
+
+**Workflow:**
+1. **Food Selection**: Users select one or more foods from three required categories:
+   - Carbohydrate sources (Brown Rice, Oats, Sweet Potato, etc.)
+   - Protein sources (Chicken, Salmon, Eggs, Greek Yogurt, etc.)
+   - Fat sources (Olive Oil, Avocado, Almonds, Butter, etc.)
+
+2. **Calculation Process**: After clicking "Calculate", the system uses a waterfall algorithm:
+   - **Step 1**: Calculate carbohydrate quantities in ounces to match the meal's carb target
+   - **Step 2**: Subtract protein from carbs, then calculate protein quantities in ounces for the remaining protein needed
+   - **Step 3**: Subtract fat from carbs and proteins, then calculate fat quantities in ounces for the remaining fat needed
+
+3. **Results Display**: Shows recommended ounces for each selected food with macro contribution breakdown
 
 **Key Features:**
-- **Daily Calorie Target (DCT) Calculation**: Automatically calculates calorie needs based on TEE (Total Energy Expenditure), daily exercise calories, and weight loss goals with safety minimums (1500 cal for men, 1200 cal for women)
-- **Meal Plan Type Support**: Dynamically adjusts meal distribution based on user's preferred meal plan (3 meals, 3 meals + 1 snack, or 3 meals + 2 snacks)
-- **Metabolic Profile Integration**: Uses Fast/Slow/Medium Oxidizer profiles to automatically set macro ratios
-- **Canadian Nutrient File (CNF) Integration**: Search over 5,000 Canadian foods via the CNF API with automatic database caching
-- **Food Search**: Local database → CNF API fallback → Custom foods workflow
-- **Real-Time Macro Tracking**: Running totals and progress bars for calories, protein, carbs, and fat (per meal and daily)
-- **Water Intake Tracking**: Visual tracker for daily water consumption (0-20 glasses) with database persistence
-- **Responsive UI**: Mobile-first design with brand colors and glass morphism effects
+- **Daily Calorie Target (DCT)**: Auto-calculates based on TEE, weight loss goals, with safety minimums (1500 cal men, 1200 cal women)
+- **Meal Plan Support**: Distributes macros across 3 meals, 3 meals + 1 snack, or 3 meals + 2 snacks
+- **Metabolic Profile Integration**: Uses Fast/Slow/Medium Oxidizer profiles for macro ratios
+- **Three-Category Food Selection**: Checkbox interface for selecting multiple foods per category
+- **Ounce-Based Output**: All recommendations displayed in ounces (1 oz = 28.3495g)
+- **Macro Tracking**: Shows total calories, protein, carbs, and fat achieved by recommended portions
 
 **Technical Implementation:**
-- React Query for efficient API calls and caching
-- useEffect-based CNF search to prevent infinite re-renders
-- TypeScript typing throughout for type safety
-- Database persistence with CNF code deduplication
-- Backend routes: `/api/cnf/search`, `/api/custom-foods`, `/api/water-intake`
+- Waterfall calculation algorithm distributes macros sequentially
+- Even distribution when multiple foods selected per category
+- Database-driven food categorization (carbohydrate, protein, fat)
+- React Query for data fetching
+- 30 seed foods across all three categories
+- TypeScript typing throughout
 
-**Database Tables:**
-- `food_items` with CNF code support
-- `water_intake` for hydration tracking
-- `favorite_meals` and `recipes` (schema ready for future features)
+**Database:**
+- `food_items` table with category field supporting carbohydrate/protein/fat classification
+- Seed data includes 10 carb sources, 10 protein sources, 10 fat sources
+- All foods validated to have non-zero macros in their primary category
 
 # User Preferences
 

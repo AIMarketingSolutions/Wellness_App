@@ -38,7 +38,7 @@ interface MealCalculation {
 const GRAMS_PER_OUNCE = 28.3495;
 
 export default function MealPlanner() {
-  const { user } = useAuth();
+  useAuth();
   const [activeMeal, setActiveMeal] = useState<MealType>('breakfast');
   const [selectedCarbIds, setSelectedCarbIds] = useState<string[]>([]);
   const [selectedProteinIds, setSelectedProteinIds] = useState<string[]>([]);
