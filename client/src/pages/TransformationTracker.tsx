@@ -71,9 +71,17 @@ export default function TransformationTracker() {
     return metabolicProfileLabels[profile.metabolicProfile] || "Not set";
   };
 
+  // Calculate TEE first so it's available for macro calculations
+  const tee = calculateTEE();
+
   // Calculate Daily Calorie Target and Macros
   const calculateMacros = () => {
     if (!profile?.weightLossGoal || !profile?.metabolicProfile || !profile?.mealPlanType) {
+      return null;
+    }
+
+    // Guard: TEE must be calculated before proceeding
+    if (!tee || tee === 0) {
       return null;
     }
 
@@ -202,8 +210,6 @@ export default function TransformationTracker() {
       </div>
     );
   }
-
-  const tee = calculateTEE();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white">

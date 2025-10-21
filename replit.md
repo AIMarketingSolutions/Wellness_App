@@ -4,6 +4,30 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 
 ## Recent Updates (October 2025)
 
+### Automatic Macro Calculation & Display (Latest)
+After users complete their Personal Profile Assessment, the system automatically calculates and displays recommended macros per meal in the Transformation Tracker:
+
+**Calculation Process:**
+1. **Daily Calorie Target (DCT)** = TEE - Weight Loss Deficit, with safety minimums (1500 cal men, 1200 cal women)
+2. **Macro Percentages** from Metabolic Profile (Fast/Slow/Medium Oxidizer or custom ratios)
+3. **Daily Macros in Grams**: Protein (cal×%/4), Carbs (cal×%/4), Fat (cal×%/9)
+4. **Per-Meal Distribution** based on Meal Plan Type:
+   - 3 Meals: 33.33% each
+   - 3 Meals + 1 Snack: 30% each + 10% snack
+   - 3 Meals + 2 Snacks: 26.67% each + 10% per snack
+
+**Display:**
+- Daily Targets section showing DCT, total protein/carbs/fat in grams with percentages
+- Per-meal cards for Breakfast, Lunch, Dinner showing calories and macros
+- Conditional Snack cards based on meal plan type
+- Helper text linking to Daily Meal Calculator for meal planning
+
+**Technical Implementation:**
+- `calculateMacros()` function in TransformationTracker component
+- Automatic calculation triggered when profile data changes via React Query
+- Guards for incomplete profile data (returns null if TEE unavailable or required fields missing)
+- UI conditionally renders based on calculation result
+
 ### Daily Meal Calculator - Waterfall Calculation System
 A sophisticated meal composition calculator that determines recommended food portions using a three-step waterfall algorithm:
 
