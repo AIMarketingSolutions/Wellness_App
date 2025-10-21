@@ -165,8 +165,16 @@ export default function MealPlanner() {
 
   // Waterfall calculation algorithm
   const calculateMeal = () => {
+    console.log('Calculate button clicked!');
+    console.log('Profile:', profile);
+    console.log('Meal Targets:', mealTargets);
+    console.log('Selected Carbs:', selectedCarbIds);
+    console.log('Selected Proteins:', selectedProteinIds);
+    console.log('Selected Fats:', selectedFatIds);
+
     // Check if profile is complete
     if (!profile || !profile.weightLossGoal || !profile.metabolicProfile || !profile.mealPlanType) {
+      console.log('Profile incomplete');
       alert('Please complete your Personal Profile Assessment first before using the meal calculator.');
       return;
     }
@@ -177,6 +185,7 @@ export default function MealPlanner() {
     const targetFatG = mealTargets.fatG;
 
     if (mealTargets.calories === 0 || (targetProteinG === 0 && targetCarbsG === 0 && targetFatG === 0)) {
+      console.log('Macro targets invalid');
       alert('Unable to calculate macros. Please ensure your profile has valid age, weight, height, and activity level.');
       return;
     }
@@ -185,7 +194,12 @@ export default function MealPlanner() {
     const selectedProteinFoods = proteinFoods.filter(f => selectedProteinIds.includes(f.id));
     const selectedFatFoods = fatFoods.filter(f => selectedFatIds.includes(f.id));
 
+    console.log('Selected carb foods:', selectedCarbFoods);
+    console.log('Selected protein foods:', selectedProteinFoods);
+    console.log('Selected fat foods:', selectedFatFoods);
+
     if (selectedCarbFoods.length === 0 || selectedProteinFoods.length === 0 || selectedFatFoods.length === 0) {
+      console.log('Not all food categories selected');
       alert('Please select at least one food from each category (Carb, Protein, Fat)');
       return;
     }
