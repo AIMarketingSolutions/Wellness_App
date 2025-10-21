@@ -55,17 +55,17 @@ export default function MealPlanner() {
 
   // Fetch today's exercises for calorie calculation
   const { data: exercises } = useQuery({
-    queryKey: ["/api/exercises", selected Date],
+    queryKey: [`/api/daily-exercises/date/${selectedDate}`],
   });
 
   // Fetch food items for search
   const { data: foodItems = [] } = useQuery<FoodItem[]>({
-    queryKey: ["/api/foods"],
+    queryKey: ["/api/food-items"],
   });
 
   // Fetch water intake for today
   const { data: waterIntake } = useQuery({
-    queryKey: ["/api/water", selectedDate],
+    queryKey: [`/api/water-intake/${selectedDate}`],
   });
 
   // Initialize water glasses from API
@@ -278,13 +278,13 @@ export default function MealPlanner() {
   // Update water intake
   const updateWaterMutation = useMutation({
     mutationFn: async (glasses: number) => {
-      return apiRequest(`/api/water`, {
+      return apiRequest(`/api/water-intake`, {
         method: "POST",
-        body: JSON.stringify({ glassesConsumed: glasses, intakeDate: selectedDate }),
+        body: JSON.stringify({ glassesConsumed: glasses, intakeDate: selectedDate, userId: user?.id }),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/water", selectedDate] });
+      queryClient.invalidateQueries({ queryKey: [`/api/water-intake/${selectedDate}`] });
     },
   });
 

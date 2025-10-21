@@ -9,6 +9,7 @@ import Dashboard from "@/pages/Dashboard";
 import ProfileAssessment from "@/pages/ProfileAssessment";
 import TransformationTracker from "@/pages/TransformationTracker";
 import MealPlan from "@/pages/MealPlan";
+import MealPlanner from "@/pages/MealPlanner";
 import Fitness from "@/pages/Fitness";
 import Supplement from "@/pages/Supplement";
 import NutritionalProtocol from "@/pages/NutritionalProtocol";
@@ -54,6 +55,9 @@ function AppRoutes() {
       </Route>
       <Route path="/meal-plan">
         {() => <ProtectedRoute component={MealPlan} />}
+      </Route>
+      <Route path="/meal-planner">
+        {() => <ProtectedRoute component={MealPlanner} />}
       </Route>
       <Route path="/fitness">
         {() => <ProtectedRoute component={Fitness} />}
