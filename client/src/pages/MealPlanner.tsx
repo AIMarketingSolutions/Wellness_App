@@ -204,8 +204,12 @@ export default function MealPlanner() {
       return;
     }
 
-    // STEP 1: Calculate carbohydrate quantities in ounces to match allowed grams
-    const carbsPerFood = targetCarbsG / selectedCarbFoods.length;
+    console.log('Starting calculation...');
+    
+    try {
+      // STEP 1: Calculate carbohydrate quantities in ounces to match allowed grams
+      console.log('Step 1: Calculating carbs...');
+      const carbsPerFood = targetCarbsG / selectedCarbFoods.length;
     const calculatedCarbFoods: CalculatedFood[] = selectedCarbFoods.map(food => {
       const carbsPer100g = parseFloat(food.carbsPer100g);
       const proteinPer100g = parseFloat(food.proteinPer100g);
@@ -271,22 +275,30 @@ export default function MealPlanner() {
       };
     });
 
-    // Calculate totals
-    const allFoods = [...calculatedCarbFoods, ...calculatedProteinFoods, ...calculatedFatFoods];
-    const totalProtein = allFoods.reduce((sum, f) => sum + f.contributedProteinG, 0);
-    const totalCarbs = allFoods.reduce((sum, f) => sum + f.contributedCarbsG, 0);
-    const totalFat = allFoods.reduce((sum, f) => sum + f.contributedFatG, 0);
-    const totalCalories = (totalProtein * 4) + (totalCarbs * 4) + (totalFat * 9);
+      // Calculate totals
+      console.log('Calculating totals...');
+      const allFoods = [...calculatedCarbFoods, ...calculatedProteinFoods, ...calculatedFatFoods];
+      const totalProtein = allFoods.reduce((sum, f) => sum + f.contributedProteinG, 0);
+      const totalCarbs = allFoods.reduce((sum, f) => sum + f.contributedCarbsG, 0);
+      const totalFat = allFoods.reduce((sum, f) => sum + f.contributedFatG, 0);
+      const totalCalories = (totalProtein * 4) + (totalCarbs * 4) + (totalFat * 9);
 
-    setCalculation({
-      carbFoods: calculatedCarbFoods,
-      proteinFoods: calculatedProteinFoods,
-      fatFoods: calculatedFatFoods,
-      totalProtein,
-      totalCarbs,
-      totalFat,
-      totalCalories,
-    });
+      console.log('Setting calculation state...');
+      setCalculation({
+        carbFoods: calculatedCarbFoods,
+        proteinFoods: calculatedProteinFoods,
+        fatFoods: calculatedFatFoods,
+        totalProtein,
+        totalCarbs,
+        totalFat,
+        totalCalories,
+      });
+      
+      console.log('Calculation complete!');
+    } catch (error) {
+      console.error('ERROR during calculation:', error);
+      alert('An error occurred during calculation: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
   };
 
   // Meal tabs
