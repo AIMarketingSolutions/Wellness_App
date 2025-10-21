@@ -116,9 +116,12 @@ router.post("/api/profile", requireAuth, async (req, res) => {
 
 router.patch("/api/profile", requireAuth, async (req, res) => {
   try {
-    const profile = await storage.updateUserProfile(req.userId!, req.body);
+    // Parse and validate the data, but make all fields optional for PATCH
+    const validated = schema.insertUserProfileSchema.partial().parse(req.body);
+    const profile = await storage.updateUserProfile(req.userId!, validated);
     res.json(profile);
   } catch (error: any) {
+    console.error("Profile update error:", error);
     res.status(500).json({ error: error.message });
   }
 });
