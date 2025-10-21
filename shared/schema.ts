@@ -70,11 +70,12 @@ export const bodyFatCalculations = pgTable("body_fat_calculations", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-// Food Items Master Table
+// Food Items Master Table (CNF + Custom Foods)
 export const foodItems = pgTable("food_items", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  category: text("category").notNull(),
+  category: text("category").$type<'carbohydrate' | 'protein' | 'fat' | 'vegetable' | 'fruit' | 'dairy' | 'other'>().notNull(),
+  cnfCode: text("cnf_code"), // Canadian Nutrient File food code
   proteinPer100g: numeric("protein_per_100g", { precision: 5, scale: 2 }).default("0"),
   carbsPer100g: numeric("carbs_per_100g", { precision: 5, scale: 2 }).default("0"),
   fatPer100g: numeric("fat_per_100g", { precision: 5, scale: 2 }).default("0"),
@@ -241,6 +242,55 @@ export const groceryListItems = pgTable("grocery_list_items", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// Favorite Meals Table
+export const favoriteMeals = pgTable("favorite_meals", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  mealName: text("meal_name").notNull(),
+  mealType: text("meal_type").$type<'breakfast' | 'lunch' | 'dinner' | 'snack'>().notNull(),
+  totalCalories: numeric("total_calories", { precision: 6, scale: 2 }).notNull(),
+  totalProteinG: numeric("total_protein_g", { precision: 6, scale: 2 }).notNull(),
+  totalCarbsG: numeric("total_carbs_g", { precision: 6, scale: 2 }).notNull(),
+  totalFatG: numeric("total_fat_g", { precision: 6, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Favorite Meal Foods Junction Table
+export const favoriteMealFoods = pgTable("favorite_meal_foods", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  favoriteMealId: uuid("favorite_meal_id").references(() => favoriteMeals.id, { onDelete: "cascade" }).notNull(),
+  foodItemId: uuid("food_item_id").references(() => foodItems.id, { onDelete: "cascade" }).notNull(),
+  quantityG: numeric("quantity_g", { precision: 6, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Recipes Table
+export const recipes = pgTable("recipes", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  recipeName: text("recipe_name").notNull(),
+  servings: integer("servings").default(1),
+  totalCalories: numeric("total_calories", { precision: 6, scale: 2 }).notNull(),
+  totalProteinG: numeric("total_protein_g", { precision: 6, scale: 2 }).notNull(),
+  totalCarbsG: numeric("total_carbs_g", { precision: 6, scale: 2 }).notNull(),
+  totalFatG: numeric("total_fat_g", { precision: 6, scale: 2 }).notNull(),
+  caloriesPerServing: numeric("calories_per_serving", { precision: 6, scale: 2 }).notNull(),
+  proteinPerServing: numeric("protein_per_serving", { precision: 6, scale: 2 }).notNull(),
+  carbsPerServing: numeric("carbs_per_serving", { precision: 6, scale: 2 }).notNull(),
+  fatPerServing: numeric("fat_per_serving", { precision: 6, scale: 2 }).notNull(),
+  instructions: text("instructions"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Recipe Ingredients Junction Table
+export const recipeIngredients = pgTable("recipe_ingredients", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  recipeId: uuid("recipe_id").references(() => recipes.id, { onDelete: "cascade" }).notNull(),
+  foodItemId: uuid("food_item_id").references(() => foodItems.id, { onDelete: "cascade" }).notNull(),
+  quantityG: numeric("quantity_g", { precision: 6, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -309,3 +359,19 @@ export const insertGroceryListSchema = createInsertSchema(groceryLists).omit({ i
 export type GroceryListItem = typeof groceryListItems.$inferSelect;
 export type InsertGroceryListItem = z.infer<typeof insertGroceryListItemSchema>;
 export const insertGroceryListItemSchema = createInsertSchema(groceryListItems).omit({ id: true, createdAt: true });
+
+export type FavoriteMeal = typeof favoriteMeals.$inferSelect;
+export type InsertFavoriteMeal = z.infer<typeof insertFavoriteMealSchema>;
+export const insertFavoriteMealSchema = createInsertSchema(favoriteMeals).omit({ id: true, createdAt: true });
+
+export type FavoriteMealFood = typeof favoriteMealFoods.$inferSelect;
+export type InsertFavoriteMealFood = z.infer<typeof insertFavoriteMealFoodSchema>;
+export const insertFavoriteMealFoodSchema = createInsertSchema(favoriteMealFoods).omit({ id: true, createdAt: true });
+
+export type Recipe = typeof recipes.$inferSelect;
+export type InsertRecipe = z.infer<typeof insertRecipeSchema>;
+export const insertRecipeSchema = createInsertSchema(recipes).omit({ id: true, createdAt: true });
+
+export type RecipeIngredient = typeof recipeIngredients.$inferSelect;
+export type InsertRecipeIngredient = z.infer<typeof insertRecipeIngredientSchema>;
+export const insertRecipeIngredientSchema = createInsertSchema(recipeIngredients).omit({ id: true, createdAt: true });
