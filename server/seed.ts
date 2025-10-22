@@ -40,18 +40,11 @@ async function seed() {
 
   await db.insert(schema.foodItems).values(foodItemsData).onConflictDoNothing();
 
-  // Seed exercise types
+  // Seed exercise types (from Fitness System document)
   const exerciseTypesData = [
-    { name: 'Running (6 mph)', category: 'Cardio', caloriesPerMinute: '10.0', description: 'Moderate pace running' },
-    { name: 'Walking (3.5 mph)', category: 'Cardio', caloriesPerMinute: '4.0', description: 'Brisk walking' },
-    { name: 'Cycling (moderate)', category: 'Cardio', caloriesPerMinute: '8.0', description: 'Moderate intensity cycling' },
-    { name: 'Swimming', category: 'Cardio', caloriesPerMinute: '11.0', description: 'General swimming' },
-    { name: 'Weight Training', category: 'Strength', caloriesPerMinute: '6.0', description: 'General weight lifting' },
-    { name: 'Push-ups', category: 'Strength', caloriesPerMinute: '7.0', description: 'Bodyweight push-ups' },
-    { name: 'Squats', category: 'Strength', caloriesPerMinute: '8.0', description: 'Bodyweight squats' },
-    { name: 'Yoga', category: 'Flexibility', caloriesPerMinute: '3.0', description: 'Hatha yoga' },
-    { name: 'Pilates', category: 'Flexibility', caloriesPerMinute: '4.0', description: 'General pilates' },
-    { name: 'HIIT', category: 'Cardio', caloriesPerMinute: '12.0', description: 'High-intensity interval training' },
+    { name: 'Bicycling, 12-14 mph, moderate', category: 'Cardio', caloriesPerMinute: '12.1', description: 'Moderate pace cycling (726 cal/60min)' },
+    { name: 'Walking, 3.0 mph, moderate', category: 'Cardio', caloriesPerMinute: '5.0', description: 'Moderate pace walking (299 cal/60min)' },
+    { name: 'Strength training', category: 'Strength', caloriesPerMinute: '4.53', description: 'General strength training (272 cal/60min)' },
   ];
 
   await db.insert(schema.exerciseTypes).values(exerciseTypesData).onConflictDoNothing();

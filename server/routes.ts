@@ -582,4 +582,57 @@ router.get("/api/custom-foods", requireAuth, async (req, res) => {
   }
 });
 
+// Exercise routes
+router.get("/api/exercise-types", requireAuth, async (req, res) => {
+  try {
+    const exerciseTypes = await storage.getExerciseTypes();
+    res.json(exerciseTypes);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/api/daily-exercise/today", requireAuth, async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const exercises = await storage.getDailyExercisesByDate(req.userId!, today);
+    res.json(exercises.length > 0 ? exercises[0] : null);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/api/daily-exercise", requireAuth, async (req, res) => {
+  try {
+    const { exerciseTypeId, durationMinutes, caloriesBurned } = req.body;
+    
+    const today = new Date().toISOString().split('T')[0];
+    const existingExercises = await storage.getDailyExercisesByDate(req.userId!, today);
+    
+    if (existingExercises.length > 0) {
+      // Update existing exercise
+      const updated = await storage.updateDailyExercise(existingExercises[0].id, {
+        exerciseTypeId,
+        durationMinutes,
+        caloriesBurned,
+        isCompleted: true,
+      });
+      res.json(updated);
+    } else {
+      // Create new exercise
+      const newExercise = await storage.createDailyExercise({
+        userId: req.userId!,
+        exerciseTypeId,
+        exerciseDate: today,
+        durationMinutes,
+        caloriesBurned,
+        isCompleted: true,
+      });
+      res.json(newExercise);
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
