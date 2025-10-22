@@ -29,15 +29,54 @@ After users complete their Personal Profile Assessment, the system automatically
 - UI conditionally renders based on calculation result
 - **Integration with Daily Meal Calculator:** MealPlanner uses identical macro calculation logic to display per-meal targets, ensuring consistency across both views
 
+### Fitness System Integration with Daily Macro Adjustment (October 2025)
+The fitness system dynamically adjusts daily calorie targets and meal macros based on selected workouts, ensuring accurate nutrition planning that accounts for exercise.
+
+**Workout Selection Features:**
+- **Three Exercise Types** (from Fitness System document):
+  - Bicycling, 12-14 mph, moderate (12.1 cal/min = 726 cal/60min)
+  - Walking, 3.0 mph, moderate (5.0 cal/min = 299 cal/60min)
+  - Strength training (4.53 cal/min = 272 cal/60min)
+- **Duration Options**: 60, 40, 30, or 20 minutes
+- **Real-time Calorie Calculation**: Displays calories burned based on exercise type and duration
+- **Persistent Storage**: Today's workout saved to database and persists across sessions
+
+**Dynamic Macro Adjustment:**
+- **Base DCT Calculation**: TEE - Weight Loss Deficit (with safety minimums)
+- **Exercise Adjustment**: Final DCT = Base DCT + Exercise Calories
+- **Automatic Recalculation**: All per-meal macro targets update when workout is selected
+- **Synchronized Display**: Both Meal Planner and Transformation Tracker show adjusted targets
+
+**Integration Points:**
+1. **Daily Meal Calculator**:
+   - Workout selector displayed above meal tabs
+   - Macro targets automatically increase with exercise calories
+   - Users see adjusted portions based on their workout
+   
+2. **Transformation Tracker**:
+   - Calorie Breakdown section showing: TEE → Weight Loss Goal → Daily Fitness Routine → Daily Calorie Target
+   - Visual display of how exercise impacts daily targets
+   - Shows selected exercise details (name, duration, calories burned)
+
+**API Endpoints:**
+- `GET /api/exercise-types`: Fetch available exercise types
+- `GET /api/daily-exercise/today`: Get today's selected workout
+- `POST /api/daily-exercise`: Save/update today's workout selection
+
+**Database:**
+- `exercise_types` table: Stores the 3 exercise types with calorie rates
+- `daily_exercises` table: Logs daily workout selections with calories burned
+
 ### Daily Meal Calculator - Waterfall Calculation System (Integrated with Macro Targets)
 A sophisticated meal composition calculator that determines recommended food portions using a three-step waterfall algorithm. The calculator displays personalized macro targets at the top, calculated using the same logic as the Transformation Tracker.
 
 **Macro Targets Display:**
 - Shows calories and macros (protein, carbs, fat in grams) for the selected meal tab
 - Automatically recalculates when switching between Breakfast/Lunch/Dinner/Snack tabs
+- **Exercise-Adjusted**: Targets include calories burned from daily workout selection
 - Uses identical calculation logic as TransformationTracker:
   - TEE (Total Energy Expenditure) based on BMR and activity level
-  - DCT (Daily Calorie Target) with weight loss deficit and safety minimums
+  - DCT (Daily Calorie Target) with weight loss deficit, exercise calories, and safety minimums
   - Metabolic profile macro ratios (Fast/Slow/Medium Oxidizer or custom)
   - Meal-specific distribution based on meal plan type
 
