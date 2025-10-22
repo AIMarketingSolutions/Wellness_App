@@ -25,8 +25,8 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features and Implementations
 - **Automatic Macro Calculation & Display**: Calculates and displays recommended macros per meal based on a Personal Profile Assessment, Daily Calorie Target (DCT), and metabolic profile. This includes a safety minimum for calorie intake and per-meal distribution based on meal plan type.
-- **Fitness System Integration with Daily Macro Adjustment**: Dynamically adjusts daily calorie targets and meal macros based on selected workouts. Users select exercise type and duration, which updates calorie breakdown and macro targets across the application.
-- **Daily Meal Calculator - Waterfall Calculation System**: Determines recommended food portions using a three-step waterfall algorithm (carbohydrates, then protein, then fat) to meet meal-specific macro targets. Supports three-category food selection (carbohydrate, protein, fat) and provides ounce-based recommendations.
+- **Fitness System Integration with Daily Macro Adjustment**: Dynamically adjusts daily calorie targets and meal macros based on selected workouts. Users select exercise type and duration, which updates calorie breakdown and macro targets across the application. Workout selection occurs in Fitness System page; Calorie Breakdown display (4 cards: TEE, Weight Loss Goal, Daily Fitness Routine, DCT) shown in Daily Meal Calculator. All calorie calculations use unrounded values internally with rounding only for display.
+- **Daily Meal Calculator - Waterfall Calculation System**: Determines recommended food portions using a three-step waterfall algorithm (carbohydrates, then protein, then fat) to meet meal-specific macro targets. All macro contributions are calculated from actual portion sizes using formula `(gramsNeeded / 100) * macroPer100g` to ensure accuracy and consistency. Supports three-category food selection (carbohydrate, protein, fat) and provides ounce-based recommendations.
 
 ## Backend
 
