@@ -1,7 +1,25 @@
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { ArrowLeft, TrendingUp, User, Scale, Activity, Target, Apple, TrendingDown, Ruler, ChefHat } from "lucide-react";
+import { ArrowLeft, TrendingUp, User, Scale, Activity, Target, Apple, TrendingDown, Ruler, ChefHat, Dumbbell } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+
+interface ExerciseType {
+  id: string;
+  name: string;
+  category: string;
+  caloriesPerMinute: string;
+  description: string | null;
+}
+
+interface DailyExercise {
+  id: string;
+  userId: string;
+  exerciseTypeId: string;
+  exerciseDate: string;
+  durationMinutes: number;
+  caloriesBurned: string;
+  isCompleted: boolean;
+}
 
 export default function TransformationTracker() {
   const { user } = useAuth();
@@ -10,6 +28,22 @@ export default function TransformationTracker() {
   const { data: profile, isLoading } = useQuery({
     queryKey: ["/api/profile"],
   });
+
+  // Fetch exercise types
+  const { data: exerciseTypes = [] } = useQuery<ExerciseType[]>({
+    queryKey: ["/api/exercise-types"],
+  });
+
+  // Fetch today's exercise
+  const { data: todayExercise } = useQuery<DailyExercise | null>({
+    queryKey: ["/api/daily-exercise/today"],
+  });
+
+  // Calculate calories burned from today's exercise
+  const exerciseCalories = (() => {
+    if (!todayExercise) return 0;
+    return parseInt(todayExercise.caloriesBurned) || 0;
+  })();
 
   // Calculate TEE
   const calculateTEE = () => {
@@ -96,9 +130,10 @@ export default function TransformationTracker() {
 
     const deficit = deficits[profile.weightLossGoal] || 0;
     
-    // Calculate DCT with safety minimums
+    // Calculate DCT with safety minimums and add exercise calories
     const minimumCalories = profile.gender === 'male' ? 1500 : 1200;
-    const dct = Math.max(tee - deficit, minimumCalories);
+    const baseDct = Math.max(tee - deficit, minimumCalories);
+    const dct = baseDct + exerciseCalories;
 
     // Get macro percentages
     let proteinPercent = 30;
@@ -439,9 +474,56 @@ export default function TransformationTracker() {
                   Recommended Macros Per Meal
                 </h2>
 
+                {/* Calorie Breakdown with Exercise */}
+                <div className="mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Dumbbell className="w-6 h-6 text-blue-600" />
+                    <h3 className="text-lg font-bold text-[#2C3E50]">Calorie Breakdown</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-white rounded-lg">
+                      <p className="text-xs text-gray-600 mb-1">Total Daily Calories (TEE)</p>
+                      <p className="text-2xl font-bold text-[#2C3E50]" data-testid="text-tee">
+                        {tee}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">Base metabolism + activity</p>
+                    </div>
+                    <div className="p-4 bg-white rounded-lg">
+                      <p className="text-xs text-gray-600 mb-1">Weight Loss Goal</p>
+                      <p className="text-lg font-bold text-orange-600" data-testid="text-weight-loss-goal">
+                        {profile.weightLossGoal ? weightLossGoalLabels[profile.weightLossGoal] : "Not set"}
+                      </p>
+                    </div>
+                    <div className="p-4 bg-white rounded-lg">
+                      <p className="text-xs text-gray-600 mb-1">Daily Fitness Routine</p>
+                      {todayExercise ? (
+                        <>
+                          <p className="text-sm font-bold text-[#52C878]" data-testid="text-today-exercise">
+                            {exerciseTypes.find(e => e.id === todayExercise.exerciseTypeId)?.name || "Exercise"}
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {todayExercise.durationMinutes} min • <span className="text-[#52C878] font-semibold">{exerciseCalories} cal</span>
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-gray-500">No workout selected</p>
+                      )}
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-[#52C878]/20 to-[#4A90E2]/20 rounded-lg border-2 border-[#52C878]/50">
+                      <p className="text-xs text-gray-700 mb-1 font-semibold">Daily Calorie Target</p>
+                      <p className="text-2xl font-bold text-[#52C878]" data-testid="text-dct-with-exercise">
+                        {macros.dct}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-1">
+                        {exerciseCalories > 0 ? `Base ${macros.dct - exerciseCalories} + Exercise ${exerciseCalories}` : 'No exercise added'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Daily Summary */}
                 <div className="mb-8 p-6 bg-gradient-to-br from-[#52C878]/10 to-[#4A90E2]/10 rounded-xl border-2 border-[#52C878]/30">
-                  <h3 className="text-lg font-bold text-[#2C3E50] mb-4">Daily Targets</h3>
+                  <h3 className="text-lg font-bold text-[#2C3E50] mb-4">Daily Macro Targets</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
                       <p className="text-sm text-gray-600 mb-1">Calories</p>
