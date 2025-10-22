@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { ArrowLeft, Calculator, Check, Dumbbell } from "lucide-react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { ArrowLeft, Calculator, Check } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import type { UserProfile } from "@shared/schema";
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'snack2';
@@ -55,7 +54,6 @@ interface DailyExercise {
 }
 
 const GRAMS_PER_OUNCE = 28.3495;
-const DURATION_OPTIONS = [60, 40, 30, 20];
 
 export default function MealPlanner() {
   useAuth();
@@ -64,8 +62,6 @@ export default function MealPlanner() {
   const [selectedProteinIds, setSelectedProteinIds] = useState<string[]>([]);
   const [selectedFatIds, setSelectedFatIds] = useState<string[]>([]);
   const [calculation, setCalculation] = useState<MealCalculation | null>(null);
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
-  const [selectedDuration, setSelectedDuration] = useState<number>(0);
 
   // Fetch user profile
   const { data: profile } = useQuery<UserProfile>({
@@ -87,48 +83,11 @@ export default function MealPlanner() {
     queryKey: ["/api/daily-exercise/today"],
   });
 
-  // Set selected exercise from today's exercise
-  useEffect(() => {
-    if (todayExercise) {
-      setSelectedExerciseId(todayExercise.exerciseTypeId);
-      setSelectedDuration(todayExercise.durationMinutes);
-    }
-  }, [todayExercise]);
-
-  // Calculate calories burned from exercise
+  // Calculate calories burned from today's exercise
   const exerciseCalories = useMemo(() => {
-    if (!selectedExerciseId || !selectedDuration) return 0;
-    const exercise = exerciseTypes.find(e => e.id === selectedExerciseId);
-    if (!exercise) return 0;
-    const caloriesPerMin = parseFloat(exercise.caloriesPerMinute);
-    return Math.round(caloriesPerMin * selectedDuration);
-  }, [selectedExerciseId, selectedDuration, exerciseTypes]);
-
-  // Handle workout selection save
-  const handleWorkoutSave = () => {
-    if (!selectedExerciseId || !selectedDuration) {
-      alert('Please select an exercise type and duration');
-      return;
-    }
-    saveExerciseMutation.mutate({
-      exerciseTypeId: selectedExerciseId,
-      durationMinutes: selectedDuration,
-      caloriesBurned: exerciseCalories,
-    });
-  };
-
-  // Save exercise mutation
-  const saveExerciseMutation = useMutation({
-    mutationFn: async (data: { exerciseTypeId: string; durationMinutes: number; caloriesBurned: number }) => {
-      return await apiRequest("/api/daily-exercise", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/daily-exercise/today"] });
-    },
-  });
+    if (!todayExercise) return 0;
+    return parseInt(todayExercise.caloriesBurned);
+  }, [todayExercise]);
 
   // Separate foods by category
   const carbFoods = foodItems.filter(f => f.category === 'carbohydrate');
@@ -448,77 +407,162 @@ export default function MealPlanner() {
           ))}
         </div>
 
-        {/* Daily Workout Selector */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Dumbbell className="w-7 h-7 text-[#52C878]" />
-            <h2 className="text-2xl font-bold text-[#2C3E50]">Daily Fitness Routine</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Exercise Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Exercise Type</label>
-              <select
-                value={selectedExerciseId}
-                onChange={(e) => setSelectedExerciseId(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#52C878] focus:outline-none transition-colors"
-                data-testid="select-exercise-type"
-              >
-                <option value="">Select Exercise</option>
-                {exerciseTypes.map(ex => (
-                  <option key={ex.id} value={ex.id}>{ex.name}</option>
-                ))}
-              </select>
+        {/* Calorie Breakdown */}
+        {profile && (
+          <div className="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6 border border-blue-100">
+            <div className="flex items-center gap-3 mb-4">
+              <Calculator className="w-6 h-6 text-blue-600" />
+              <h2 className="text-2xl font-bold text-[#2C3E50]">Calorie Breakdown</h2>
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Total Daily Calories (TEE) */}
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-xs text-gray-600 mb-1">Total Daily Calories (TEE)</p>
+                <p className="text-3xl font-bold text-[#2C3E50]" data-testid="text-tee">
+                  {(() => {
+                    const age = profile.age || 0;
+                    const weight = parseFloat(profile.weightKg || "0");
+                    const height = parseFloat(profile.heightCm || "0");
+                    const gender = profile.gender || "male";
 
-            {/* Duration Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Duration (minutes)</label>
-              <div className="grid grid-cols-4 gap-2">
-                {DURATION_OPTIONS.map(duration => (
-                  <button
-                    key={duration}
-                    onClick={() => setSelectedDuration(duration)}
-                    className={`px-3 py-3 rounded-xl font-semibold transition-all ${
-                      selectedDuration === duration
-                        ? 'bg-[#52C878] text-white shadow-lg'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                    data-testid={`button-duration-${duration}`}
-                  >
-                    {duration}
-                  </button>
-                ))}
+                    let bmr = 0;
+                    if (gender === "male") {
+                      bmr = 66.5 + (13.75 * weight) + (5.003 * height) - (6.755 * age);
+                    } else {
+                      bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+                    }
+
+                    const activityMultipliers = {
+                      sedentary: 1.2,
+                      lightly_active: 1.375,
+                      moderately_active: 1.55,
+                      very_active: 1.725,
+                      extra_active: 1.9,
+                    };
+                    const activityLevel = profile.activityLevel || "sedentary";
+                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.2;
+                    const tee = Math.round(bmr * multiplier);
+                    return tee;
+                  })()}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Base metabolism + activity</p>
+              </div>
+
+              {/* Weight Loss Goal */}
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-xs text-gray-600 mb-1">Weight Loss Goal</p>
+                <p className="text-lg font-bold text-orange-600" data-testid="text-weight-loss-goal">
+                  {(() => {
+                    const weightLossGoalLabels = {
+                      maintain: 'Maintain',
+                      lose_0_5: 'Lose 0.5 lb/week (-250 cal/day)',
+                      lose_1: 'Lose 1 lb/week (-500 cal/day)',
+                      lose_1_5: 'Lose 1.5 lb/week (-750 cal/day)',
+                      lose_2: 'Lose 2 lb/week (-1000 cal/day)',
+                    };
+                    return profile.weightLossGoal ? weightLossGoalLabels[profile.weightLossGoal as keyof typeof weightLossGoalLabels] : "Not set";
+                  })()}
+                </p>
+              </div>
+
+              {/* Daily Fitness Routine */}
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <p className="text-xs text-gray-600 mb-1">Daily Fitness Routine</p>
+                {todayExercise ? (
+                  <>
+                    <p className="text-sm font-bold text-[#52C878]" data-testid="text-today-exercise">
+                      {exerciseTypes.find(e => e.id === todayExercise.exerciseTypeId)?.name || "Exercise"}
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      {todayExercise.durationMinutes} min • <span className="text-[#52C878] font-semibold">{exerciseCalories} cal</span>
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-500">No workout selected</p>
+                )}
+              </div>
+
+              {/* Daily Calorie Target */}
+              <div className="bg-gradient-to-br from-[#52C878]/20 to-[#4A90E2]/20 rounded-xl p-4 shadow-sm border-2 border-[#52C878]/50">
+                <p className="text-xs text-gray-700 mb-1 font-semibold">Daily Calorie Target</p>
+                <p className="text-3xl font-bold text-[#52C878]" data-testid="text-dct-display">
+                  {(() => {
+                    const age = profile.age || 0;
+                    const weight = parseFloat(profile.weightKg || "0");
+                    const height = parseFloat(profile.heightCm || "0");
+                    const gender = profile.gender || "male";
+
+                    let bmr = 0;
+                    if (gender === "male") {
+                      bmr = 66.5 + (13.75 * weight) + (5.003 * height) - (6.755 * age);
+                    } else {
+                      bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+                    }
+
+                    const activityMultipliers = {
+                      sedentary: 1.2,
+                      lightly_active: 1.375,
+                      moderately_active: 1.55,
+                      very_active: 1.725,
+                      extra_active: 1.9,
+                    };
+                    const activityLevel = profile.activityLevel || "sedentary";
+                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.2;
+                    const tee = Math.round(bmr * multiplier);
+
+                    const deficits = {
+                      maintain: 0,
+                      lose_0_5: 250,
+                      lose_1: 500,
+                      lose_1_5: 750,
+                      lose_2: 1000,
+                    };
+                    const deficit = deficits[profile.weightLossGoal as keyof typeof deficits] || 0;
+                    const minimumCalories = gender === 'male' ? 1500 : 1200;
+                    const baseDct = Math.max(tee - deficit, minimumCalories);
+                    const dct = baseDct + exerciseCalories;
+                    return dct;
+                  })()}
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  {exerciseCalories > 0 ? `Base ${(() => {
+                    const age = profile.age || 0;
+                    const weight = parseFloat(profile.weightKg || "0");
+                    const height = parseFloat(profile.heightCm || "0");
+                    const gender = profile.gender || "male";
+                    let bmr = 0;
+                    if (gender === "male") {
+                      bmr = 66.5 + (13.75 * weight) + (5.003 * height) - (6.755 * age);
+                    } else {
+                      bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+                    }
+                    const activityMultipliers = {
+                      sedentary: 1.2,
+                      lightly_active: 1.375,
+                      moderately_active: 1.55,
+                      very_active: 1.725,
+                      extra_active: 1.9,
+                    };
+                    const activityLevel = profile.activityLevel || "sedentary";
+                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.2;
+                    const tee = Math.round(bmr * multiplier);
+                    const deficits = {
+                      maintain: 0,
+                      lose_0_5: 250,
+                      lose_1: 500,
+                      lose_1_5: 750,
+                      lose_2: 1000,
+                    };
+                    const deficit = deficits[profile.weightLossGoal as keyof typeof deficits] || 0;
+                    const minimumCalories = gender === 'male' ? 1500 : 1200;
+                    return Math.max(tee - deficit, minimumCalories);
+                  })()} + Exercise ${exerciseCalories}` : 'No exercise added'}
+                </p>
               </div>
             </div>
-
-            {/* Calories Burned Display */}
-            <div className="flex flex-col justify-between">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Calories Burned</label>
-                <div className="text-center p-3 bg-gradient-to-br from-[#52C878]/10 to-[#4A90E2]/10 rounded-xl">
-                  <p className="text-3xl font-bold text-[#2C3E50]" data-testid="text-exercise-calories">
-                    {exerciseCalories}
-                  </p>
-                  <p className="text-xs text-gray-600 mt-1">cal</p>
-                </div>
-              </div>
-              <button
-                onClick={handleWorkoutSave}
-                disabled={!selectedExerciseId || !selectedDuration}
-                className={`mt-2 px-4 py-2 rounded-xl font-semibold transition-all ${
-                  selectedExerciseId && selectedDuration
-                    ? 'bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white hover:shadow-lg'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-                data-testid="button-save-workout"
-              >
-                {saveExerciseMutation.isPending ? 'Saving...' : 'Save Workout'}
-              </button>
-            </div>
           </div>
-        </div>
+        )}
 
         {/* Macro Targets */}
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6">
