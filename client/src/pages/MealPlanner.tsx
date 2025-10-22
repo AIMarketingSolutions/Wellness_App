@@ -438,12 +438,12 @@ export default function MealPlanner() {
                       lightly_active: 1.375,
                       moderately_active: 1.55,
                       very_active: 1.725,
-                      extra_active: 1.9,
+                      extremely_active: 1.9,
                     };
-                    const activityLevel = profile.activityLevel || "sedentary";
-                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.2;
-                    const tee = Math.round(bmr * multiplier);
-                    return tee;
+                    const activityLevel = profile.activityLevel || "moderately_active";
+                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.55;
+                    const tee = bmr * multiplier;
+                    return Math.round(tee);
                   })()}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">Base metabolism + activity</p>
@@ -505,11 +505,11 @@ export default function MealPlanner() {
                       lightly_active: 1.375,
                       moderately_active: 1.55,
                       very_active: 1.725,
-                      extra_active: 1.9,
+                      extremely_active: 1.9,
                     };
-                    const activityLevel = profile.activityLevel || "sedentary";
-                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.2;
-                    const tee = Math.round(bmr * multiplier);
+                    const activityLevel = profile.activityLevel || "moderately_active";
+                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.55;
+                    const tee = bmr * multiplier;
 
                     const deficits = {
                       maintain: 0,
@@ -522,7 +522,7 @@ export default function MealPlanner() {
                     const minimumCalories = gender === 'male' ? 1500 : 1200;
                     const baseDct = Math.max(tee - deficit, minimumCalories);
                     const dct = baseDct + exerciseCalories;
-                    return dct;
+                    return Math.round(dct);
                   })()}
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
@@ -542,11 +542,11 @@ export default function MealPlanner() {
                       lightly_active: 1.375,
                       moderately_active: 1.55,
                       very_active: 1.725,
-                      extra_active: 1.9,
+                      extremely_active: 1.9,
                     };
-                    const activityLevel = profile.activityLevel || "sedentary";
-                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.2;
-                    const tee = Math.round(bmr * multiplier);
+                    const activityLevel = profile.activityLevel || "moderately_active";
+                    const multiplier = activityMultipliers[activityLevel as keyof typeof activityMultipliers] || 1.55;
+                    const tee = bmr * multiplier;
                     const deficits = {
                       maintain: 0,
                       lose_0_5: 250,
@@ -556,7 +556,7 @@ export default function MealPlanner() {
                     };
                     const deficit = deficits[profile.weightLossGoal as keyof typeof deficits] || 0;
                     const minimumCalories = gender === 'male' ? 1500 : 1200;
-                    return Math.max(tee - deficit, minimumCalories);
+                    return Math.round(Math.max(tee - deficit, minimumCalories));
                   })()} + Exercise ${exerciseCalories}` : 'No exercise added'}
                 </p>
               </div>
