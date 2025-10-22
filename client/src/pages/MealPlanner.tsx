@@ -257,7 +257,7 @@ export default function MealPlanner() {
       return {
         food,
         recommendedOz,
-        contributedCarbsG: carbsPerFood,
+        contributedCarbsG: (gramsNeeded / 100) * carbsPer100g,
         contributedProteinG: (gramsNeeded / 100) * proteinPer100g,
         contributedFatG: (gramsNeeded / 100) * fatPer100g,
       };
@@ -280,7 +280,7 @@ export default function MealPlanner() {
       return {
         food,
         recommendedOz,
-        contributedProteinG: proteinPerFood,
+        contributedProteinG: (gramsNeeded / 100) * proteinPer100g,
         contributedCarbsG: (gramsNeeded / 100) * carbsPer100g,
         contributedFatG: (gramsNeeded / 100) * fatPer100g,
       };
@@ -304,7 +304,7 @@ export default function MealPlanner() {
       return {
         food,
         recommendedOz,
-        contributedFatG: fatPerFood,
+        contributedFatG: (gramsNeeded / 100) * fatPer100g,
         contributedProteinG: (gramsNeeded / 100) * proteinPer100g,
         contributedCarbsG: (gramsNeeded / 100) * carbsPer100g,
       };
