@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { ArrowLeft, Calculator, Check } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Calculator, Check, Dumbbell } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { UserProfile } from "@shared/schema";
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'snack2';
@@ -35,7 +36,26 @@ interface MealCalculation {
   totalCalories: number;
 }
 
+interface ExerciseType {
+  id: string;
+  name: string;
+  category: string;
+  caloriesPerMinute: string;
+  description: string | null;
+}
+
+interface DailyExercise {
+  id: string;
+  userId: string;
+  exerciseTypeId: string;
+  exerciseDate: string;
+  durationMinutes: number;
+  caloriesBurned: string;
+  isCompleted: boolean;
+}
+
 const GRAMS_PER_OUNCE = 28.3495;
+const DURATION_OPTIONS = [60, 40, 30, 20];
 
 export default function MealPlanner() {
   useAuth();
@@ -44,6 +64,8 @@ export default function MealPlanner() {
   const [selectedProteinIds, setSelectedProteinIds] = useState<string[]>([]);
   const [selectedFatIds, setSelectedFatIds] = useState<string[]>([]);
   const [calculation, setCalculation] = useState<MealCalculation | null>(null);
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
+  const [selectedDuration, setSelectedDuration] = useState<number>(0);
 
   // Fetch user profile
   const { data: profile } = useQuery<UserProfile>({
@@ -53,6 +75,59 @@ export default function MealPlanner() {
   // Fetch food items
   const { data: foodItems = [] } = useQuery<FoodItem[]>({
     queryKey: ["/api/food-items"],
+  });
+
+  // Fetch exercise types
+  const { data: exerciseTypes = [] } = useQuery<ExerciseType[]>({
+    queryKey: ["/api/exercise-types"],
+  });
+
+  // Fetch today's exercise
+  const { data: todayExercise } = useQuery<DailyExercise | null>({
+    queryKey: ["/api/daily-exercise/today"],
+  });
+
+  // Set selected exercise from today's exercise
+  useEffect(() => {
+    if (todayExercise) {
+      setSelectedExerciseId(todayExercise.exerciseTypeId);
+      setSelectedDuration(todayExercise.durationMinutes);
+    }
+  }, [todayExercise]);
+
+  // Calculate calories burned from exercise
+  const exerciseCalories = useMemo(() => {
+    if (!selectedExerciseId || !selectedDuration) return 0;
+    const exercise = exerciseTypes.find(e => e.id === selectedExerciseId);
+    if (!exercise) return 0;
+    const caloriesPerMin = parseFloat(exercise.caloriesPerMinute);
+    return Math.round(caloriesPerMin * selectedDuration);
+  }, [selectedExerciseId, selectedDuration, exerciseTypes]);
+
+  // Handle workout selection save
+  const handleWorkoutSave = () => {
+    if (!selectedExerciseId || !selectedDuration) {
+      alert('Please select an exercise type and duration');
+      return;
+    }
+    saveExerciseMutation.mutate({
+      exerciseTypeId: selectedExerciseId,
+      durationMinutes: selectedDuration,
+      caloriesBurned: exerciseCalories,
+    });
+  };
+
+  // Save exercise mutation
+  const saveExerciseMutation = useMutation({
+    mutationFn: async (data: { exerciseTypeId: string; durationMinutes: number; caloriesBurned: number }) => {
+      return await apiRequest("/api/daily-exercise", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/daily-exercise/today"] });
+    },
   });
 
   // Separate foods by category
@@ -123,9 +198,10 @@ export default function MealPlanner() {
     const weightLossGoal = profile.weightLossGoal || "maintain";
     const deficit = deficits[weightLossGoal] || 0;
 
-    // Calculate DCT with minimum safety
+    // Calculate DCT with minimum safety and add exercise calories
     const minCalories = gender === "male" ? 1500 : 1200;
-    const dct = Math.max(tee - deficit, minCalories);
+    const baseDct = Math.max(tee - deficit, minCalories);
+    const dct = baseDct + exerciseCalories;
 
     // Distribute calories across meals based on meal plan type
     const mealPlanType = profile.mealPlanType || 'three_meals';
@@ -161,7 +237,7 @@ export default function MealPlanner() {
       carbsG: Math.round(carbsG),
       fatG: Math.round(fatG),
     };
-  }, [profile, activeMeal]);
+  }, [profile, activeMeal, exerciseCalories]);
 
   // Waterfall calculation algorithm
   const calculateMeal = () => {
@@ -370,6 +446,78 @@ export default function MealPlanner() {
               {tab.label}
             </button>
           ))}
+        </div>
+
+        {/* Daily Workout Selector */}
+        <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Dumbbell className="w-7 h-7 text-[#52C878]" />
+            <h2 className="text-2xl font-bold text-[#2C3E50]">Daily Fitness Routine</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Exercise Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Exercise Type</label>
+              <select
+                value={selectedExerciseId}
+                onChange={(e) => setSelectedExerciseId(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#52C878] focus:outline-none transition-colors"
+                data-testid="select-exercise-type"
+              >
+                <option value="">Select Exercise</option>
+                {exerciseTypes.map(ex => (
+                  <option key={ex.id} value={ex.id}>{ex.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Duration Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Duration (minutes)</label>
+              <div className="grid grid-cols-4 gap-2">
+                {DURATION_OPTIONS.map(duration => (
+                  <button
+                    key={duration}
+                    onClick={() => setSelectedDuration(duration)}
+                    className={`px-3 py-3 rounded-xl font-semibold transition-all ${
+                      selectedDuration === duration
+                        ? 'bg-[#52C878] text-white shadow-lg'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    data-testid={`button-duration-${duration}`}
+                  >
+                    {duration}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Calories Burned Display */}
+            <div className="flex flex-col justify-between">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Calories Burned</label>
+                <div className="text-center p-3 bg-gradient-to-br from-[#52C878]/10 to-[#4A90E2]/10 rounded-xl">
+                  <p className="text-3xl font-bold text-[#2C3E50]" data-testid="text-exercise-calories">
+                    {exerciseCalories}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">cal</p>
+                </div>
+              </div>
+              <button
+                onClick={handleWorkoutSave}
+                disabled={!selectedExerciseId || !selectedDuration}
+                className={`mt-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+                  selectedExerciseId && selectedDuration
+                    ? 'bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white hover:shadow-lg'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+                data-testid="button-save-workout"
+              >
+                {saveExerciseMutation.isPending ? 'Saving...' : 'Save Workout'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Macro Targets */}
