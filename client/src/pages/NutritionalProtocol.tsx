@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ArrowLeft, BookOpen, Bug, Heart, Flame, Sparkles, Droplet, Zap } from "lucide-react";
+import { ArrowLeft, BookOpen, Bug, Heart, Flame, Sparkles, Droplet, Zap, Shield } from "lucide-react";
 
 export default function NutritionalProtocol() {
   const topics = [
@@ -11,38 +11,45 @@ export default function NutritionalProtocol() {
       details: "Assess symptoms such as bloating, cravings, fatigue, skin issues, sleep disturbances, and irregular bowel movements"
     },
     { 
+      title: "Leaky Gut", 
+      desc: "Restore intestinal barrier integrity and reduce inflammation", 
+      icon: Shield, 
+      color: "from-[#4A90E2] to-[#52C878]",
+      details: "Address intestinal permeability, improve nutrient absorption, and reduce food sensitivities and autoimmune triggers"
+    },
+    { 
       title: "Adrenal Stress & Cortisol Balance", 
       desc: "Restore energy and support stress hormone recovery", 
       icon: Heart, 
-      color: "from-[#4A90E2] to-[#52C878]",
+      color: "from-[#52C878] to-[#4A90E2]",
       details: "Evaluate adrenal fatigue indicators including morning tiredness, afternoon crashes, anxiety, and sugar cravings"
     },
     { 
       title: "Heavy Metal Detox Support", 
       desc: "Reduce toxic load from mercury, lead, cadmium, aluminum, and arsenic", 
       icon: Flame, 
-      color: "from-[#52C878] to-[#4A90E2]",
+      color: "from-[#4A90E2] to-[#52C878]",
       details: "Improve brain health, digestion, energy, and cellular repair through safe detoxification"
     },
     { 
       title: "Whole Body Detox", 
       desc: "Support all major elimination pathways for complete wellness", 
       icon: Sparkles, 
-      color: "from-[#4A90E2] to-[#52C878]",
+      color: "from-[#52C878] to-[#4A90E2]",
       details: "Enhance liver, kidneys, colon, lungs, lymphatic system, and skin function"
     },
     { 
       title: "Liver Detox & Regeneration", 
       desc: "Optimize your primary fat-burning and detox organ", 
       icon: Zap, 
-      color: "from-[#52C878] to-[#4A90E2]",
+      color: "from-[#4A90E2] to-[#52C878]",
       details: "Improve fat metabolism, hormonal balance, immunity, and toxin removal"
     },
     { 
       title: "Kidney Detox", 
       desc: "Filter acids, toxins, and metabolic waste effectively", 
       icon: Droplet, 
-      color: "from-[#4A90E2] to-[#52C878]",
+      color: "from-[#52C878] to-[#4A90E2]",
       details: "Support electrolyte balance, hydration, cellular function, and reduce inflammation"
     },
     { 
