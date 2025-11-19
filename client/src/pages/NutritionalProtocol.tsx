@@ -1,12 +1,57 @@
 import { Link } from "wouter";
-import { ArrowLeft, BookOpen, FileText, Lightbulb, TrendingUp } from "lucide-react";
+import { ArrowLeft, BookOpen, Bug, Heart, Flame, Sparkles, Droplet, Zap } from "lucide-react";
 
 export default function NutritionalProtocol() {
   const topics = [
-    { title: "Metabolic Typing", desc: "Understanding your metabolic profile", icon: TrendingUp, color: "from-[#52C878] to-[#4A90E2]" },
-    { title: "Macro Balance", desc: "Optimal protein, carbs, and fat ratios", icon: FileText, color: "from-[#4A90E2] to-[#52C878]" },
-    { title: "Meal Timing", desc: "When to eat for best results", icon: Lightbulb, color: "from-[#52C878] to-[#4A90E2]" },
-    { title: "Food Quality", desc: "Choosing nutrient-dense foods", icon: BookOpen, color: "from-[#4A90E2] to-[#52C878]" },
+    { 
+      title: "Parasite Symptom Assessment", 
+      desc: "Identify hidden parasitic burdens affecting digestion, immunity, and energy", 
+      icon: Bug, 
+      color: "from-[#52C878] to-[#4A90E2]",
+      details: "Assess symptoms such as bloating, cravings, fatigue, skin issues, sleep disturbances, and irregular bowel movements"
+    },
+    { 
+      title: "Adrenal Stress & Cortisol Balance", 
+      desc: "Restore energy and support stress hormone recovery", 
+      icon: Heart, 
+      color: "from-[#4A90E2] to-[#52C878]",
+      details: "Evaluate adrenal fatigue indicators including morning tiredness, afternoon crashes, anxiety, and sugar cravings"
+    },
+    { 
+      title: "Heavy Metal Detox Support", 
+      desc: "Reduce toxic load from mercury, lead, cadmium, aluminum, and arsenic", 
+      icon: Flame, 
+      color: "from-[#52C878] to-[#4A90E2]",
+      details: "Improve brain health, digestion, energy, and cellular repair through safe detoxification"
+    },
+    { 
+      title: "Whole Body Detox", 
+      desc: "Support all major elimination pathways for complete wellness", 
+      icon: Sparkles, 
+      color: "from-[#4A90E2] to-[#52C878]",
+      details: "Enhance liver, kidneys, colon, lungs, lymphatic system, and skin function"
+    },
+    { 
+      title: "Liver Detox & Regeneration", 
+      desc: "Optimize your primary fat-burning and detox organ", 
+      icon: Zap, 
+      color: "from-[#52C878] to-[#4A90E2]",
+      details: "Improve fat metabolism, hormonal balance, immunity, and toxin removal"
+    },
+    { 
+      title: "Kidney Detox", 
+      desc: "Filter acids, toxins, and metabolic waste effectively", 
+      icon: Droplet, 
+      color: "from-[#4A90E2] to-[#52C878]",
+      details: "Support electrolyte balance, hydration, cellular function, and reduce inflammation"
+    },
+    { 
+      title: "Gallbladder Flush & Bile Flow", 
+      desc: "Optimize fat digestion and toxin elimination", 
+      icon: BookOpen, 
+      color: "from-[#52C878] to-[#4A90E2]",
+      details: "Improve bile flow, reduce digestive discomfort, and support natural flushing of gallstones"
+    },
   ];
 
   return (
@@ -27,9 +72,9 @@ export default function NutritionalProtocol() {
               <BookOpen className="w-12 h-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-3">Nutritional Protocol</h1>
+          <h1 className="text-4xl font-bold text-[#2C3E50] mb-3">Detox & Organ Support Protocol</h1>
           <p className="text-lg text-gray-600">
-            Evidence-based nutrition strategies from certified professionals
+            Comprehensive detoxification and wellness strategies from certified nutritional practitioners
           </p>
         </div>
 
@@ -51,10 +96,10 @@ export default function NutritionalProtocol() {
 
         {/* Info Section */}
         <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] rounded-2xl p-8 text-white shadow-xl">
-          <h3 className="text-2xl font-bold mb-4">Professional Guidance</h3>
+          <h3 className="text-2xl font-bold mb-4">Professional Detox & Wellness Guidance</h3>
           <p className="text-white/90 text-lg mb-6">
-            Our nutritional protocols are developed by Registered Nutritional Consulting Practitioners (RNCP) 
-            and are based on the latest scientific research and proven methodologies.
+            Our detoxification and organ support protocols are developed by Registered Nutritional Consulting Practitioners (RNCP) 
+            and focus on safe, effective methods to restore vitality, reduce toxic burden, and optimize metabolic function.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
