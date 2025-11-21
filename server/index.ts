@@ -3,9 +3,15 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import { createServer as createViteServer } from "vite";
 import routes from "./routes";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 5000;
+const isProduction = process.env.NODE_ENV === "production";
 
 app.use(express.json());
 app.use(cookieParser());
@@ -27,15 +33,27 @@ app.use(
 app.use(routes);
 
 async function startServer() {
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: "spa",
-  });
+  if (isProduction) {
+    // In production, serve the built static files
+    const distPath = path.join(__dirname, "..", "dist", "public");
+    app.use(express.static(distPath));
+    
+    // Serve index.html for all other routes (SPA fallback)
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  } else {
+    // In development, use Vite middleware
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
 
-  app.use(vite.middlewares);
+    app.use(vite.middlewares);
+  }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Server running on http://0.0.0.0:${PORT} (${isProduction ? 'production' : 'development'})`);
   });
 }
 
