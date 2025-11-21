@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, BookOpen, Bug, Heart, Flame, Sparkles, Droplet, Zap, Shield, ChevronDown, ChevronUp, CheckCircle, AlertCircle, Clock, Coffee, Utensils } from "lucide-react";
+import { ArrowLeft, BookOpen, Bug, Heart, Flame, Sparkles, Droplet, Zap, ChevronDown, ChevronUp, CheckCircle, AlertCircle, Clock, Coffee, Utensils } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface QuizAnswer {
@@ -92,7 +92,6 @@ export default function NutritionalProtocol() {
   const [quizScore, setQuizScore] = useState<number | null>(null);
   const [showParasiteSection, setShowParasiteSection] = useState(false);
   const [expandedParasiteTab, setExpandedParasiteTab] = useState<string | null>(null);
-  const [trackerEntries, setTrackerEntries] = useState<any[]>([]);
 
   const otherTopics = [
     { 
