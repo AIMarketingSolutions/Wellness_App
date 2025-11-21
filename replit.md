@@ -2,6 +2,14 @@
 
 Nutrition One Fitness Inc. is a comprehensive wellness application that provides personalized nutrition planning, fitness tracking, and health assessment tools. Its primary purpose is to help users achieve their health goals through metabolic profiling, customized meal planning, exercise tracking, and progress monitoring, aiming to be a complete solution for personalized health and fitness.
 
+# Recent Changes
+
+## November 21, 2025 - Production Deployment Fixes
+- **Fixed wildcard route crash**: Changed SPA fallback route from `app.get("*", ...)` to `app.get(/^\/(?!api).*/, ...)` to be compatible with path-to-regexp library, preventing deployment crash loop
+- **Added production session store**: Implemented PostgreSQL-backed session storage using `connect-pg-simple` for production deployments, enabling session persistence across multiple server instances
+- **Database setup**: Completed production PostgreSQL database configuration with all tables migrated successfully
+- **Session security**: Configured secure cookies for HTTPS in production while maintaining compatibility with HTTP in development
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
