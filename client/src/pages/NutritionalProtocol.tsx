@@ -10,7 +10,6 @@ interface QuizAnswer {
 interface ProtocolState {
   quizAnswers: QuizAnswer;
   quizScore: number | null;
-  isExpanded: boolean;
 }
 
 interface Supplement {
@@ -163,12 +162,13 @@ const otherProtocols = [
   { title: "Gallbladder Flush & Bile Flow", desc: "Optimize fat digestion and toxin elimination", icon: BookOpen, color: "from-[#52C878] to-[#4A90E2]" },
 ];
 
-function ProtocolSection({ protocol }: { protocol: ProtocolConfig }) {
+function ProtocolDetailModal({ protocol, isOpen, onClose }: { protocol: ProtocolConfig; isOpen: boolean; onClose: () => void }) {
   const [state, setState] = useState<ProtocolState>({
     quizAnswers: {},
     quizScore: null,
-    isExpanded: false,
   });
+
+  if (!isOpen) return null;
 
   const handleQuizAnswer = (questionId: string, value: boolean) => {
     setState(prev => ({
@@ -193,169 +193,122 @@ function ProtocolSection({ protocol }: { protocol: ProtocolConfig }) {
   };
 
   return (
-    <div className="mb-8">
-      <button
-        onClick={() => setState(prev => ({ ...prev, isExpanded: !prev.isExpanded }))}
-        className={`w-full bg-gradient-to-r ${protocol.color} text-white py-4 px-6 rounded-xl font-semibold flex items-center justify-between hover:shadow-lg transition-all mb-2`}
-        data-testid={`button-toggle-${protocol.id}`}
-      >
-        <div className="flex items-center gap-3">
-          <protocol.icon className="w-6 h-6" />
-          <span>{protocol.title}</span>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-96 overflow-y-auto">
+        <div className="sticky top-0 bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white p-4 flex justify-between items-center">
+          <h2 className="text-2xl font-bold">{protocol.title}</h2>
+          <button onClick={onClose} className="text-2xl font-bold hover:opacity-80">×</button>
         </div>
-        {state.isExpanded ? <ChevronUp /> : <ChevronDown />}
-      </button>
 
-      {state.isExpanded && (
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-100 space-y-6">
-          {/* Body Health Assessment */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
-            <h3 className="text-2xl font-bold text-[#2C3E50] mb-3">Body Health Assessment</h3>
-            <p className="text-gray-600 mb-4 text-sm">Complete this assessment to determine if support may be beneficial.</p>
-
-            <div className="space-y-4 max-h-80 overflow-y-auto pr-2 mb-4">
-              {["digestive", "energy", "skin", "sleep", "appetite", "exposure"].map(category => {
-                const categoryQuestions = protocol.quizQuestions.filter(q => q.category === category);
-                if (categoryQuestions.length === 0) return null;
-                return (
-                  <div key={category}>
-                    <h4 className="font-semibold text-[#2C3E50] mb-2 text-sm capitalize">{category === "digestive" ? "Digestive" : category === "energy" ? "Energy" : category === "skin" ? "Skin" : category === "sleep" ? "Sleep" : category === "appetite" ? "Appetite" : "Exposure"}</h4>
-                    <div className="space-y-2">
-                      {categoryQuestions.map(q => (
-                        <label key={q.id} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-white/50 p-1 rounded">
-                          <input
-                            type="checkbox"
-                            checked={state.quizAnswers[q.id] || false}
-                            onChange={(e) => handleQuizAnswer(q.id, e.target.checked)}
-                            className="w-4 h-4 rounded"
-                            data-testid={`checkbox-${q.id}`}
-                          />
-                          <span className="text-gray-700">{q.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <button
-              onClick={submitQuiz}
-              className="w-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-2 px-4 rounded-lg font-semibold hover:shadow-lg transition-all text-sm"
-              data-testid={`button-submit-${protocol.id}`}
-            >
-              Get Results
-            </button>
-
-            {state.quizScore !== null && (
-              <div className={`mt-4 p-3 rounded-lg ${getRiskLevel(state.quizScore).bgColor}`}>
-                <p className={`font-semibold ${getRiskLevel(state.quizScore).color} text-sm`}>
-                  Risk Level: {getRiskLevel(state.quizScore).label} (Score: {state.quizScore})
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Tabs for Symptom Tracker, Education, Supplements */}
-          <Tabs defaultValue="symptom-tracker" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
-              <TabsTrigger value="symptom-tracker" data-testid={`tab-symptom-${protocol.id}`}>Symptom Tracker</TabsTrigger>
-              <TabsTrigger value="education" data-testid={`tab-education-${protocol.id}`}>Education</TabsTrigger>
-              <TabsTrigger value="supplements" data-testid={`tab-supplements-${protocol.id}`}>Supplements</TabsTrigger>
+        <div className="p-6 space-y-6">
+          <Tabs defaultValue="assessment" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-lg">
+              <TabsTrigger value="assessment" data-testid={`tab-assess-${protocol.id}`}>Assessment</TabsTrigger>
+              <TabsTrigger value="tracker" data-testid={`tab-track-${protocol.id}`}>Tracker</TabsTrigger>
+              <TabsTrigger value="education" data-testid={`tab-edu-${protocol.id}`}>Education</TabsTrigger>
+              <TabsTrigger value="supplements" data-testid={`tab-supp-${protocol.id}`}>Supplements</TabsTrigger>
             </TabsList>
 
-            {/* Symptom Tracker */}
-            <TabsContent value="symptom-tracker" className="space-y-4">
-              <h4 className="font-bold text-[#2C3E50]">Daily Symptom Tracker</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                  <h5 className="font-semibold text-sm text-[#2C3E50] mb-2">Digestive</h5>
-                  {["Bloating", "Gas", "Cramping", "Discomfort"].map(s => (
-                    <div key={s} className="flex justify-between items-center text-xs py-1">
-                      <span>{s}</span>
-                      <input type="range" min="0" max="10" className="w-16" data-testid={`slider-${protocol.id}-${s}`} />
+            <TabsContent value="assessment" className="space-y-3">
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {["digestive", "energy", "skin", "sleep", "appetite", "exposure"].map(category => {
+                  const categoryQuestions = protocol.quizQuestions.filter(q => q.category === category);
+                  if (categoryQuestions.length === 0) return null;
+                  return (
+                    <div key={category}>
+                      <h4 className="font-semibold text-sm text-[#2C3E50] capitalize">{category === "digestive" ? "Digestive" : category === "energy" ? "Energy" : category === "skin" ? "Skin" : category === "sleep" ? "Sleep" : category === "appetite" ? "Appetite" : "Exposure"}</h4>
+                      <div className="space-y-1">
+                        {categoryQuestions.map(q => (
+                          <label key={q.id} className="flex items-center gap-2 text-xs cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={state.quizAnswers[q.id] || false}
+                              onChange={(e) => handleQuizAnswer(q.id, e.target.checked)}
+                              className="w-3 h-3 rounded"
+                              data-testid={`checkbox-${q.id}`}
+                            />
+                            <span className="text-gray-700">{q.label}</span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                </div>
-                <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                  <h5 className="font-semibold text-sm text-[#2C3E50] mb-2">Energy & Mood</h5>
-                  {["Energy", "Brain Fog", "Mood", "Sleep"].map(s => (
-                    <div key={s} className="flex justify-between items-center text-xs py-1">
-                      <span>{s}</span>
-                      <input type="range" min="0" max="10" className="w-16" data-testid={`slider-${protocol.id}-${s}`} />
-                    </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-              <button className="w-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-2 rounded-lg font-semibold text-sm hover:shadow-lg transition-all" data-testid={`button-save-${protocol.id}`}>Save Entry</button>
+              <button onClick={submitQuiz} className="w-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-2 rounded-lg font-semibold text-sm hover:shadow-lg" data-testid={`btn-submit-${protocol.id}`}>Get Results</button>
+              {state.quizScore !== null && (
+                <div className={`p-2 rounded-lg ${getRiskLevel(state.quizScore).bgColor}`}>
+                  <p className={`font-semibold ${getRiskLevel(state.quizScore).color} text-xs`}>Risk Level: {getRiskLevel(state.quizScore).label} (Score: {state.quizScore})</p>
+                </div>
+              )}
             </TabsContent>
 
-            {/* Education */}
-            <TabsContent value="education" className="space-y-3">
+            <TabsContent value="tracker" className="space-y-2">
+              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <h5 className="font-semibold text-xs text-[#2C3E50] mb-2">Digestive Symptoms</h5>
+                {["Bloating", "Gas", "Cramping"].map(s => (
+                  <div key={s} className="flex justify-between items-center text-xs py-1">
+                    <span>{s}</span>
+                    <input type="range" min="0" max="10" className="w-16" data-testid={`range-${s}`} />
+                  </div>
+                ))}
+              </div>
+              <button className="w-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-2 rounded-lg font-semibold text-xs hover:shadow-lg" data-testid={`btn-save-${protocol.id}`}>Save Entry</button>
+            </TabsContent>
+
+            <TabsContent value="education" className="space-y-2 text-xs">
               {protocol.handoutSections.map((section, idx) => (
-                <div key={idx} className="border-l-4 border-[#52C878] pl-3 py-2">
-                  <h4 className="font-semibold text-[#2C3E50] text-sm mb-1">{section.title}</h4>
-                  <p className="text-gray-700 text-xs mb-2">{section.content}</p>
+                <div key={idx} className="border-l-4 border-[#52C878] pl-2">
+                  <h4 className="font-semibold text-[#2C3E50]">{section.title}</h4>
+                  <p className="text-gray-700">{section.content}</p>
                   <ul className="list-disc list-inside space-y-1">
                     {section.bullets.map((bullet, bidx) => (
-                      <li key={bidx} className="text-xs text-gray-600">{bullet}</li>
+                      <li key={bidx} className="text-gray-600">{bullet}</li>
                     ))}
                   </ul>
                 </div>
               ))}
             </TabsContent>
 
-            {/* Supplements */}
-            <TabsContent value="supplements" className="space-y-3">
-              <div className="space-y-2">
-                <div className="bg-orange-50 rounded-lg p-3 border-l-4 border-orange-400">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Utensils className="w-4 h-4 text-orange-500" />
-                    <h5 className="font-semibold text-sm text-gray-800">With Meals</h5>
+            <TabsContent value="supplements" className="space-y-2 text-xs">
+              <div className="bg-orange-50 rounded-lg p-2 border-l-4 border-orange-400">
+                <h5 className="font-semibold text-gray-800 mb-1">With Meals</h5>
+                {protocol.supplements.filter(s => s.timing === "with_meal").map((supp, idx) => (
+                  <div key={idx} className="text-gray-700 py-1">
+                    <p className="font-medium">{supp.name}</p>
+                    <p className="text-gray-600">{supp.dosing}</p>
                   </div>
-                  {protocol.supplements.filter(s => s.timing === "with_meal").map((supp, idx) => (
-                    <div key={idx} className="text-xs text-gray-700 py-1">
-                      <p className="font-medium">{supp.name}</p>
-                      <p className="text-gray-600">{supp.dosing}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-blue-50 rounded-lg p-3 border-l-4 border-blue-400">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Coffee className="w-4 h-4 text-blue-500" />
-                    <h5 className="font-semibold text-sm text-gray-800">Empty Stomach</h5>
+                ))}
+              </div>
+              <div className="bg-blue-50 rounded-lg p-2 border-l-4 border-blue-400">
+                <h5 className="font-semibold text-gray-800 mb-1">Empty Stomach</h5>
+                {protocol.supplements.filter(s => s.timing === "empty_stomach").map((supp, idx) => (
+                  <div key={idx} className="text-gray-700 py-1">
+                    <p className="font-medium">{supp.name}</p>
+                    <p className="text-gray-600">{supp.dosing}</p>
                   </div>
-                  {protocol.supplements.filter(s => s.timing === "empty_stomach").map((supp, idx) => (
-                    <div key={idx} className="text-xs text-gray-700 py-1">
-                      <p className="font-medium">{supp.name}</p>
-                      <p className="text-gray-600">{supp.dosing}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-purple-50 rounded-lg p-3 border-l-4 border-purple-400">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="w-4 h-4 text-purple-500" />
-                    <h5 className="font-semibold text-sm text-gray-800">30 Min Before Meals</h5>
+                ))}
+              </div>
+              <div className="bg-purple-50 rounded-lg p-2 border-l-4 border-purple-400">
+                <h5 className="font-semibold text-gray-800 mb-1">30 Min Before Meals</h5>
+                {protocol.supplements.filter(s => s.timing === "before_meal").map((supp, idx) => (
+                  <div key={idx} className="text-gray-700 py-1">
+                    <p className="font-medium">{supp.name}</p>
+                    <p className="text-gray-600">{supp.dosing}</p>
                   </div>
-                  {protocol.supplements.filter(s => s.timing === "before_meal").map((supp, idx) => (
-                    <div key={idx} className="text-xs text-gray-700 py-1">
-                      <p className="font-medium">{supp.name}</p>
-                      <p className="text-gray-600">{supp.dosing}</p>
-                    </div>
-                  ))}
-                </div>
+                ))}
               </div>
             </TabsContent>
           </Tabs>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
 export default function NutritionalProtocol() {
+  const [selectedProtocol, setSelectedProtocol] = useState<ProtocolConfig | null>(null);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white">
       <header className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white shadow-lg">
@@ -378,30 +331,38 @@ export default function NutritionalProtocol() {
           <p className="text-lg text-gray-600">Comprehensive detoxification and wellness strategies from certified practitioners</p>
         </div>
 
-        {/* Protocol Sections with Independent Assessments */}
-        <div className="space-y-6 mb-12">
-          {protocols.map(protocol => (
-            <ProtocolSection key={protocol.id} protocol={protocol} />
-          ))}
-        </div>
-
-        {/* Other Protocols */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-[#2C3E50] mb-6 text-center">Additional Support Protocols</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {otherProtocols.map((topic) => (
-              <div key={topic.title} className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer group">
-                <div className={`bg-gradient-to-r ${topic.color} p-4 rounded-xl inline-block mb-4 group-hover:scale-110 transition-transform`}>
-                  <topic.icon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-[#2C3E50] mb-2 group-hover:text-[#52C878] transition-colors">{topic.title}</h3>
-                <p className="text-gray-600">{topic.desc}</p>
-                <div className="mt-4 text-[#52C878] font-medium flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Learn More →
-                </div>
+        {/* All Protocols Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {protocols.map((protocol) => (
+            <div
+              key={protocol.id}
+              onClick={() => setSelectedProtocol(protocol)}
+              className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+              data-testid={`card-${protocol.id}`}
+            >
+              <div className={`bg-gradient-to-r ${protocol.color} p-4 rounded-xl inline-block mb-4 group-hover:scale-110 transition-transform`}>
+                <protocol.icon className="w-8 h-8 text-white" />
               </div>
-            ))}
-          </div>
+              <h3 className="text-2xl font-bold text-[#2C3E50] mb-2 group-hover:text-[#52C878] transition-colors">{protocol.title}</h3>
+              <p className="text-gray-600">{protocol.description}</p>
+              <div className="mt-4 text-[#52C878] font-medium flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                Explore →
+              </div>
+            </div>
+          ))}
+
+          {otherProtocols.map((topic) => (
+            <div key={topic.title} className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer group">
+              <div className={`bg-gradient-to-r ${topic.color} p-4 rounded-xl inline-block mb-4 group-hover:scale-110 transition-transform`}>
+                <topic.icon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-[#2C3E50] mb-2 group-hover:text-[#52C878] transition-colors">{topic.title}</h3>
+              <p className="text-gray-600">{topic.desc}</p>
+              <div className="mt-4 text-[#52C878] font-medium flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                Learn More →
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Info Section */}
@@ -426,6 +387,15 @@ export default function NutritionalProtocol() {
           </div>
         </div>
       </main>
+
+      {/* Modal for Protocol Details */}
+      {selectedProtocol && (
+        <ProtocolDetailModal
+          protocol={selectedProtocol}
+          isOpen={!!selectedProtocol}
+          onClose={() => setSelectedProtocol(null)}
+        />
+      )}
     </div>
   );
 }
