@@ -10,6 +10,7 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 - **Database setup**: Completed production PostgreSQL database configuration with all tables migrated successfully
 - **Session security**: Configured secure cookies for HTTPS in production while maintaining compatibility with HTTP in development
 - **Fixed deployment run command**: Created `start.sh` wrapper script and configured deployment to use `run = ["bash", "start.sh"]` as workaround for Replit's deployment configuration tool limitations
+- **Fixed static file path**: Corrected server static file path from `dist/public/` to `dist/` to match Vite's actual build output directory, resolving ENOENT errors when serving index.html and assets in production
 
 # User Preferences
 
