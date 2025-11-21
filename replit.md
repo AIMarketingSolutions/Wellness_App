@@ -9,6 +9,7 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 - **Added production session store**: Implemented PostgreSQL-backed session storage using `connect-pg-simple` for production deployments, enabling session persistence across multiple server instances
 - **Database setup**: Completed production PostgreSQL database configuration with all tables migrated successfully
 - **Session security**: Configured secure cookies for HTTPS in production while maintaining compatibility with HTTP in development
+- **Fixed deployment run command**: Created `start.sh` wrapper script and configured deployment to use `run = ["bash", "start.sh"]` as workaround for Replit's deployment configuration tool limitations
 
 # User Preferences
 
