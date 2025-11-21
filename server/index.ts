@@ -5,6 +5,8 @@ import { createServer as createViteServer } from "vite";
 import routes from "./routes";
 import path from "path";
 import { fileURLToPath } from "url";
+import pg from "pg";
+import connectPgSimple from "connect-pg-simple";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +18,17 @@ const isProduction = process.env.NODE_ENV === "production";
 app.use(express.json());
 app.use(cookieParser());
 
+const PgSession = connectPgSimple(session);
+
 app.use(
   session({
+    store: isProduction
+      ? new PgSession({
+          pool: new pg.Pool({ connectionString: process.env.DATABASE_URL }),
+          tableName: "user_sessions",
+          createTableIfMissing: true,
+        })
+      : undefined,
     secret: process.env.SESSION_SECRET || "wellness-app-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
@@ -39,7 +50,8 @@ async function startServer() {
     app.use(express.static(distPath));
     
     // Serve index.html for all other routes (SPA fallback)
-    app.get("*", (req, res) => {
+    // Use a regex pattern instead of '*' for compatibility with path-to-regexp
+    app.get(/^\/(?!api).*/, (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   } else {
