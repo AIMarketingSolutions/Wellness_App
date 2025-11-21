@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { ArrowLeft, Check } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import logoImage from "@assets/2022_Nutrition One Fitness _1763751788857.png";
+import logoImage from "@assets/2022_Nutrition One Fitness _1763752383427.png";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
