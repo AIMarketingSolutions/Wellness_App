@@ -46,7 +46,7 @@ app.use(routes);
 async function startServer() {
   if (isProduction) {
     // In production, serve the built static files
-    const distPath = path.join(__dirname, "..", "dist", "public");
+    const distPath = path.join(__dirname, "..", "dist");
     app.use(express.static(distPath));
     
     // Serve index.html for all other routes (SPA fallback)
