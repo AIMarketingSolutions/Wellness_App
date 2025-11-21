@@ -22,7 +22,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Allow cookies over HTTP in development
+      secure: isProduction, // Use secure cookies in production (HTTPS)
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       sameSite: 'lax', // Allow cookies in cross-site contexts
