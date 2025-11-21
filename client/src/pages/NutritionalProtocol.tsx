@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, BookOpen, Bug, Heart, Flame, Sparkles, Droplet, Zap } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, BookOpen, Bug, Heart, Flame, Sparkles, Droplet, Zap, Leaf, Droplets } from "lucide-react";
 
 interface QuizAnswer {
   [key: string]: boolean;
@@ -53,32 +52,8 @@ const bodyHealthQuestions = [
   { id: "gardening_soil", label: "Regular gardening or soil contact without gloves", category: "exposure", score: 1 },
 ];
 
-const parasiteSupplements: Supplement[] = [
-  { name: "Black Walnut Hull Extract", timing: "with_meal", dosing: "500-1000mg daily" },
-  { name: "Wormwood", timing: "with_meal", dosing: "200-400mg daily" },
-  { name: "Clove Extract", timing: "with_meal", dosing: "350-500mg daily" },
-  { name: "Oregano Oil (Softgels)", timing: "with_meal", dosing: "1-2 softgels daily" },
-  { name: "Probiotics", timing: "empty_stomach", dosing: "20-50 billion CFU daily" },
-  { name: "Digestive Enzymes", timing: "with_meal", dosing: "1 capsule with meals" },
-  { name: "Activated Charcoal", timing: "empty_stomach", dosing: "2 capsules as needed" },
-  { name: "Magnesium Glycinate", timing: "before_meal", dosing: "200-400mg evening" },
-  { name: "Milk Thistle", timing: "with_meal", dosing: "150-300mg daily" },
-];
-
-const parasiteHandoutSections = [
-  {
-    title: "What Are Parasites?",
-    content: "Parasites are organisms that live in or on the human body and use your nutrients to survive.",
-    bullets: ["They can inhabit the digestive tract, liver, blood, and tissues.", "They interfere with digestion, nutrient absorption, and immune health.", "Many people are unaware parasites may be involved in their health issues."],
-  },
-  {
-    title: "Common Symptoms",
-    content: "Symptoms vary widely, but some patterns are common.",
-    bullets: ["Digestive issues: bloating, gas, constipation, diarrhea", "Unexplained fatigue or low energy", "Brain fog or difficulty concentrating", "Skin issues and rashes", "Sugar cravings"],
-  },
-];
-
-const otherProtocols = [
+const protocols = [
+  { title: "Parasite Symptoms", desc: "Identify and support parasitic burdens affecting digestion and immunity", icon: Bug, color: "from-[#52C878] to-[#4A90E2]" },
   { title: "Leaky Gut", desc: "Restore intestinal barrier integrity and reduce inflammation", icon: Heart, color: "from-[#4A90E2] to-[#52C878]" },
   { title: "Adrenal Stress & Cortisol Balance", desc: "Restore energy and support stress hormone recovery", icon: Heart, color: "from-[#4A90E2] to-[#52C878]" },
   { title: "Heavy Metal Detox Support", desc: "Reduce toxic load from mercury, lead, cadmium, aluminum, and arsenic", icon: Flame, color: "from-[#52C878] to-[#4A90E2]" },
@@ -86,176 +61,9 @@ const otherProtocols = [
   { title: "Liver Detox & Regeneration", desc: "Optimize your primary fat-burning and detox organ", icon: Zap, color: "from-[#52C878] to-[#4A90E2]" },
   { title: "Kidney Detox", desc: "Filter acids, toxins, and metabolic waste effectively", icon: Droplet, color: "from-[#4A90E2] to-[#52C878]" },
   { title: "Gallbladder Flush & Bile Flow", desc: "Optimize fat digestion and toxin elimination", icon: BookOpen, color: "from-[#52C878] to-[#4A90E2]" },
+  { title: "Menopausal Symptoms", desc: "Support hormonal balance and manage transition symptoms", icon: Leaf, color: "from-[#4A90E2] to-[#52C878]" },
+  { title: "Anemia", desc: "Boost iron levels and support healthy blood formation", icon: Droplets, color: "from-[#52C878] to-[#4A90E2]" },
 ];
-
-function ParasiteSymptomSection({ assessmentScore }: { assessmentScore: number | null }) {
-  const [symptoms, setSymptoms] = useState<{ [key: string]: number }>({
-    bloating: 0,
-    gas: 0,
-    cramping: 0,
-    fatigue: 0,
-  });
-
-  const getRiskLevel = (score: number) => {
-    if (score <= 7) return { label: "Low", color: "text-green-600", bgColor: "bg-green-50", severity: "minimal" };
-    if (score <= 15) return { label: "Moderate", color: "text-yellow-600", bgColor: "bg-yellow-50", severity: "moderate" };
-    if (score <= 24) return { label: "High", color: "text-orange-600", bgColor: "bg-orange-50", severity: "high" };
-    return { label: "Very High", color: "text-red-600", bgColor: "bg-red-50", severity: "very_high" };
-  };
-
-  const riskLevel = assessmentScore !== null ? getRiskLevel(assessmentScore) : null;
-
-  return (
-    <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] p-4 rounded-xl">
-          <Bug className="w-8 h-8 text-white" />
-        </div>
-        <div>
-          <h2 className="text-3xl font-bold text-[#2C3E50]">Parasite Symptom Support</h2>
-          <p className="text-gray-600">Track symptoms and supplement protocol for parasitic burden</p>
-        </div>
-      </div>
-
-      {riskLevel && (
-        <div className={`p-4 rounded-lg mb-6 ${riskLevel.bgColor} border-l-4 border-${riskLevel.severity}`}>
-          <p className={`font-semibold ${riskLevel.color}`}>Assessment Result: {riskLevel.label} Risk (Score: {assessmentScore})</p>
-          <p className="text-gray-700 text-sm mt-1">Based on your Body Health Assessment responses.</p>
-        </div>
-      )}
-
-      <Tabs defaultValue="tracker" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
-          <TabsTrigger value="tracker" data-testid="tab-tracker-parasite">Symptom Tracker</TabsTrigger>
-          <TabsTrigger value="education" data-testid="tab-education-parasite">Education</TabsTrigger>
-          <TabsTrigger value="supplements" data-testid="tab-supplements-parasite">Supplements</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="tracker" className="space-y-4">
-          <div className="space-y-4">
-            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <h5 className="font-semibold text-[#2C3E50] mb-4">Daily Symptom Tracker (0-10 Scale)</h5>
-              {Object.keys(symptoms).map(symptom => (
-                <div key={symptom} className="mb-4">
-                  <div className="flex justify-between mb-2">
-                    <label className="text-sm font-medium text-gray-700 capitalize">{symptom.replace(/_/g, " ")}</label>
-                    <span className="text-sm font-bold text-[#52C878]">{symptoms[symptom]}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    value={symptoms[symptom]}
-                    onChange={(e) => setSymptoms(prev => ({ ...prev, [symptom]: parseInt(e.target.value) }))}
-                    className="w-full"
-                    data-testid={`slider-${symptom}`}
-                  />
-                </div>
-              ))}
-            </div>
-            <button className="w-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-2 rounded-lg font-semibold hover:shadow-lg" data-testid="btn-save-tracker">Save Entry</button>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="education" className="space-y-4">
-          {parasiteHandoutSections.map((section, idx) => (
-            <div key={idx} className="border-l-4 border-[#52C878] pl-4 py-2">
-              <h4 className="font-semibold text-[#2C3E50] mb-2">{section.title}</h4>
-              <p className="text-gray-700 text-sm mb-3">{section.content}</p>
-              <ul className="list-disc list-inside space-y-1">
-                {section.bullets.map((bullet, bidx) => (
-                  <li key={bidx} className="text-gray-600 text-sm">{bullet}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="supplements" className="space-y-4">
-          <p className="text-sm text-gray-700 mb-4 font-semibold">Supplement Timing Guide for Optimal Absorption</p>
-          
-          {/* Timing Chart */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {/* With Meals */}
-            <div className="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-400">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-4 h-4 bg-orange-400 rounded"></div>
-                <h5 className="font-semibold text-gray-800">With Meals</h5>
-              </div>
-              <div className="space-y-3">
-                {parasiteSupplements.filter(s => s.timing === "with_meal").map((supp, idx) => (
-                  <div key={idx}>
-                    <p className="font-medium text-gray-800 text-sm">{supp.name}</p>
-                    <p className="text-gray-600 text-xs">{supp.dosing}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Empty Stomach */}
-            <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-4 h-4 bg-blue-400 rounded"></div>
-                <h5 className="font-semibold text-gray-800">Empty Stomach</h5>
-              </div>
-              <div className="space-y-3">
-                {parasiteSupplements.filter(s => s.timing === "empty_stomach").map((supp, idx) => (
-                  <div key={idx}>
-                    <p className="font-medium text-gray-800 text-sm">{supp.name}</p>
-                    <p className="text-gray-600 text-xs">{supp.dosing}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 30 Min Before Meals */}
-            <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-400">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-4 h-4 bg-purple-400 rounded"></div>
-                <h5 className="font-semibold text-gray-800">30 Min Before Meals</h5>
-              </div>
-              <div className="space-y-3">
-                {parasiteSupplements.filter(s => s.timing === "before_meal").map((supp, idx) => (
-                  <div key={idx}>
-                    <p className="font-medium text-gray-800 text-sm">{supp.name}</p>
-                    <p className="text-gray-600 text-xs">{supp.dosing}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Daily Schedule */}
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <h5 className="font-semibold text-gray-800 mb-4">Sample Daily Schedule</h5>
-            <div className="space-y-3 text-sm">
-              <div className="flex gap-4">
-                <span className="font-medium text-gray-700 min-w-24">6:00 AM</span>
-                <span className="text-gray-600">Probiotics + Activated Charcoal (empty stomach)</span>
-              </div>
-              <div className="flex gap-4">
-                <span className="font-medium text-gray-700 min-w-24">7:00 AM</span>
-                <span className="text-gray-600">Breakfast</span>
-              </div>
-              <div className="flex gap-4">
-                <span className="font-medium text-gray-700 min-w-24">7:15 AM</span>
-                <span className="text-gray-600">Black Walnut, Wormwood, Clove, Oregano Oil, Digestive Enzymes (with meal)</span>
-              </div>
-              <div className="flex gap-4">
-                <span className="font-medium text-gray-700 min-w-24">12:00 PM</span>
-                <span className="text-gray-600">Lunch</span>
-              </div>
-              <div className="flex gap-4">
-                <span className="font-medium text-gray-700 min-w-24">8:00 PM</span>
-                <span className="text-gray-600">Magnesium Glycinate (with evening meal)</span>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
 
 export default function NutritionalProtocol() {
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswer>({});
@@ -371,7 +179,7 @@ export default function NutritionalProtocol() {
                   </p>
                   <p className={`${getRiskLevel(quizScore).color} font-semibold mb-3`}>Total Score: {quizScore} points</p>
                   {quizScore >= 16 && (
-                    <p className="text-gray-800 font-semibold">Your assessment indicates a potential parasitic burden. See the Parasite Symptom Support section below for targeted support strategies.</p>
+                    <p className="text-gray-800 font-semibold">Your assessment indicates a potential parasitic burden. See the Parasite Symptoms section below for targeted support strategies.</p>
                   )}
                 </div>
               )}
@@ -390,16 +198,9 @@ export default function NutritionalProtocol() {
           )}
         </div>
 
-        {/* Parasite Symptom Section - Auto-opens if score >= 16 */}
-        {showResults && quizScore !== null && quizScore >= 16 && (
-          <div className="mb-12">
-            <ParasiteSymptomSection assessmentScore={quizScore} />
-          </div>
-        )}
-
-        {/* Other Protocols Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {otherProtocols.map((protocol) => (
+        {/* Nutritional Protocols Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {protocols.map((protocol) => (
             <div key={protocol.title} className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer group">
               <div className={`bg-gradient-to-r ${protocol.color} p-4 rounded-xl inline-block mb-4 group-hover:scale-110 transition-transform`}>
                 <protocol.icon className="w-8 h-8 text-white" />
@@ -414,7 +215,7 @@ export default function NutritionalProtocol() {
         </div>
 
         {/* Info Section */}
-        <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] rounded-2xl p-8 text-white shadow-xl mt-12">
+        <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] rounded-2xl p-8 text-white shadow-xl">
           <h3 className="text-2xl font-bold mb-4">Professional Detox & Wellness Guidance</h3>
           <p className="text-white/90 text-lg mb-6">
             Our protocols are developed by Registered Nutritional Consulting Practitioners (RNCP) and focus on safe, effective methods to restore vitality and optimize health.
