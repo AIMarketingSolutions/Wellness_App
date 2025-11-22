@@ -322,17 +322,14 @@ export default function MealPlanner() {
       
       // Check each macronutrient and adjust if over target
       if (totalCarbs > targetCarbsG) {
-        const carbScale = targetCarbsG / totalCarbs;
         totalCarbs = targetCarbsG;
       }
       
       if (totalProtein > targetProteinG) {
-        const proteinScale = targetProteinG / totalProtein;
         totalProtein = targetProteinG;
       }
       
       if (totalFat > targetFatG) {
-        const fatScale = targetFatG / totalFat;
         totalFat = targetFatG;
       }
 
