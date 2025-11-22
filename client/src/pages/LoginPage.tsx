@@ -27,8 +27,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white flex flex-col items-center justify-center p-4">
-      <Link href="/" className="absolute top-8 left-8 inline-flex items-center gap-2 text-gray-600 hover:text-[#52C878] transition-colors duration-200 group">
+    <div className="min-h-screen bg-gradient-to-br from-[#6DD891]/5 via-[#4A90E2]/5 to-white flex flex-col items-center justify-center p-4">
+      <Link href="/" className="absolute top-8 left-8 inline-flex items-center gap-2 text-gray-600 hover:text-[#6DD891] transition-colors duration-200 group">
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
         <span className="font-medium">Back to Home</span>
       </Link>
@@ -59,7 +59,7 @@ export default function LoginPage() {
                     data-testid="input-email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#52C878]/20 focus:border-[#52C878] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
+                    className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#6DD891]/20 focus:border-[#6DD891] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
                     placeholder="Enter your email address"
                     disabled={loading}
                     required
@@ -76,7 +76,7 @@ export default function LoginPage() {
                     data-testid="input-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#52C878]/20 focus:border-[#52C878] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
+                    className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#6DD891]/20 focus:border-[#6DD891] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
                     placeholder="Enter your password"
                     disabled={loading}
                     required
@@ -87,7 +87,7 @@ export default function LoginPage() {
                   type="submit"
                   data-testid="button-login"
                   disabled={loading}
-                  className="w-full py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] text-white font-bold rounded-2xl hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full py-4 bg-gradient-to-r from-[#6DD891] to-[#4A90E2] text-white font-bold rounded-2xl hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {loading ? "Signing in..." : "Login"}
                 </button>
@@ -96,14 +96,12 @@ export default function LoginPage() {
               <div className="text-center">
                 <p className="text-gray-600">
                   Don't have an account?{" "}
-                  <Link href="/signup" className="text-[#52C878] font-semibold hover:text-[#4A90E2] transition-colors">
+                  <Link href="/signup" className="text-[#6DD891] font-semibold hover:text-[#4A90E2] transition-colors">
                     Sign up here
                   </Link>
                 </p>
               </div>
             </div>
-          </div>
-        </div>
       </div>
     </div>
   );

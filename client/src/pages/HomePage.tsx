@@ -1,27 +1,37 @@
 import { Link } from "wouter";
-import { Dumbbell, Heart, Target } from "lucide-react";
+import { Check, Target } from "lucide-react";
+import logoImage from "@assets/2022_Nutrition One Fitness _1763776935265.png";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#6DD891]/5 via-[#4A90E2]/5 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-2xl mx-auto text-center space-y-12">
         {/* Header Section */}
         <div className="space-y-6">
           <div className="flex justify-center mb-6">
-            <div className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] p-4 rounded-full shadow-lg">
-              <Dumbbell className="w-12 h-12 text-white" />
-            </div>
+            <img 
+              src={logoImage} 
+              alt="Nutrition One Fitness" 
+              className="w-24 h-24 object-contain"
+              style={{
+                filter: 'hue-rotate(100deg) saturate(1.1) brightness(1.1)'
+              }}
+            />
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold text-[#2C3E50] leading-tight tracking-tight">
             Welcome to
-            <span className="block bg-gradient-to-r from-[#52C878] to-[#4A90E2] bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-[#6DD891] to-[#4A90E2] bg-clip-text text-transparent">
               Nutrition One Fitness Inc.
             </span>
           </h1>
           
-          <p className="text-lg md:text-xl text-gray-600 max-w-xl mx-auto leading-relaxed">
-            Transform your health journey with personalized nutrition and fitness coaching, featuring customized meal plans, tailored exercise routines, and expert guidance designed to deliver lasting results.
+          <p className="text-xl md:text-2xl text-gray-700 font-semibold max-w-xl mx-auto leading-relaxed">
+            Transform Your Health from the Inside Out
+          </p>
+
+          <p className="text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
+            True wellness isn't just about losing weight; it's about healing your body at the root. At Nutrition One Fitness, we help you restore balance through science-backed wellness protocols, personalized nutrition, and targeted fitness coaching that address the real issues holding you back.
           </p>
         </div>
 
@@ -29,7 +39,7 @@ export default function HomePage() {
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-lg mx-auto">
           <Link 
             to="/login"
-            className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-[#52C878]/30 focus:ring-opacity-50"
+            className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-[#6DD891] to-[#4A90E2] hover:from-[#6DD891]/90 hover:to-[#4A90E2]/90 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-[#6DD891]/30 focus:ring-opacity-50"
             data-testid="button-login"
           >
             Login
@@ -37,7 +47,7 @@ export default function HomePage() {
           
           <Link 
             to="/signup"
-            className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-[#4A90E2] to-[#52C878] hover:from-[#4A90E2]/90 hover:to-[#52C878]/90 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-[#4A90E2]/30 focus:ring-opacity-50"
+            className="w-full sm:w-auto px-12 py-4 bg-gradient-to-r from-[#4A90E2] to-[#6DD891] hover:from-[#4A90E2]/90 hover:to-[#6DD891]/90 text-white font-semibold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-[#4A90E2]/30 focus:ring-opacity-50"
             data-testid="button-signup"
           >
             Signup
@@ -45,41 +55,61 @@ export default function HomePage() {
         </div>
 
         {/* Feature Highlights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-12 max-w-4xl mx-auto">
-          <div className="text-center space-y-4 p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="flex justify-center">
-              <div className="bg-[#52C878]/10 p-3 rounded-full">
-                <Heart className="w-8 h-8 text-[#52C878]" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-12 max-w-4xl mx-auto">
+          <div className="text-left space-y-3 p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-start gap-4">
+              <div className="bg-gradient-to-r from-[#6DD891] to-[#4A90E2] p-2 rounded-lg flex-shrink-0">
+                <Check className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#2C3E50] mb-2">Expert Guidance</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Partner with a Registered Nutritional Consulting Practitioner (RNCP) and certified fitness professionals who understand how to help your body function at its best naturally and sustainably.
+                </p>
               </div>
             </div>
-            <h3 className="text-xl font-semibold text-[#2C3E50]">Personalized Plans</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Customize your nutrition and fitness plans designed specifically for you, aligning with your individual goals and lifestyle needs.
-            </p>
           </div>
 
-          <div className="text-center space-y-4 p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="flex justify-center">
-              <div className="bg-[#4A90E2]/10 p-3 rounded-full">
-                <Target className="w-8 h-8 text-[#4A90E2]" />
+          <div className="text-left space-y-3 p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-start gap-4">
+              <div className="bg-gradient-to-r from-[#6DD891] to-[#4A90E2] p-2 rounded-lg flex-shrink-0">
+                <Target className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#2C3E50] mb-2">Nutritional Consulting</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Fatigue, brain fog, stubborn weight, and low energy aren't "just aging." They're signals that your body needs support. Our step-by-step protocols help you eliminate parasites, strengthen your adrenal system, repair leaky gut, and rebalance your metabolism, creating the conditions for effortless weight loss and long-term vitality.
+                </p>
               </div>
             </div>
-            <h3 className="text-xl font-semibold text-[#2C3E50]">Expert Guidance</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Work with a Registered Nutritional Consulting Practitioner (RNCP) and certified fitness professionals to achieve optimal results.
-            </p>
           </div>
 
-          <div className="text-center space-y-4 p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="flex justify-center">
-              <div className="bg-gradient-to-r from-[#52C878]/10 to-[#4A90E2]/10 p-3 rounded-full">
-                <Dumbbell className="w-8 h-8 text-[#52C878]" />
+          <div className="text-left space-y-3 p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-start gap-4">
+              <div className="bg-gradient-to-r from-[#6DD891] to-[#4A90E2] p-2 rounded-lg flex-shrink-0">
+                <Check className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#2C3E50] mb-2">Personalized Plans</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  No cookie-cutter diets. Every plan is designed around your goals, lifestyle, metabolic profile, and health needs, giving you a structure you can follow and the flexibility to make it work.
+                </p>
               </div>
             </div>
-            <h3 className="text-xl font-semibold text-[#2C3E50]">Proven Results</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Transform your health and fitness like thousands before you—join a community of success and achieve your lifestyle goals today!
-            </p>
+          </div>
+
+          <div className="text-left space-y-3 p-6 bg-white/50 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-start gap-4">
+              <div className="bg-gradient-to-r from-[#6DD891] to-[#4A90E2] p-2 rounded-lg flex-shrink-0">
+                <Check className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#2C3E50] mb-2">Proven Results</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Join thousands who've reclaimed their energy, confidence, and health. Experience a fundamental transformation through protocols engineered for lasting success, not temporary fixes.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
