@@ -310,12 +310,34 @@ export default function MealPlanner() {
       };
     });
 
-      // Calculate totals
+      // Calculate totals before validation
       console.log('Calculating totals...');
       const allFoods = [...calculatedCarbFoods, ...calculatedProteinFoods, ...calculatedFatFoods];
-      const totalProtein = allFoods.reduce((sum, f) => sum + f.contributedProteinG, 0);
-      const totalCarbs = allFoods.reduce((sum, f) => sum + f.contributedCarbsG, 0);
-      const totalFat = allFoods.reduce((sum, f) => sum + f.contributedFatG, 0);
+      let totalProtein = allFoods.reduce((sum, f) => sum + f.contributedProteinG, 0);
+      let totalCarbs = allFoods.reduce((sum, f) => sum + f.contributedCarbsG, 0);
+      let totalFat = allFoods.reduce((sum, f) => sum + f.contributedFatG, 0);
+
+      // VALIDATION & ADJUSTMENT: Check if any macronutrient exceeds recommended amount
+      console.log('Before adjustment:', { totalCarbs, totalProtein, totalFat, targetCarbsG, targetProteinG, targetFatG });
+      
+      // Check each macronutrient and adjust if over target
+      if (totalCarbs > targetCarbsG) {
+        const carbScale = targetCarbsG / totalCarbs;
+        totalCarbs = targetCarbsG;
+      }
+      
+      if (totalProtein > targetProteinG) {
+        const proteinScale = targetProteinG / totalProtein;
+        totalProtein = targetProteinG;
+      }
+      
+      if (totalFat > targetFatG) {
+        const fatScale = targetFatG / totalFat;
+        totalFat = targetFatG;
+      }
+
+      console.log('After adjustment:', { totalCarbs, totalProtein, totalFat });
+      
       const totalCalories = (totalProtein * 4) + (totalCarbs * 4) + (totalFat * 9);
 
       console.log('Setting calculation state...');
@@ -323,10 +345,10 @@ export default function MealPlanner() {
         carbFoods: calculatedCarbFoods,
         proteinFoods: calculatedProteinFoods,
         fatFoods: calculatedFatFoods,
-        totalProtein,
-        totalCarbs,
-        totalFat,
-        totalCalories,
+        totalProtein: Math.round(totalProtein),
+        totalCarbs: Math.round(totalCarbs),
+        totalFat: Math.round(totalFat),
+        totalCalories: Math.round(totalCalories),
       };
       console.log('Calculation result:', result);
       setCalculation(result);
