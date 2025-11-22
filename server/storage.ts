@@ -121,6 +121,11 @@ export interface IStorage {
   getGroceryListItems(groceryListId: string): Promise<GroceryListItem[]>;
   createGroceryListItem(item: InsertGroceryListItem): Promise<GroceryListItem>;
   updateGroceryListItem(id: string, isPurchased: boolean): Promise<GroceryListItem | undefined>;
+
+  // Admin seed methods
+  seedFoodItems(foodItems: Omit<InsertFoodItem, 'id'>[]): Promise<void>;
+  seedExerciseTypes(exerciseTypes: Omit<InsertExerciseType, 'id'>[]): Promise<void>;
+  seedSupplements(supplements: Omit<InsertSupplement, 'id'>[]): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -393,6 +398,19 @@ export class DatabaseStorage implements IStorage {
       .where(eq(schema.groceryListItems.id, id))
       .returning();
     return updated || undefined;
+  }
+
+  // Admin seed methods
+  async seedFoodItems(foodItems: Omit<InsertFoodItem, 'id'>[]): Promise<void> {
+    await db.insert(schema.foodItems).values(foodItems).onConflictDoNothing();
+  }
+
+  async seedExerciseTypes(exerciseTypes: Omit<InsertExerciseType, 'id'>[]): Promise<void> {
+    await db.insert(schema.exerciseTypes).values(exerciseTypes).onConflictDoNothing();
+  }
+
+  async seedSupplements(supplements: Omit<InsertSupplement, 'id'>[]): Promise<void> {
+    await db.insert(schema.supplements).values(supplements).onConflictDoNothing();
   }
 }
 

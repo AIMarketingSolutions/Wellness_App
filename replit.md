@@ -4,8 +4,15 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 
 # Recent Changes
 
+## November 22, 2025 - Admin Database Seeding System
+- **Admin seeding tool**: Created `/admin-seed` page and `/api/admin/seed-database` endpoint to populate production database with food items, exercise types, and supplements
+- **Admin authorization**: Implemented `requireAdmin` middleware that checks user email against `ADMIN_EMAIL` environment variable for secure admin-only access
+- **Database population**: Seeds 30 food items (10 carbs, 10 proteins, 10 fats), 3 exercise types, and 10 supplements
+- **Idempotent seeding**: Uses `onConflictDoNothing()` to safely run multiple times without duplicating data
+- **Environment requirement**: `ADMIN_EMAIL` must be set in both development and production environments to access admin features
+
 ## November 21, 2025 - Production Deployment Fixes
-- **Fixed wildcard route crash**: Changed SPA fallback route from `app.get("*", ...)` to `app.get(/^\/(?!api).*/, ...)` to be compatible with path-to-regexp library, preventing deployment crash loop
+- **Fixed wildcard route crash**: Changed SPA fallback route from `app.get("*", ...")` to `app.get(/^\/(?!api).*/, ...)` to be compatible with path-to-regexp library, preventing deployment crash loop
 - **Added production session store**: Implemented PostgreSQL-backed session storage using `connect-pg-simple` for production deployments, enabling session persistence across multiple server instances
 - **Database setup**: Completed production PostgreSQL database configuration with all tables migrated successfully
 - **Session security**: Configured secure cookies for HTTPS in production while maintaining compatibility with HTTP in development

@@ -12,6 +12,7 @@ import MealPlanner from "@/pages/MealPlanner";
 import Fitness from "@/pages/Fitness";
 import Supplement from "@/pages/Supplement";
 import NutritionalProtocol from "@/pages/NutritionalProtocol";
+import AdminSeed from "@/pages/AdminSeed";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, isLoading } = useAuth();
@@ -63,6 +64,9 @@ function AppRoutes() {
       </Route>
       <Route path="/nutritional-protocol">
         {() => <ProtectedRoute component={NutritionalProtocol} />}
+      </Route>
+      <Route path="/admin-seed">
+        {() => <ProtectedRoute component={AdminSeed} />}
       </Route>
       
       {/* Default redirect for unknown routes */}
