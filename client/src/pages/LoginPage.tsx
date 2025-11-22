@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import logoImage from "@assets/2022_Nutrition One Fitness _1763752383427.png";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -28,100 +27,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white">
-      <div className="container mx-auto px-4 py-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-[#52C878] transition-colors duration-200 group mb-8">
-          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-          <span className="font-medium">Back to Home</span>
-        </Link>
+    <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white flex flex-col items-center justify-center p-4">
+      <Link href="/" className="absolute top-8 left-8 inline-flex items-center gap-2 text-gray-600 hover:text-[#52C878] transition-colors duration-200 group">
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+        <span className="font-medium">Back to Home</span>
+      </Link>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start max-w-7xl mx-auto">
-          <div className="space-y-8">
-            <div className="flex flex-col items-center lg:items-start space-y-6">
-              <img 
-                src={logoImage} 
-                alt="Nutrition One Fitness" 
-                className="w-32 h-32 object-contain"
-                style={{
-                  filter: 'hue-rotate(130deg) saturate(1.2) brightness(0.9)'
-                }}
-              />
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold text-[#2C3E50] leading-tight mb-4">
-                  Welcome to
-                  <span className="block bg-gradient-to-r from-[#52C878] to-[#4A90E2] bg-clip-text text-transparent">
-                    Nutrition One Fitness Inc.
-                  </span>
-                </h1>
-                <p className="text-xl text-gray-700 font-semibold mb-6">
-                  Transform Your Health from the Inside Out
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  True wellness isn't just about losing weight; it's about healing your body at the root. At Nutrition One Fitness, we help you restore balance through science-backed wellness protocols, personalized nutrition, and targeted fitness coaching that address the real issues holding you back.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-start gap-4">
-                  <div className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] p-3 rounded-xl flex-shrink-0">
-                    <Check className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-[#2C3E50] mb-2">Expert Guidance</h3>
-                    <p className="text-gray-600">
-                      Partner with a Registered Nutritional Consulting Practitioner (RNCP) and certified fitness professionals who understand how to help your body function at its best naturally and sustainably.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-start gap-4">
-                  <div className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] p-3 rounded-xl flex-shrink-0">
-                    <Check className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-[#2C3E50] mb-2">Nutritional Consulting</h3>
-                    <p className="text-gray-600">
-                      Fatigue, brain fog, stubborn weight, and low energy aren't "just aging." They're signals that your body needs support. Our step-by-step protocols help you eliminate parasites, strengthen your adrenal system, repair leaky gut, and rebalance your metabolism, creating the conditions for effortless weight loss and long-term vitality.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-start gap-4">
-                  <div className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] p-3 rounded-xl flex-shrink-0">
-                    <Check className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-[#2C3E50] mb-2">Personalized Plans</h3>
-                    <p className="text-gray-600">
-                      No cookie-cutter diets. Every plan is designed around your goals, lifestyle, metabolic profile, and health needs, giving you a structure you can follow and the flexibility to make it work.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-start gap-4">
-                  <div className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] p-3 rounded-xl flex-shrink-0">
-                    <Check className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-[#2C3E50] mb-2">Proven Results</h3>
-                    <p className="text-gray-600">
-                      Join thousands who've reclaimed their energy, confidence, and health. Experience a fundamental transformation through protocols engineered for lasting success, not temporary fixes.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:sticky lg:top-8">
+      <div className="w-full max-w-md">
             <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 space-y-8">
               <div className="flex flex-col items-center space-y-4">
                 <h2 className="text-3xl font-bold text-[#2C3E50]">Sign In</h2>
