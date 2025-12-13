@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { User, LogOut, Dumbbell, Target, TrendingUp, Utensils, Activity, Pill, BookOpen, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, LogOut, Dumbbell, Target, TrendingUp, Utensils, Activity, Pill, BookOpen, ArrowRight, ShoppingBag, ClipboardList } from 'lucide-react';
 import { signOut, getCurrentUser } from '../../lib/supabase';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -75,43 +75,43 @@ function DashboardNew({}: DashboardNewProps) {
                 onClick={() => navigate('/profile-assessment')}
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
-                <Target className="w-4 h-4" />
-                Profile Assessment
+                <ClipboardList className="w-4 h-4" />
+                Client Intake Profile
               </button>
               <button
                 onClick={() => navigate('/transformation-tracker')}
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
                 <TrendingUp className="w-4 h-4" />
-                Transformation Tracker
+                Goal Dashboard
               </button>
               <button
                 onClick={() => navigate('/meal-plan')}
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
                 <Utensils className="w-4 h-4" />
-                Meal Plan
+                Daily Nutrition Planner
               </button>
               <button
                 onClick={() => navigate('/fitness')}
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
                 <Activity className="w-4 h-4" />
-                Fitness
+                Daily Movement Plan
               </button>
               <button
                 onClick={() => navigate('/supplement')}
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
-                <Pill className="w-4 h-4" />
-                Supplement
+                <ShoppingBag className="w-4 h-4" />
+                Supplement Shop
               </button>
               <button
                 onClick={() => navigate('/nutritional-protocol')}
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
                 <Pill className="w-4 h-4" />
-                Nutritional Protocol
+                Wellness Protocol Builder
               </button>
               <button
                 onClick={() => navigate('/article')}
@@ -139,17 +139,21 @@ function DashboardNew({}: DashboardNewProps) {
 
         {/* Main Page Sections - All 7 sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Profile Assessment Section */}
+          {/* Client Intake Profile Section */}
           <div 
             onClick={() => navigate('/profile-assessment')}
             className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer group"
+            data-testid="card-client-intake-profile"
           >
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-4">
               <div className="bg-[#52C878]/10 p-4 rounded-full group-hover:bg-[#52C878]/20 transition-colors">
-                <Target className="w-8 h-8 text-[#52C878]" />
+                <ClipboardList className="w-8 h-8 text-[#52C878]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Profile Assessment</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Client Intake Profile</h3>
             </div>
+            <p className="text-sm text-gray-500 mb-4 italic">
+              Set up your personal details, health history, and preferences so your plan fits you.
+            </p>
             <p className="text-gray-600 mb-6 leading-relaxed">
               Complete your personalized health profile to get tailored nutrition and fitness recommendations based on your metabolic type and goals.
             </p>
@@ -158,17 +162,21 @@ function DashboardNew({}: DashboardNewProps) {
             </div>
           </div>
 
-          {/* Transformation Tracker Section */}
+          {/* Goal Dashboard Section */}
           <div 
             onClick={() => navigate('/transformation-tracker')}
             className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer group"
+            data-testid="card-goal-dashboard"
           >
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-4">
               <div className="bg-[#4A90E2]/10 p-4 rounded-full group-hover:bg-[#4A90E2]/20 transition-colors">
                 <TrendingUp className="w-8 h-8 text-[#4A90E2]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Transformation Tracker</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Goal Dashboard</h3>
             </div>
+            <p className="text-sm text-gray-500 mb-4 italic">
+              See your starting point, target goals, and progress at a glance.
+            </p>
             <p className="text-gray-600 mb-6 leading-relaxed">
               Track your progress with photos, measurements, and milestones. Monitor your transformation journey and celebrate your achievements.
             </p>
@@ -177,17 +185,21 @@ function DashboardNew({}: DashboardNewProps) {
             </div>
           </div>
 
-          {/* Meal Plan Section */}
+          {/* Daily Nutrition Planner Section */}
           <div 
             onClick={() => navigate('/meal-plan')}
             className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer group"
+            data-testid="card-daily-nutrition-planner"
           >
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-4">
               <div className="bg-[#52C878]/10 p-4 rounded-full group-hover:bg-[#52C878]/20 transition-colors">
                 <Utensils className="w-8 h-8 text-[#52C878]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Meal Plan</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Daily Nutrition Planner</h3>
             </div>
+            <p className="text-sm text-gray-500 mb-4 italic">
+              Plan today's meals, calorie target, workouts, and water intake in one place.
+            </p>
             <p className="text-gray-600 mb-6 leading-relaxed">
               Create personalized meal plans with precise ounce measurements and safety checks. 
               Track your daily nutrition goals with intelligent food recommendations and macro balancing.
@@ -197,17 +209,21 @@ function DashboardNew({}: DashboardNewProps) {
             </div>
           </div>
 
-          {/* Fitness Section */}
+          {/* Daily Movement Plan Section */}
           <div 
             onClick={() => navigate('/fitness')}
             className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer group"
+            data-testid="card-daily-movement-plan"
           >
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-4">
               <div className="bg-[#4A90E2]/10 p-4 rounded-full group-hover:bg-[#4A90E2]/20 transition-colors">
                 <Activity className="w-8 h-8 text-[#4A90E2]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Fitness</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Daily Movement Plan</h3>
             </div>
+            <p className="text-sm text-gray-500 mb-4 italic">
+              Choose or track today's workout to support your goals and consistency.
+            </p>
             <p className="text-gray-600 mb-6 leading-relaxed">
               Build custom workout routines and track exercise calories. 
               Monitor your fitness progress with personalized exercise recommendations and calorie burn calculations.
@@ -217,17 +233,21 @@ function DashboardNew({}: DashboardNewProps) {
             </div>
           </div>
 
-          {/* Supplement Section */}
+          {/* Supplement Shop Section */}
           <div 
             onClick={() => navigate('/supplement')}
             className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer group"
+            data-testid="card-supplement-shop"
           >
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-4">
               <div className="bg-[#52C878]/10 p-4 rounded-full group-hover:bg-[#52C878]/20 transition-colors">
-                <Pill className="w-8 h-8 text-[#52C878]" />
+                <ShoppingBag className="w-8 h-8 text-[#52C878]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Supplement</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Supplement Shop</h3>
             </div>
+            <p className="text-sm text-gray-500 mb-4 italic">
+              Shop symptom-based bundles or choose individual supplements anytime.
+            </p>
             <p className="text-gray-600 mb-6 leading-relaxed">
               Get personalized supplement recommendations based on your metabolic profile. 
               Optimize your nutrition with targeted supplements for your health goals.
@@ -237,17 +257,21 @@ function DashboardNew({}: DashboardNewProps) {
             </div>
           </div>
 
-          {/* Nutritional Protocol Section */}
+          {/* Wellness Protocol Builder Section */}
           <div 
             onClick={() => navigate('/nutritional-protocol')}
             className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer group"
+            data-testid="card-wellness-protocol-builder"
           >
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex items-center gap-4 mb-4">
               <div className="bg-[#4A90E2]/10 p-4 rounded-full group-hover:bg-[#4A90E2]/20 transition-colors">
                 <Pill className="w-8 h-8 text-[#4A90E2]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Nutritional Protocol</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Wellness Protocol Builder</h3>
             </div>
+            <p className="text-sm text-gray-500 mb-4 italic">
+              Complete your symptom assessment and generate a personalized support plan.
+            </p>
             <p className="text-gray-600 mb-6 leading-relaxed">
               Access comprehensive nutritional protocols tailored to your metabolic type. 
               Follow evidence-based nutrition strategies for optimal health and performance.
@@ -261,6 +285,7 @@ function DashboardNew({}: DashboardNewProps) {
           <div 
             onClick={() => navigate('/article')}
             className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer group"
+            data-testid="card-article"
           >
             <div className="flex items-center gap-4 mb-6">
               <div className="bg-[#52C878]/10 p-4 rounded-full group-hover:bg-[#52C878]/20 transition-colors">

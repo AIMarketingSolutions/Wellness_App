@@ -20,7 +20,8 @@ export default function Supplement() {
               <Pill className="w-12 h-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-3">Supplement Guide</h1>
+          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Supplement Shop</h1>
+          <p className="text-sm text-gray-500 italic mb-3">Shop symptom-based bundles or choose individual supplements anytime.</p>
           <p className="text-lg text-gray-600">
             Personalized supplement recommendations based on your health profile
           </p>

@@ -99,7 +99,8 @@ export default function Fitness() {
               <Activity className="w-12 h-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-3">Fitness System</h1>
+          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Daily Movement Plan</h1>
+          <p className="text-sm text-gray-500 italic mb-3">Choose or track today's workout to support your goals and consistency.</p>
           <p className="text-lg text-gray-600">
             Custom workout plans and exercise tracking for optimal results
           </p>

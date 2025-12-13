@@ -344,7 +344,8 @@ export default function ProfileAssessment() {
               <User className="w-12 h-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-3">Personal Profile Assessment</h1>
+          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Client Intake Profile</h1>
+          <p className="text-sm text-gray-500 italic mb-3">Set up your personal details, health history, and preferences so your plan fits you.</p>
           <p className="text-lg text-gray-600">
             Complete your health profile to get personalized recommendations
           </p>

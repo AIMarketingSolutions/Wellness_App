@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { ArrowLeft, Calculator, Check } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import type { UserProfile } from "@shared/schema";
+import { ArrowLeft, Calculator, Check, Droplet, Plus, Minus } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { UserProfile, WaterIntake } from "@shared/schema";
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'snack2';
 
@@ -82,6 +83,43 @@ export default function MealPlanner() {
   const { data: todayExercise } = useQuery<DailyExercise | null>({
     queryKey: ["/api/daily-exercise/today"],
   });
+
+  // Fetch today's water intake
+  const today = new Date().toISOString().split('T')[0];
+  const { data: waterIntake } = useQuery<WaterIntake | null>({
+    queryKey: [`/api/water-intake/${today}`],
+  });
+
+  // Water intake mutation
+  const updateWaterMutation = useMutation({
+    mutationFn: async (newGlasses: number) => {
+      if (waterIntake?.id) {
+        return await apiRequest(`/api/water-intake/${waterIntake.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ glassesConsumed: newGlasses }),
+        });
+      } else {
+        return await apiRequest("/api/water-intake", {
+          method: "POST",
+          body: JSON.stringify({ intakeDate: today, glassesConsumed: newGlasses }),
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/water-intake/${today}`] });
+    },
+  });
+
+  // Water intake helpers (1 glass = 8 oz)
+  const currentGlasses = waterIntake?.glassesConsumed || 0;
+  const targetGlasses = waterIntake?.targetGlasses || 8;
+  const currentWaterOz = currentGlasses * 8;
+  const targetWaterOz = targetGlasses * 8;
+  
+  const addGlasses = (glassesToAdd: number) => {
+    const newGlasses = Math.max(0, currentGlasses + glassesToAdd);
+    updateWaterMutation.mutate(newGlasses);
+  };
 
   // Calculate calories burned from today's exercise
   const exerciseCalories = useMemo(() => {
@@ -398,7 +436,8 @@ export default function MealPlanner() {
         </Link>
 
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Daily Meal Calculator</h1>
+          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Daily Nutrition Planner</h1>
+          <p className="text-sm text-gray-500 italic mb-2">Plan today's meals, calorie target, workouts, and water intake in one place.</p>
           <p className="text-gray-600">Select foods from each category and calculate recommended portions</p>
         </div>
 
@@ -582,6 +621,67 @@ export default function MealPlanner() {
             </div>
           </div>
         )}
+
+        {/* Hydration Tracker */}
+        <div className="bg-gradient-to-br from-blue-50/80 to-cyan-50/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6 border border-blue-100">
+          <div className="flex items-center gap-3 mb-4">
+            <Droplet className="w-6 h-6 text-blue-500" />
+            <h2 className="text-2xl font-bold text-[#2C3E50]">Hydration Tracker</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            {/* Progress */}
+            <div className="md:col-span-2">
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Today's water intake</span>
+                <span className="font-semibold text-blue-600">{currentGlasses} / {targetGlasses} glasses ({currentWaterOz} oz)</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div 
+                  className="bg-gradient-to-r from-blue-400 to-cyan-400 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, (currentGlasses / targetGlasses) * 100)}%` }}
+                  data-testid="progress-water"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Target: {targetGlasses} glasses per day (1 glass = 8 oz)
+              </p>
+            </div>
+            
+            {/* Quick Add Buttons */}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => addGlasses(1)}
+                  disabled={updateWaterMutation.isPending}
+                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                  data-testid="button-add-1glass"
+                >
+                  <Plus className="w-4 h-4" />
+                  1 Glass
+                </button>
+                <button
+                  onClick={() => addGlasses(2)}
+                  disabled={updateWaterMutation.isPending}
+                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                  data-testid="button-add-2glasses"
+                >
+                  <Plus className="w-4 h-4" />
+                  2 Glasses
+                </button>
+              </div>
+              <button
+                onClick={() => addGlasses(-1)}
+                disabled={updateWaterMutation.isPending || currentGlasses === 0}
+                className="flex items-center justify-center gap-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50"
+                data-testid="button-remove-1glass"
+              >
+                <Minus className="w-4 h-4" />
+                Remove 1 Glass
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* Macro Targets */}
         <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6">

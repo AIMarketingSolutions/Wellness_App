@@ -267,7 +267,8 @@ export default function TransformationTracker() {
               <TrendingUp className="w-12 h-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-3">Transformation Tracker</h1>
+          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Goal Dashboard</h1>
+          <p className="text-sm text-gray-500 italic mb-3">See your starting point, target goals, and progress at a glance.</p>
           <p className="text-lg text-gray-600">
             Track your progress and view your personalized health profile
           </p>

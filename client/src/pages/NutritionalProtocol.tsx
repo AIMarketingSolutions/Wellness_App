@@ -143,7 +143,8 @@ export default function NutritionalProtocol() {
               <BookOpen className="w-12 h-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-3">Detox & Organ Support Protocol</h1>
+          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Wellness Protocol Builder</h1>
+          <p className="text-sm text-gray-500 italic mb-3">Complete your symptom assessment and generate a personalized support plan.</p>
           <p className="text-lg text-gray-600">Comprehensive detoxification and wellness strategies from certified practitioners</p>
         </div>
 
