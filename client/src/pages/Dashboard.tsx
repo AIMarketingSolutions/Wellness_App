@@ -10,7 +10,6 @@ export default function Dashboard() {
       id: "profile",
       name: "Client Intake Profile",
       subtitle: "Set up your personal details, health history, and preferences so your plan fits you.",
-      description: "Complete your health profile & metabolic assessment",
       icon: Target,
       color: "from-[#52C878] to-[#4A90E2]",
       bgColor: "bg-[#52C878]/10",
@@ -20,7 +19,6 @@ export default function Dashboard() {
       id: "tracker",
       name: "Goal Dashboard",
       subtitle: "See your starting point, target goals, and progress at a glance.",
-      description: "Track your body composition & progress over time",
       icon: TrendingUp,
       color: "from-[#4A90E2] to-[#52C878]",
       bgColor: "bg-[#4A90E2]/10",
@@ -30,7 +28,6 @@ export default function Dashboard() {
       id: "meal-planner",
       name: "Daily Nutrition Planner",
       subtitle: "Plan today's meals, calorie target, workouts, and water intake in one place.",
-      description: "Track daily meals, macros, water & hit your targets",
       icon: Apple,
       color: "from-[#52C878] to-[#4A90E2]",
       bgColor: "bg-[#52C878]/10",
@@ -40,7 +37,6 @@ export default function Dashboard() {
       id: "fitness",
       name: "Daily Workout Plan",
       subtitle: "Track today's workout to support your goals and consistency.",
-      description: "Custom workout plans & exercise tracking",
       icon: Activity,
       color: "from-[#4A90E2] to-[#52C878]",
       bgColor: "bg-[#4A90E2]/10",
@@ -50,7 +46,6 @@ export default function Dashboard() {
       id: "supplements",
       name: "Supplement Shop",
       subtitle: "Shop symptom-based bundles or choose individual supplements anytime.",
-      description: "Personalized supplement recommendations",
       icon: Pill,
       color: "from-[#52C878] to-[#4A90E2]",
       bgColor: "bg-[#52C878]/10",
@@ -60,7 +55,6 @@ export default function Dashboard() {
       id: "protocol",
       name: "Wellness Protocol Builder",
       subtitle: "Complete your symptom assessment and generate a personalized support plan.",
-      description: "Evidence-based nutrition strategies",
       icon: BookOpen,
       color: "from-[#4A90E2] to-[#52C878]",
       bgColor: "bg-[#4A90E2]/10",
@@ -133,12 +127,8 @@ export default function Dashboard() {
                 <h3 className="text-xl font-bold text-[#2C3E50] mb-1 group-hover:text-[#52C878] transition-colors duration-300">
                   {feature.name}
                 </h3>
-                <p className="text-xs text-gray-500 italic mb-2">
+                <p className="text-xs text-gray-500 italic mb-4 flex-grow">
                   {feature.subtitle}
-                </p>
-                
-                <p className="text-gray-600 text-sm flex-grow">
-                  {feature.description}
                 </p>
                 
                 <div className="mt-4 flex items-center text-[#52C878] font-medium text-sm group-hover:translate-x-2 transition-transform duration-300">

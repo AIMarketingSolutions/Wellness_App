@@ -151,11 +151,8 @@ function DashboardNew({}: DashboardNewProps) {
               </div>
               <h3 className="text-2xl font-bold text-[#2C3E50]">Client Intake Profile</h3>
             </div>
-            <p className="text-sm text-gray-500 mb-4 italic">
+            <p className="text-sm text-gray-500 mb-6 italic">
               Set up your personal details, health history, and preferences so your plan fits you.
-            </p>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Complete your personalized health profile to get tailored nutrition and fitness recommendations based on your metabolic type and goals.
             </p>
             <div className="flex items-center text-[#52C878] text-sm font-medium">
               Start Assessment <ArrowRight className="w-4 h-4 ml-1" />
@@ -174,11 +171,8 @@ function DashboardNew({}: DashboardNewProps) {
               </div>
               <h3 className="text-2xl font-bold text-[#2C3E50]">Goal Dashboard</h3>
             </div>
-            <p className="text-sm text-gray-500 mb-4 italic">
+            <p className="text-sm text-gray-500 mb-6 italic">
               See your starting point, target goals, and progress at a glance.
-            </p>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Track your progress with photos, measurements, and milestones. Monitor your transformation journey and celebrate your achievements.
             </p>
             <div className="flex items-center text-[#4A90E2] text-sm font-medium">
               Track Progress <ArrowRight className="w-4 h-4 ml-1" />
@@ -197,12 +191,8 @@ function DashboardNew({}: DashboardNewProps) {
               </div>
               <h3 className="text-2xl font-bold text-[#2C3E50]">Daily Nutrition Planner</h3>
             </div>
-            <p className="text-sm text-gray-500 mb-4 italic">
+            <p className="text-sm text-gray-500 mb-6 italic">
               Plan today's meals, calorie target, workouts, and water intake in one place.
-            </p>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Create personalized meal plans with precise ounce measurements and safety checks. 
-              Track your daily nutrition goals with intelligent food recommendations and macro balancing.
             </p>
             <div className="flex items-center text-[#52C878] text-sm font-medium">
               Start Planning <ArrowRight className="w-4 h-4 ml-1" />
@@ -221,12 +211,8 @@ function DashboardNew({}: DashboardNewProps) {
               </div>
               <h3 className="text-2xl font-bold text-[#2C3E50]">Daily Workout Plan</h3>
             </div>
-            <p className="text-sm text-gray-500 mb-4 italic">
+            <p className="text-sm text-gray-500 mb-6 italic">
               Track today's workout to support your goals and consistency.
-            </p>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Build custom workout routines and track exercise calories. 
-              Monitor your fitness progress with personalized exercise recommendations and calorie burn calculations.
             </p>
             <div className="flex items-center text-[#4A90E2] text-sm font-medium">
               Start Workout <ArrowRight className="w-4 h-4 ml-1" />
@@ -245,12 +231,8 @@ function DashboardNew({}: DashboardNewProps) {
               </div>
               <h3 className="text-2xl font-bold text-[#2C3E50]">Supplement Shop</h3>
             </div>
-            <p className="text-sm text-gray-500 mb-4 italic">
+            <p className="text-sm text-gray-500 mb-6 italic">
               Shop symptom-based bundles or choose individual supplements anytime.
-            </p>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Get personalized supplement recommendations based on your metabolic profile. 
-              Optimize your nutrition with targeted supplements for your health goals.
             </p>
             <div className="flex items-center text-[#52C878] text-sm font-medium">
               View Supplements <ArrowRight className="w-4 h-4 ml-1" />
@@ -269,12 +251,8 @@ function DashboardNew({}: DashboardNewProps) {
               </div>
               <h3 className="text-2xl font-bold text-[#2C3E50]">Wellness Protocol Builder</h3>
             </div>
-            <p className="text-sm text-gray-500 mb-4 italic">
+            <p className="text-sm text-gray-500 mb-6 italic">
               Complete your symptom assessment and generate a personalized support plan.
-            </p>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Access comprehensive nutritional protocols tailored to your metabolic type. 
-              Follow evidence-based nutrition strategies for optimal health and performance.
             </p>
             <div className="flex items-center text-[#4A90E2] text-sm font-medium">
               View Protocol <ArrowRight className="w-4 h-4 ml-1" />
