@@ -4,6 +4,18 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 
 # Recent Changes
 
+## December 13, 2025 - Client-Facing Tool Renaming & Hydration Tracker
+- **Tool name updates**: Renamed all 6 main tools across the application UI:
+  - Profile Assessment → Client Intake Profile
+  - Transformation Tracker → Goal Dashboard
+  - Meal Plan → Daily Nutrition Planner
+  - Fitness → Daily Movement Plan
+  - Supplement → Supplement Shop
+  - Nutritional Protocol → Wellness Protocol Builder
+- **Subtitles added**: Each tool card on dashboard now displays a descriptive subtitle
+- **Hydration tracker**: Added water intake tracking to Daily Nutrition Planner with progress bar, quick-add buttons (+1/+2 glasses), and remove functionality
+- **Routes preserved**: All internal routes (/profile-assessment, /meal-plan, etc.) kept stable for backwards compatibility
+
 ## November 22, 2025 - Admin Database Seeding System
 - **Admin seeding tool**: Created `/admin-seed` page and `/api/admin/seed-database` endpoint to populate production database with food items, exercise types, and supplements
 - **Admin authorization**: Implemented `requireAdmin` middleware that checks user email against `ADMIN_EMAIL` environment variable for secure admin-only access
