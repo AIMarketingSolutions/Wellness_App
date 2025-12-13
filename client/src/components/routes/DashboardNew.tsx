@@ -97,7 +97,7 @@ function DashboardNew({}: DashboardNewProps) {
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
                 <Activity className="w-4 h-4" />
-                Daily Movement Plan
+                Daily Workout Plan
               </button>
               <button
                 onClick={() => navigate('/supplement')}
@@ -209,20 +209,20 @@ function DashboardNew({}: DashboardNewProps) {
             </div>
           </div>
 
-          {/* Daily Movement Plan Section */}
+          {/* Daily Workout Plan Section */}
           <div 
             onClick={() => navigate('/fitness')}
             className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer group"
-            data-testid="card-daily-movement-plan"
+            data-testid="card-daily-workout-plan"
           >
             <div className="flex items-center gap-4 mb-4">
               <div className="bg-[#4A90E2]/10 p-4 rounded-full group-hover:bg-[#4A90E2]/20 transition-colors">
                 <Activity className="w-8 h-8 text-[#4A90E2]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Daily Movement Plan</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Daily Workout Plan</h3>
             </div>
             <p className="text-sm text-gray-500 mb-4 italic">
-              Choose or track today's workout to support your goals and consistency.
+              Track today's workout to support your goals and consistency.
             </p>
             <p className="text-gray-600 mb-6 leading-relaxed">
               Build custom workout routines and track exercise calories. 

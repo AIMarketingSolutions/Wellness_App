@@ -9,7 +9,7 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
   - Profile Assessment → Client Intake Profile
   - Transformation Tracker → Goal Dashboard
   - Meal Plan → Daily Nutrition Planner
-  - Fitness → Daily Movement Plan
+  - Fitness → Daily Workout Plan
   - Supplement → Supplement Shop
   - Nutritional Protocol → Wellness Protocol Builder
 - **Subtitles added**: Each tool card on dashboard now displays a descriptive subtitle

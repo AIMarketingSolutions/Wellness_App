@@ -38,8 +38,8 @@ export default function Dashboard() {
     },
     {
       id: "fitness",
-      name: "Daily Movement Plan",
-      subtitle: "Choose or track today's workout to support your goals and consistency.",
+      name: "Daily Workout Plan",
+      subtitle: "Track today's workout to support your goals and consistency.",
       description: "Custom workout plans & exercise tracking",
       icon: Activity,
       color: "from-[#4A90E2] to-[#52C878]",
