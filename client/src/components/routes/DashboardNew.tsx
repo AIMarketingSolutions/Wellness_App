@@ -83,14 +83,14 @@ function DashboardNew({}: DashboardNewProps) {
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
                 <TrendingUp className="w-4 h-4" />
-                Goal Dashboard
+                Momentum Tracker
               </button>
               <button
                 onClick={() => navigate('/meal-plan')}
                 className="flex items-center gap-2 px-3 py-2 font-medium transition-colors duration-200 cursor-pointer text-white/80 hover:text-white hover:bg-white/10 rounded-lg"
               >
                 <Utensils className="w-4 h-4" />
-                Daily Nutrition Planner
+                Smart Meal Planning
               </button>
               <button
                 onClick={() => navigate('/fitness')}
@@ -169,7 +169,7 @@ function DashboardNew({}: DashboardNewProps) {
               <div className="bg-[#4A90E2]/10 p-4 rounded-full group-hover:bg-[#4A90E2]/20 transition-colors">
                 <TrendingUp className="w-8 h-8 text-[#4A90E2]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Goal Dashboard</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Momentum Tracker</h3>
             </div>
             <p className="text-sm text-gray-500 mb-6 italic">
               See your starting point, target goals, and progress at a glance.
@@ -189,7 +189,7 @@ function DashboardNew({}: DashboardNewProps) {
               <div className="bg-[#52C878]/10 p-4 rounded-full group-hover:bg-[#52C878]/20 transition-colors">
                 <Utensils className="w-8 h-8 text-[#52C878]" />
               </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50]">Daily Nutrition Planner</h3>
+              <h3 className="text-2xl font-bold text-[#2C3E50]">Smart Meal Planning</h3>
             </div>
             <p className="text-sm text-gray-500 mb-6 italic">
               Plan today's meals, calorie target, workouts, and water intake in one place.

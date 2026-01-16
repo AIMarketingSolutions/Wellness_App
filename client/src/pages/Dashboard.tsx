@@ -17,7 +17,7 @@ export default function Dashboard() {
     },
     {
       id: "tracker",
-      name: "Goal Dashboard",
+      name: "Momentum Tracker",
       subtitle: "See your starting point, target goals, and progress at a glance.",
       icon: TrendingUp,
       color: "from-[#4A90E2] to-[#52C878]",
@@ -26,7 +26,7 @@ export default function Dashboard() {
     },
     {
       id: "meal-planner",
-      name: "Daily Nutrition Planner",
+      name: "Smart Meal Planning",
       subtitle: "Plan today's meals, calorie target, workouts, and water intake in one place.",
       icon: Apple,
       color: "from-[#52C878] to-[#4A90E2]",

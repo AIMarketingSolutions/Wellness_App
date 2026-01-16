@@ -7,13 +7,13 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 ## December 13, 2025 - Client-Facing Tool Renaming & Hydration Tracker
 - **Tool name updates**: Renamed all 6 main tools across the application UI:
   - Profile Assessment → Client Intake Profile
-  - Transformation Tracker → Goal Dashboard
-  - Meal Plan → Daily Nutrition Planner
+  - Transformation Tracker → Momentum Tracker
+  - Meal Plan → Smart Meal Planning
   - Fitness → Daily Workout Plan
   - Supplement → Supplement Shop
   - Nutritional Protocol → Wellness Protocol Builder
 - **Subtitles added**: Each tool card on dashboard now displays a descriptive subtitle
-- **Hydration tracker**: Added water intake tracking to Daily Nutrition Planner with progress bar, quick-add buttons (+1/+2 glasses), and remove functionality
+- **Hydration tracker**: Added water intake tracking to Smart Meal Planning with progress bar, quick-add buttons (+1/+2 glasses), and remove functionality
 - **Routes preserved**: All internal routes (/profile-assessment, /meal-plan, etc.) kept stable for backwards compatibility
 
 ## November 22, 2025 - Admin Database Seeding System

@@ -436,7 +436,7 @@ export default function MealPlanner() {
         </Link>
 
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Daily Nutrition Planner</h1>
+          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Smart Meal Planning</h1>
           <p className="text-sm text-gray-500 italic mb-2">Plan today's meals, calorie target, workouts, and water intake in one place.</p>
           <p className="text-gray-600">Select foods from each category and calculate recommended portions</p>
         </div>
