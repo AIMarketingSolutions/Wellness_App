@@ -4,6 +4,16 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 
 # Recent Changes
 
+## January 16, 2026 - Waist-to-Height Ratio (WHtR) Feature
+- **WHtR in Client Intake Profile**: Added Section 7 to the profile assessment page (`client/src/pages/ProfileAssessment.tsx`) with:
+  - Educational information about WHtR as a cardiometabolic risk indicator
+  - Real-time ratio calculation from height and waist measurements
+  - Classification display (Underfat <0.40, Healthy 0.40-0.49, Overfat 0.50-0.59, Obese ≥0.60)
+  - Health interpretation for each classification
+  - Color-coded range indicators
+- **WHtR in Momentum Tracker**: Verified existing display in the metabolic profile section
+- **Data-testid attributes**: Added `text-whtr-value`, `text-whtr-classification`, `text-whtr-interpretation` for testing
+
 ## December 13, 2025 - Client-Facing Tool Renaming & Hydration Tracker
 - **Tool name updates**: Renamed all 6 main tools across the application UI:
   - Profile Assessment → Client Intake Profile
