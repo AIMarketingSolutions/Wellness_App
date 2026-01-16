@@ -459,43 +459,90 @@ export default function TransformationTracker() {
                 Metabolic Profile
               </h2>
 
-              <div className="space-y-4">
-                <div className="p-6 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-200">
-                  <p className="text-sm font-semibold text-violet-700 mb-2">Macronutrient Distribution</p>
-                  <p className="text-lg font-bold text-violet-900" data-testid="text-metabolic-profile">
-                    {getMetabolicProfileDisplay()}
-                  </p>
-                </div>
+              <div className="p-6 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-200">
+                <p className="text-sm font-semibold text-violet-700 mb-2">Macronutrient Distribution</p>
+                <p className="text-lg font-bold text-violet-900" data-testid="text-metabolic-profile">
+                  {getMetabolicProfileDisplay()}
+                </p>
+              </div>
+            </div>
 
-                {profile?.heightCm && profile?.waistCm && (
-                  <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
-                    <p className="text-sm font-semibold text-emerald-700 mb-2">Waist-to-Height Ratio (WHtR)</p>
-                    <div className="flex flex-wrap items-baseline gap-2">
-                      <p className="text-3xl font-bold text-emerald-900">
-                        {(parseFloat(profile.waistCm) / parseFloat(profile.heightCm)).toFixed(2)}
-                      </p>
-                      <p className="text-lg font-semibold text-emerald-700">
-                        {(() => {
-                          const whtr = parseFloat(profile.waistCm) / parseFloat(profile.heightCm);
-                          if (whtr < 0.40) return "Underfat";
-                          if (whtr < 0.50) return "Healthy";
-                          if (whtr < 0.60) return "Overfat";
-                          return "Obese (Central Obesity)";
-                        })()}
-                      </p>
-                    </div>
-                    <p className="text-xs text-emerald-600 mt-2 italic">
-                      {(() => {
-                        const whtr = parseFloat(profile.waistCm) / parseFloat(profile.heightCm);
-                        if (whtr < 0.40) return "Possible under-nutrition or low energy reserves";
-                        if (whtr < 0.50) return "Low cardiometabolic risk";
-                        if (whtr < 0.60) return "Increased risk for metabolic and cardiovascular conditions";
-                        return "High risk for cardiometabolic disease";
-                      })()}
+            {/* Waist-to-Height Ratio Section */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8">
+              <h2 className="text-2xl font-bold text-[#2C3E50] flex items-center gap-2 mb-6">
+                <Ruler className="w-6 h-6 text-[#52C878]" />
+                Waist-to-Height Ratio (WHtR)
+              </h2>
+
+              {profile?.heightCm && profile?.waistCm && parseFloat(profile.heightCm) > 0 && parseFloat(profile.waistCm) > 0 ? (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 p-4 rounded-xl border border-[#52C878]/20">
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      WHtR is a strong predictor of cardiovascular and metabolic risk. The key rule: your waist should be less than half your height.
                     </p>
                   </div>
-                )}
-              </div>
+
+                  <div className="p-6 bg-white rounded-xl border-2 border-[#52C878]/30 shadow-md">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Your WHtR Result</p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-4xl font-bold text-[#2C3E50]" data-testid="text-whtr-value">
+                            {(parseFloat(profile.waistCm) / parseFloat(profile.heightCm)).toFixed(2)}
+                          </p>
+                          <p className="text-xl font-semibold text-[#52C878]" data-testid="text-whtr-classification">
+                            {(() => {
+                              const ratio = parseFloat(profile.waistCm) / parseFloat(profile.heightCm);
+                              if (ratio < 0.40) return "Underfat";
+                              if (ratio < 0.50) return "Healthy";
+                              if (ratio < 0.60) return "Overfat";
+                              return "Obese (Central Obesity)";
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-100">
+                        <p className="text-xs font-medium text-gray-500 mb-1">Interpretation</p>
+                        <p className="text-sm text-[#2C3E50]" data-testid="text-whtr-interpretation">
+                          {(() => {
+                            const ratio = parseFloat(profile.waistCm) / parseFloat(profile.heightCm);
+                            if (ratio < 0.40) return "Possible under-nutrition or low energy reserves";
+                            if (ratio < 0.50) return "Low cardiometabolic risk";
+                            if (ratio < 0.60) return "Increased risk for metabolic and cardiovascular conditions";
+                            return "High risk for cardiometabolic disease";
+                          })()}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6">
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Classification Ranges</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className={`p-2 rounded-lg text-center border ${parseFloat(profile.waistCm) / parseFloat(profile.heightCm) < 0.40 ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-400' : 'bg-gray-50 border-gray-100'}`}>
+                          <p className="text-[10px] font-bold text-gray-500">{"< 0.40"}</p>
+                          <p className="text-xs font-semibold">Underfat</p>
+                        </div>
+                        <div className={`p-2 rounded-lg text-center border ${parseFloat(profile.waistCm) / parseFloat(profile.heightCm) >= 0.40 && parseFloat(profile.waistCm) / parseFloat(profile.heightCm) < 0.50 ? 'bg-green-50 border-green-200 ring-2 ring-green-400' : 'bg-gray-50 border-gray-100'}`}>
+                          <p className="text-[10px] font-bold text-gray-500">0.40 - 0.49</p>
+                          <p className="text-xs font-semibold">Healthy</p>
+                        </div>
+                        <div className={`p-2 rounded-lg text-center border ${parseFloat(profile.waistCm) / parseFloat(profile.heightCm) >= 0.50 && parseFloat(profile.waistCm) / parseFloat(profile.heightCm) < 0.60 ? 'bg-yellow-50 border-yellow-200 ring-2 ring-yellow-400' : 'bg-gray-50 border-gray-100'}`}>
+                          <p className="text-[10px] font-bold text-gray-500">0.50 - 0.59</p>
+                          <p className="text-xs font-semibold">Overfat</p>
+                        </div>
+                        <div className={`p-2 rounded-lg text-center border ${parseFloat(profile.waistCm) / parseFloat(profile.heightCm) >= 0.60 ? 'bg-red-50 border-red-200 ring-2 ring-red-400' : 'bg-gray-50 border-gray-100'}`}>
+                          <p className="text-[10px] font-bold text-gray-500">{"≥ 0.60"}</p>
+                          <p className="text-xs font-semibold">Obese</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                  <p className="text-gray-500">Please complete height and waist measurements in your Client Intake Profile to see your ratio.</p>
+                </div>
+              )}
             </div>
 
             {/* Recommended Macros Per Meal Section */}
