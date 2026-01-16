@@ -459,11 +459,42 @@ export default function TransformationTracker() {
                 Metabolic Profile
               </h2>
 
-              <div className="p-6 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-200">
-                <p className="text-sm font-semibold text-violet-700 mb-2">Macronutrient Distribution</p>
-                <p className="text-lg font-bold text-violet-900" data-testid="text-metabolic-profile">
-                  {getMetabolicProfileDisplay()}
-                </p>
+              <div className="space-y-4">
+                <div className="p-6 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border border-violet-200">
+                  <p className="text-sm font-semibold text-violet-700 mb-2">Macronutrient Distribution</p>
+                  <p className="text-lg font-bold text-violet-900" data-testid="text-metabolic-profile">
+                    {getMetabolicProfileDisplay()}
+                  </p>
+                </div>
+
+                {profile?.heightCm && profile?.waistCm && (
+                  <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+                    <p className="text-sm font-semibold text-emerald-700 mb-2">Waist-to-Height Ratio (WHtR)</p>
+                    <div className="flex flex-wrap items-baseline gap-2">
+                      <p className="text-3xl font-bold text-emerald-900">
+                        {(parseFloat(profile.waistCm) / parseFloat(profile.heightCm)).toFixed(2)}
+                      </p>
+                      <p className="text-lg font-semibold text-emerald-700">
+                        {(() => {
+                          const whtr = parseFloat(profile.waistCm) / parseFloat(profile.heightCm);
+                          if (whtr < 0.40) return "Underfat";
+                          if (whtr < 0.50) return "Healthy";
+                          if (whtr < 0.60) return "Overfat";
+                          return "Obese (Central Obesity)";
+                        })()}
+                      </p>
+                    </div>
+                    <p className="text-xs text-emerald-600 mt-2 italic">
+                      {(() => {
+                        const whtr = parseFloat(profile.waistCm) / parseFloat(profile.heightCm);
+                        if (whtr < 0.40) return "Possible under-nutrition or low energy reserves";
+                        if (whtr < 0.50) return "Low cardiometabolic risk";
+                        if (whtr < 0.60) return "Increased risk for metabolic and cardiovascular conditions";
+                        return "High risk for cardiometabolic disease";
+                      })()}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
