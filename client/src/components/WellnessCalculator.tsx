@@ -876,6 +876,94 @@ function WellnessCalculator() {
               )}
             </div>
           </div>
+
+          {/* Section 7: Waist-to-Height Ratio */}
+          <div className="bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20">
+            <h3 className="text-xl font-semibold text-[#2C3E50] mb-6 flex items-center gap-2">
+              <Activity className="w-5 h-5" />
+              Section 7: Waist-to-Height Ratio (WHtR)
+            </h3>
+            
+            <div className="space-y-6">
+              <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                  Waist-to-Height Ratio is a simple way to understand whether the amount of fat stored around your midsection is within a healthy range for your body size. It is a strong predictor of cardiovascular and metabolic risk.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-[#52C878]"></div>
+                    <span>Directly reflects visceral (abdominal) fat</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-[#52C878]"></div>
+                    <span>Key rule: Waist should be less than half height</span>
+                  </div>
+                </div>
+              </div>
+
+              {profile.height_inches > 0 && profile.waist_inches > 0 ? (
+                <div className="p-6 bg-white rounded-xl border-2 border-[#52C878]/30 shadow-md">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Your WHtR Result</p>
+                      <div className="flex items-baseline gap-2">
+                        <p className="text-4xl font-bold text-[#2C3E50]">
+                          {(profile.waist_inches / profile.height_inches).toFixed(2)}
+                        </p>
+                        <p className="text-xl font-semibold text-[#52C878]">
+                          {(() => {
+                            const ratio = profile.waist_inches / profile.height_inches;
+                            if (ratio < 0.40) return "Underfat";
+                            if (ratio < 0.50) return "Healthy";
+                            if (ratio < 0.60) return "Overfat";
+                            return "Obese (Central Obesity)";
+                          })()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-100">
+                      <p className="text-xs font-medium text-gray-500 mb-1">Interpretation</p>
+                      <p className="text-sm text-[#2C3E50]">
+                        {(() => {
+                          const ratio = profile.waist_inches / profile.height_inches;
+                          if (ratio < 0.40) return "Possible under-nutrition or low energy reserves";
+                          if (ratio < 0.50) return "Low cardiometabolic risk";
+                          if (ratio < 0.60) return "Increased risk for metabolic and cardiovascular conditions";
+                          return "High risk for cardiometabolic disease";
+                        })()}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Classification Ranges</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <div className={`p-2 rounded-lg text-center border ${profile.waist_inches / profile.height_inches < 0.40 ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-400' : 'bg-gray-50 border-gray-100'}`}>
+                        <p className="text-[10px] font-bold text-gray-500">{"< 0.40"}</p>
+                        <p className="text-xs font-semibold">Underfat</p>
+                      </div>
+                      <div className={`p-2 rounded-lg text-center border ${profile.waist_inches / profile.height_inches >= 0.40 && profile.waist_inches / profile.height_inches < 0.50 ? 'bg-green-50 border-green-200 ring-2 ring-green-400' : 'bg-gray-50 border-gray-100'}`}>
+                        <p className="text-[10px] font-bold text-gray-500">0.40 - 0.49</p>
+                        <p className="text-xs font-semibold">Healthy</p>
+                      </div>
+                      <div className={`p-2 rounded-lg text-center border ${profile.waist_inches / profile.height_inches >= 0.50 && profile.waist_inches / profile.height_inches < 0.60 ? 'bg-yellow-50 border-yellow-200 ring-2 ring-yellow-400' : 'bg-gray-50 border-gray-100'}`}>
+                        <p className="text-[10px] font-bold text-gray-500">0.50 - 0.59</p>
+                        <p className="text-xs font-semibold">Overfat</p>
+                      </div>
+                      <div className={`p-2 rounded-lg text-center border ${profile.waist_inches / profile.height_inches >= 0.60 ? 'bg-red-50 border-red-200 ring-2 ring-red-400' : 'bg-gray-50 border-gray-100'}`}>
+                        <p className="text-[10px] font-bold text-gray-500">{"≥ 0.60"}</p>
+                        <p className="text-xs font-semibold">Obese</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                  <p className="text-gray-500">Please complete height and waist measurements in Section 1 and 2 to see your ratio.</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="mt-8">
@@ -1105,92 +1193,6 @@ function WellnessCalculator() {
                 >
                   Create Meal Plan
                 </button>
-              </div>
-            {/* Section 7: Waist-to-Height Ratio */}
-            <div className="w-full mt-8 bg-gradient-to-r from-[#52C878]/5 to-[#4A90E2]/5 p-6 rounded-xl border border-[#52C878]/20 text-left">
-              <h3 className="text-xl font-semibold text-[#2C3E50] mb-6 flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                Section 7: Waist-to-Height Ratio (WHtR)
-              </h3>
-              
-              <div className="space-y-6">
-                <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
-                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                    Waist-to-Height Ratio is a simple way to understand whether the amount of fat stored around your midsection is within a healthy range for your body size. It is a strong predictor of cardiovascular and metabolic risk.
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#52C878]"></div>
-                      <span>Directly reflects visceral (abdominal) fat</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#52C878]"></div>
-                      <span>Key rule: Waist should be less than half height</span>
-                    </div>
-                  </div>
-                </div>
-
-                {profile.height_inches > 0 && profile.waist_inches > 0 ? (
-                  <div className="p-6 bg-white rounded-xl border-2 border-[#52C878]/30 shadow-md">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Your WHtR Result</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-4xl font-bold text-[#2C3E50]">
-                            {(profile.waist_inches / profile.height_inches).toFixed(2)}
-                          </p>
-                          <p className="text-xl font-semibold text-[#52C878]">
-                            {(() => {
-                              const ratio = profile.waist_inches / profile.height_inches;
-                              if (ratio < 0.40) return "Underfat";
-                              if (ratio < 0.50) return "Healthy";
-                              if (ratio < 0.60) return "Overfat";
-                              return "Obese (Central Obesity)";
-                            })()}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="px-4 py-2 bg-gray-50 rounded-lg border border-gray-100">
-                        <p className="text-xs font-medium text-gray-500 mb-1">Interpretation</p>
-                        <p className="text-sm text-[#2C3E50]">
-                          {(() => {
-                            const ratio = profile.waist_inches / profile.height_inches;
-                            if (ratio < 0.40) return "Possible under-nutrition or low energy reserves";
-                            if (ratio < 0.50) return "Low cardiometabolic risk";
-                            if (ratio < 0.60) return "Increased risk for metabolic and cardiovascular conditions";
-                            return "High risk for cardiometabolic disease";
-                          })()}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6">
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Classification Ranges</p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <div className={`p-2 rounded-lg text-center border ${profile.waist_inches / profile.height_inches < 0.40 ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-400' : 'bg-gray-50 border-gray-100'}`}>
-                          <p className="text-[10px] font-bold text-gray-500">{"< 0.40"}</p>
-                          <p className="text-xs font-semibold">Underfat</p>
-                        </div>
-                        <div className={`p-2 rounded-lg text-center border ${profile.waist_inches / profile.height_inches >= 0.40 && profile.waist_inches / profile.height_inches < 0.50 ? 'bg-green-50 border-green-200 ring-2 ring-green-400' : 'bg-gray-50 border-gray-100'}`}>
-                          <p className="text-[10px] font-bold text-gray-500">0.40 - 0.49</p>
-                          <p className="text-xs font-semibold">Healthy</p>
-                        </div>
-                        <div className={`p-2 rounded-lg text-center border ${profile.waist_inches / profile.height_inches >= 0.50 && profile.waist_inches / profile.height_inches < 0.60 ? 'bg-yellow-50 border-yellow-200 ring-2 ring-yellow-400' : 'bg-gray-50 border-gray-100'}`}>
-                          <p className="text-[10px] font-bold text-gray-500">0.50 - 0.59</p>
-                          <p className="text-xs font-semibold">Overfat</p>
-                        </div>
-                        <div className={`p-2 rounded-lg text-center border ${profile.waist_inches / profile.height_inches >= 0.60 ? 'bg-red-50 border-red-200 ring-2 ring-red-400' : 'bg-gray-50 border-gray-100'}`}>
-                          <p className="text-[10px] font-bold text-gray-500">{"≥ 0.60"}</p>
-                          <p className="text-xs font-semibold">Obese</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                    <p className="text-gray-500">Please complete height and waist measurements in Section 1 and 2 to see your ratio.</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
