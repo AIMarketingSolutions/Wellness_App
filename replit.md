@@ -11,7 +11,7 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
   - Classification display (Underfat <0.40, Healthy 0.40-0.49, Overfat 0.50-0.59, Obese ≥0.60)
   - Health interpretation for each classification
   - Color-coded range indicators
-- **WHtR in Momentum Tracker**: Verified existing display in the metabolic profile section
+- **WHtR in Momentum Tracker**: Added dedicated standalone section (`client/src/pages/TransformationTracker.tsx`) with same design as Client Intake Profile
 - **Data-testid attributes**: Added `text-whtr-value`, `text-whtr-classification`, `text-whtr-interpretation` for testing
 
 ## December 13, 2025 - Client-Facing Tool Renaming & Hydration Tracker
