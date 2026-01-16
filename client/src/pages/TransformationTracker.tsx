@@ -356,25 +356,6 @@ export default function TransformationTracker() {
                   </div>
                 </div>
 
-                {/* Neck Measurements */}
-                <div>
-                  <h3 className="text-lg font-semibold text-[#2C3E50] mb-3">Neck Measurement</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-6 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-xl border border-teal-200">
-                      <p className="text-sm font-semibold text-teal-700 mb-2">Current</p>
-                      <p className="text-2xl font-bold text-teal-900" data-testid="text-neck">
-                        {profile.neckCm ? `${profile.neckCm} cm` : "Not set"}
-                      </p>
-                    </div>
-                    <div className="p-6 bg-gradient-to-br from-teal-100 to-teal-200/50 rounded-xl border border-teal-300">
-                      <p className="text-sm font-semibold text-teal-800 mb-2">Goal</p>
-                      <p className="text-2xl font-bold text-teal-950" data-testid="text-goal-neck">
-                        {profile.goalNeckCm ? `${profile.goalNeckCm} cm` : "Not set"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Hip Measurements (if available) */}
                 {(profile.hipCm || profile.goalHipCm) && (
                   <div>

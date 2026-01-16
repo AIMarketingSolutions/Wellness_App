@@ -12,10 +12,8 @@ interface ProfileFormData {
   weightKg: string;
   heightCm: string;
   waistCm: string;
-  neckCm: string;
   hipCm: string;
   goalWaistCm: string;
-  goalNeckCm: string;
   goalHipCm: string;
   startingWeightKg: string;
   currentWeightKg: string;
@@ -39,10 +37,8 @@ export default function ProfileAssessment() {
     weightKg: "",
     heightCm: "",
     waistCm: "",
-    neckCm: "",
     hipCm: "",
     goalWaistCm: "",
-    goalNeckCm: "",
     goalHipCm: "",
     startingWeightKg: "",
     currentWeightKg: "",
@@ -75,10 +71,8 @@ export default function ProfileAssessment() {
         weightKg: profile.weightKg || "",
         heightCm: profile.heightCm || "",
         waistCm: profile.waistCm || "",
-        neckCm: profile.neckCm || "",
         hipCm: profile.hipCm || "",
         goalWaistCm: profile.goalWaistCm || "",
-        goalNeckCm: profile.goalNeckCm || "",
         goalHipCm: profile.goalHipCm || "",
         startingWeightKg: profile.startingWeightKg || "",
         currentWeightKg: profile.currentWeightKg || "",
@@ -144,10 +138,8 @@ export default function ProfileAssessment() {
         weightKg: formData.weightKg || null,
         heightCm: formData.heightCm || null,
         waistCm: formData.waistCm || null,
-        neckCm: formData.neckCm || null,
         hipCm: formData.hipCm || null,
         goalWaistCm: formData.goalWaistCm || null,
-        goalNeckCm: formData.goalNeckCm || null,
         goalHipCm: formData.goalHipCm || null,
         startingWeightKg: formData.startingWeightKg || null,
         currentWeightKg: formData.currentWeightKg || null,
@@ -547,43 +539,6 @@ export default function ProfileAssessment() {
                       onChange={(e) => setFormData({ ...formData, goalWaistCm: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
                       placeholder="Goal waist"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Neck Measurements */}
-              <div>
-                <h3 className="text-lg font-semibold text-[#2C3E50] mb-3">
-                  Neck Measurement
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                      Current Measurement (cm)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      data-testid="input-neck"
-                      value={formData.neckCm}
-                      onChange={(e) => setFormData({ ...formData, neckCm: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
-                      placeholder="Current neck"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                      Goal Measurement (cm)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      data-testid="input-goal-neck"
-                      value={formData.goalNeckCm}
-                      onChange={(e) => setFormData({ ...formData, goalNeckCm: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#52C878]/20 focus:border-[#52C878]"
-                      placeholder="Goal neck"
                     />
                   </div>
                 </div>
