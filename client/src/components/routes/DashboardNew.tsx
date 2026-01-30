@@ -48,7 +48,29 @@ function DashboardNew({}: DashboardNewProps) {
               <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                 <Dumbbell className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-white">Nutrition One Fitness</h1>
+              <h1 className="text-xl font-bold text-white">
+                <span className="text-white">N</span>
+                <span className="text-white">u</span>
+                <span className="text-white">t</span>
+                <span className="text-white">r</span>
+                <span className="text-white">i</span>
+                <span className="text-white">t</span>
+                <span className="text-white">i</span>
+                <span className="text-white">o</span>
+                <span className="text-white">n</span>
+                {" "}
+                <span className="text-[#4A90E2]">O</span>
+                <span className="text-[#52C878]">n</span>
+                <span className="text-[#52C878]">e</span>
+                {" "}
+                <span className="text-[#52C878]">F</span>
+                <span className="text-white">i</span>
+                <span className="text-white">t</span>
+                <span className="text-white">n</span>
+                <span className="text-white">e</span>
+                <span className="text-white">s</span>
+                <span className="text-white">s</span>
+              </h1>
             </div>
             
             <div className="flex items-center gap-6">
