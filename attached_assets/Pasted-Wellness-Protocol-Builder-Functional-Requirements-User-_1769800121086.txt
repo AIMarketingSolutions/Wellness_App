@@ -1,0 +1,87 @@
+Wellness Protocol Builder – Functional Requirements & User Flow
+
+Questionnaire Access & Format
+The Wellness Protocol Builder should be accessed via a dedicated link. Upon clicking the link, users are guided through a step-by-step questionnaire that presents one question per screen to ensure clarity, focus, and ease of completion.
+
+Each screen must include a “Next” button to advance to the following question.
+
+Link Display Content (Landing Section)
+
+Title:
+Wellness Protocol Builder
+
+Description:
+Complete your symptom assessment and generate a personalized wellness support plan.
+Comprehensive detoxification and whole-body strategies developed by certified practitioners.
+
+Section Header:
+Body Health Assessment
+
+Subtext:
+Evaluate your current health status across key wellness indicators.
+
+A simple, professional wellness-related icon or graphic should accompany this section.
+
+Questionnaire Instructions
+
+Instruction Text:
+Please select the symptoms you experience on a daily basis.
+
+Questionnaire Structure (One Question Per Screen)
+
+Digestive Health
+
+Energy & Cognition
+
+Skin & Allergies
+
+Sleep & Mood
+
+Appetite & Weight
+
+Pain & Physical Function
+
+Exposure History
+
+After completing each section, the user selects “Next” to proceed.
+After the seventh section, the user selects “Submit.”
+
+Post-Submission Logic & Output
+
+Upon submission, the system analyzes responses and categorizes symptoms into three levels:
+
+High Priority
+
+Medium Priority
+
+Low Priority
+
+Personalized Protocol Delivery
+
+The user is then presented with a customized wellness protocol, beginning with High Priority symptoms, followed by Medium and Low.
+
+For each High Priority symptom category, the protocol must include:
+
+Education
+
+A brief explanation of the symptom pattern and underlying wellness implications.
+
+Why It Matters
+
+Clear reasoning on how this symptom impacts overall health, energy, metabolism, or detoxification capacity.
+
+Supplement Recommendations
+
+Targeted supplements aligned to the symptom profile.
+
+Clear dosage guidelines.
+
+Timing instructions (when to take).
+
+Instructions on whether supplements should be taken with food, without food, or at specific times of day.
+
+Next-Step Guidance
+
+Actionable recommendations outlining what the client should focus on first.
+
+Direction for ongoing support or practitioner follow-up, if applicable.

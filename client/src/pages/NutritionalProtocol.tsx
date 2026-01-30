@@ -242,106 +242,200 @@ const protocolDetails: { [key: string]: {
 
 export default function NutritionalProtocol() {
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: boolean }>({});
-  const [quizScore, setQuizScore] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const protocols = [
-    { title: "Parasite Symptoms", desc: "Identify and support parasitic burdens affecting digestion and immunity", icon: Bug, color: "from-[#52C878] to-[#4A90E2]" },
-    { title: "Leaky Gut", desc: "Restore intestinal barrier integrity and reduce inflammation", icon: Heart, color: "from-[#4A90E2] to-[#52C878]" },
-    { title: "Adrenal Stress & Cortisol Balance", desc: "Restore energy and support stress hormone recovery", icon: Heart, color: "from-[#4A90E2] to-[#52C878]" },
-    { title: "Heavy Metal Detox Support", desc: "Reduce toxic load from mercury, lead, cadmium, aluminum, and arsenic", icon: Flame, color: "from-[#52C878] to-[#4A90E2]" },
-    { title: "Whole Body Detox", desc: "Support all major elimination pathways", icon: Sparkles, color: "from-[#4A90E2] to-[#52C878]" },
-    { title: "Liver Detox & Regeneration", desc: "Optimize your primary fat-burning and detox organ", icon: Zap, color: "from-[#52C878] to-[#4A90E2]" },
-    { title: "Kidney Detox", desc: "Filter acids, toxins, and metabolic waste effectively", icon: Droplet, color: "from-[#4A90E2] to-[#52C878]" },
-    { title: "Gallbladder Flush & Bile Flow", desc: "Optimize fat digestion and toxin elimination", icon: BookOpen, color: "from-[#52C878] to-[#4A90E2]" },
-    { title: "Menopausal Symptoms", desc: "Support hormonal balance and manage transition symptoms", icon: Leaf, color: "from-[#4A90E2] to-[#52C878]" },
-    { title: "Anemia", desc: "Boost iron levels and support healthy blood formation", icon: Droplets, color: "from-[#52C878] to-[#4A90E2]" },
+  const steps = [
+    { id: "digestive", label: "Digestive Health" },
+    { id: "energy", label: "Energy & Cognition" },
+    { id: "skin", label: "Skin & Allergies" },
+    { id: "sleep", label: "Sleep & Mood" },
+    { id: "appetite", label: "Appetite & Weight" },
+    { id: "pain", label: "Pain & Physical Function" },
+    { id: "exposure", label: "Exposure History" }
   ];
 
   const handleQuizAnswer = (questionId: string, value: boolean) => {
     setQuizAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const submitQuiz = () => {
-    let score = 0;
-    bodyHealthQuestions.forEach(q => {
-      if (quizAnswers[q.id]) score += q.score;
+  const getPriorityData = () => {
+    const categories = steps.map(s => s.id);
+    const results = categories.map(cat => {
+      const catQuestions = bodyHealthQuestions.filter(q => q.category === cat);
+      const score = catQuestions.reduce((acc, q) => acc + (quizAnswers[q.id] ? q.score : 0), 0);
+      const maxScore = catQuestions.reduce((acc, q) => acc + q.score, 0);
+      const ratio = score / maxScore;
+      
+      let priority: "High" | "Medium" | "Low" = "Low";
+      if (ratio > 0.4) priority = "High";
+      else if (ratio > 0.1) priority = "Medium";
+
+      // Map categories to relevant protocols
+      const protocolMap: { [key: string]: string[] } = {
+        digestive: ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow"],
+        energy: ["Adrenal Stress & Cortisol Balance", "Anemia"],
+        skin: ["Leaky Gut", "Whole Body Detox"],
+        sleep: ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
+        appetite: ["Liver Detox & Regeneration", "Whole Body Detox"],
+        pain: ["Heavy Metal Detox Support", "Whole Body Detox"],
+        exposure: ["Heavy Metal Detox Support", "Parasite Symptoms", "Kidney Detox"]
+      };
+
+      return {
+        category: cat,
+        label: steps.find(s => s.id === cat)?.label || cat,
+        score,
+        priority,
+        protocols: protocolMap[cat] || []
+      };
     });
-    setQuizScore(score);
-    setShowResults(true);
+
+    return results.sort((a, b) => {
+      const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    });
   };
 
-  const getRiskLevel = (score: number) => {
-    if (score <= 7) return { label: "Low", color: "text-green-600", bgColor: "bg-green-50" };
-    if (score <= 15) return { label: "Moderate", color: "text-yellow-600", bgColor: "bg-yellow-50" };
-    if (score <= 24) return { label: "High", color: "text-orange-600", bgColor: "bg-orange-50" };
-    return { label: "Very High", color: "text-red-600", bgColor: "bg-red-50" };
-  };
-
-  const renderProtocolDetails = (title: string) => {
-    const details = protocolDetails[title];
-    if (!details) return null;
+  const renderStep = () => {
+    const step = steps[currentStep];
+    const categoryQuestions = bodyHealthQuestions.filter(q => q.category === step.id);
 
     return (
-      <div className="mt-8 space-y-6 border-t border-gray-100 pt-6 animate-in fade-in slide-in-from-top-4 duration-300">
-        <div>
-          <h4 className="text-lg font-bold text-[#2C3E50] mb-2 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-[#52C878]" />
-            Education
-          </h4>
-          <p className="text-gray-700 text-sm leading-relaxed">
-            {details.education}
-          </p>
+      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-bold text-[#2C3E50] text-2xl">{step.label}</h4>
+          <span className="text-sm font-medium text-gray-500">Step {currentStep + 1} of {steps.length}</span>
         </div>
-
-        <div>
-          <h4 className="text-lg font-bold text-[#2C3E50] mb-2 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#4A90E2]" />
-            Why It Matters
-          </h4>
-          <ul className="list-disc list-inside space-y-2">
-            {details.whyItMatters.map((item, i) => (
-              <li key={i} className="text-gray-600 text-sm">{item}</li>
+        
+        <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+          <p className="text-gray-600 mb-6 italic">Please select the symptoms you experience on a daily basis.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {categoryQuestions.map(q => (
+              <label key={q.id} className="flex items-center gap-3 cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:border-[#52C878] hover:shadow-md transition-all group">
+                <input
+                  type="checkbox"
+                  checked={quizAnswers[q.id] || false}
+                  onChange={(e) => handleQuizAnswer(q.id, e.target.checked)}
+                  className="w-5 h-5 rounded accent-[#52C878] cursor-pointer"
+                  data-testid={`checkbox-${q.id}`}
+                />
+                <span className="text-gray-700 font-medium group-hover:text-[#2C3E50]">{q.label}</span>
+              </label>
             ))}
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-lg font-bold text-[#2C3E50] mb-4 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-orange-400" />
-            Supplement Protocol
-          </h4>
-          <div className="grid grid-cols-1 gap-4">
-            {["with_meal", "empty_stomach", "before_meal"].map(timing => {
-              const timingSupps = details.supplements.filter(s => s.timing === timing);
-              if (timingSupps.length === 0) return null;
-
-              const timingLabels: { [key: string]: { label: string, color: string, border: string } } = {
-                with_meal: { label: "With Meals", color: "bg-orange-50", border: "border-orange-400" },
-                empty_stomach: { label: "Empty Stomach", color: "bg-blue-50", border: "border-blue-400" },
-                before_meal: { label: "30 Min Before Meals", color: "bg-purple-50", border: "border-purple-400" }
-              };
-
-              return (
-                <div key={timing} className={`${timingLabels[timing].color} rounded-lg p-4 border-l-4 ${timingLabels[timing].border}`}>
-                  <h5 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded ${timingLabels[timing].border.replace('border', 'bg')}`}></div>
-                    {timingLabels[timing].label}
-                  </h5>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {timingSupps.map((supp, idx) => (
-                      <div key={idx} className="bg-white/50 p-2 rounded">
-                        <p className="font-semibold text-gray-800 text-sm">{supp.name}</p>
-                        <p className="text-gray-600 text-xs">{supp.dosing}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
+
+        <div className="flex gap-4">
+          {currentStep > 0 && (
+            <button
+              onClick={() => setCurrentStep(prev => prev - 1)}
+              className="flex-1 px-6 py-4 rounded-xl font-bold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              Previous
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (currentStep < steps.length - 1) {
+                setCurrentStep(prev => prev + 1);
+              } else {
+                setShowResults(true);
+              }
+            }}
+            className="flex-[2] bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-4 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-lg"
+            data-testid={currentStep === steps.length - 1 ? "btn-submit-assessment" : "btn-next-step"}
+          >
+            {currentStep === steps.length - 1 ? "Submit Assessment" : "Next Section"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderPriorityResults = () => {
+    const priorityData = getPriorityData();
+    
+    return (
+      <div className="space-y-10">
+        <div className="text-center mb-10">
+          <h3 className="text-3xl font-bold text-[#2C3E50] mb-2">Your Personalized Wellness Roadmap</h3>
+          <p className="text-gray-600">Based on your assessment, we've prioritized your support protocols below.</p>
+        </div>
+
+        {priorityData.map((data, idx) => (
+          <div key={data.category} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${idx * 100}ms` }}>
+            <div className={`flex items-center justify-between p-4 rounded-xl border-l-8 ${
+              data.priority === 'High' ? 'bg-red-50 border-red-500' :
+              data.priority === 'Medium' ? 'bg-orange-50 border-orange-500' :
+              'bg-green-50 border-green-500'
+            }`}>
+              <div>
+                <span className={`text-xs font-bold uppercase tracking-wider px-2 py-1 rounded ${
+                  data.priority === 'High' ? 'bg-red-100 text-red-700' :
+                  data.priority === 'Medium' ? 'bg-orange-100 text-orange-700' :
+                  'bg-green-100 text-green-700'
+                }`}>
+                  {data.priority} Priority
+                </span>
+                <h4 className="text-xl font-bold text-[#2C3E50] mt-1">{data.label}</h4>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Symptom Score</p>
+                <p className="text-2xl font-black text-[#2C3E50]">{data.score}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              {data.protocols.map(protocolName => (
+                <div key={protocolName} className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-gradient-to-r from-[#4A90E2] to-[#52C878] rounded-xl">
+                      <Zap className="w-6 h-6 text-white" />
+                    </div>
+                    <h5 className="text-2xl font-bold text-[#2C3E50]">{protocolName}</h5>
+                  </div>
+                  
+                  {renderProtocolDetails(protocolName)}
+
+                  <div className="mt-8 p-6 bg-blue-50 rounded-2xl border border-blue-100">
+                    <h6 className="font-bold text-[#2C3E50] mb-3 flex items-center gap-2 text-lg">
+                      <Sparkles className="w-6 h-6 text-[#4A90E2]" />
+                      Next-Step Guidance
+                    </h6>
+                    <div className="space-y-3 text-gray-700">
+                      <p className="leading-relaxed">
+                        {data.priority === 'High' ? (
+                          <><strong>Focus First:</strong> This area requires immediate attention. Start with the "Empty Stomach" supplements today and focus on proper hydration.</>
+                        ) : data.priority === 'Medium' ? (
+                          <><strong>Supporting Focus:</strong> Begin incorporating these supplements after 7 days of your High Priority protocol to avoid detox overwhelm.</>
+                        ) : (
+                          <><strong>Maintenance:</strong> These areas are currently stable. Re-evaluate in 30 days or if new symptoms emerge.</>
+                        )}
+                      </p>
+                      <p className="text-sm italic font-medium text-gray-500">
+                        Consult with your healthcare practitioner for personalized dosing adjustments and long-term support.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <button
+          onClick={() => {
+            setShowResults(false);
+            setQuizAnswers({});
+            setCurrentStep(0);
+          }}
+          className="w-full bg-white border-2 border-[#4A90E2] text-[#4A90E2] py-4 rounded-xl font-bold hover:bg-blue-50 transition-all text-lg shadow-sm"
+          data-testid="btn-retake-assessment"
+        >
+          Retake Full Assessment
+        </button>
       </div>
     );
   };
@@ -357,128 +451,93 @@ export default function NutritionalProtocol() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
-            <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] p-4 rounded-full">
+            <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] p-4 rounded-2xl shadow-lg">
               <BookOpen className="w-12 h-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-[#2C3E50] mb-2">Wellness Protocol Builder</h1>
-          <p className="text-sm text-gray-500 italic mb-3">Complete your symptom assessment and generate a personalized support plan.</p>
-          <p className="text-lg text-gray-600">Comprehensive detoxification and wellness strategies from certified practitioners</p>
+          <h1 className="text-4xl font-extrabold text-[#2C3E50] mb-3 tracking-tight">Wellness Protocol Builder</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Complete your symptom assessment and generate a personalized wellness support plan. Comprehensive detoxification and whole-body strategies developed by certified practitioners.
+          </p>
         </div>
 
         {/* Universal Body Health Assessment */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 mb-12">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] p-4 rounded-xl">
-              <Heart className="w-8 h-8 text-white" />
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl p-8 md:p-10 shadow-xl border border-white mb-12 overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <Heart className="w-32 h-32 text-[#52C878]" />
+          </div>
+          
+          <div className="relative">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="bg-gradient-to-br from-[#4A90E2] to-[#52C878] p-3 rounded-xl shadow-inner">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-[#2C3E50]">Body Health Assessment</h2>
+                <p className="text-gray-500 font-medium tracking-wide">Evaluate your current health status across key wellness indicators.</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-3xl font-bold text-[#2C3E50]">Body Health Assessment</h2>
-              <p className="text-gray-600">Evaluate your health status across key wellness indicators</p>
+
+            {!showResults ? renderStep() : renderPriorityResults()}
+          </div>
+        </div>
+
+        {/* Nutritional Protocols Reference - Only show on results page or at start if needed */}
+        {!showResults && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {protocols.map((protocol) => (
+              <div 
+                key={protocol.title} 
+                className={`bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group cursor-pointer`}
+                onClick={() => setSelectedProtocol(selectedProtocol === protocol.title ? null : protocol.title)}
+              >
+                <div className="flex justify-between items-start">
+                  <div className={`bg-gradient-to-r ${protocol.color} p-3 rounded-xl inline-block mb-3`}>
+                    <protocol.icon className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-[#2C3E50] mb-2">{protocol.title}</h3>
+                <p className="text-sm text-gray-600 mb-3">{protocol.desc}</p>
+                <div className="text-[#52C878] text-sm font-bold flex items-center gap-1">
+                  {selectedProtocol === protocol.title ? 'Hide Details' : 'View Details'}
+                </div>
+                {selectedProtocol === protocol.title && renderProtocolDetails(protocol.title)}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Info Section */}
+        <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden group">
+          <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="relative">
+            <h3 className="text-3xl font-extrabold mb-4">Professional Detox & Wellness Guidance</h3>
+            <p className="text-white/90 text-xl mb-8 leading-relaxed max-w-2xl">
+              Our protocols are developed by Registered Nutritional Consulting Practitioners (RNCP) and focus on safe, effective methods to restore vitality and optimize health.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+                <p className="text-4xl font-black mb-1">100%</p>
+                <p className="text-white/80 font-bold tracking-wider uppercase text-xs">Evidence-Based</p>
+              </div>
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+                <p className="text-4xl font-black mb-1">RNCP</p>
+                <p className="text-white/80 font-bold tracking-wider uppercase text-xs">Certified</p>
+              </div>
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+                <p className="text-4xl font-black mb-1">24/7</p>
+                <p className="text-white/80 font-bold tracking-wider uppercase text-xs">Access</p>
+              </div>
             </div>
           </div>
-
-          {!showResults ? (
-            <div className="space-y-6">
-              <div className="max-h-[500px] overflow-y-auto space-y-6 pr-2">
-                {["digestive", "energy", "skin", "sleep", "appetite", "pain", "exposure"].map(category => {
-                  const categoryQuestions = bodyHealthQuestions.filter(q => q.category === category);
-                  const categoryLabels: { [key: string]: string } = {
-                    digestive: "Digestive Health",
-                    energy: "Energy & Cognition",
-                    skin: "Skin & Allergies",
-                    sleep: "Sleep & Mood",
-                    appetite: "Appetite & Weight",
-                    pain: "Pain & Physical",
-                    exposure: "Exposure History"
-                  };
-
-                  if (categoryQuestions.length === 0) return null;
-
-                  return (
-                    <div key={category}>
-                      <h4 className="font-semibold text-[#2C3E50] mb-3 text-lg">{categoryLabels[category]}</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-50 rounded-lg p-4">
-                        {categoryQuestions.map(q => (
-                          <label key={q.id} className="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={quizAnswers[q.id] || false}
-                              onChange={(e) => handleQuizAnswer(q.id, e.target.checked)}
-                              className="w-4 h-4 rounded accent-[#52C878]"
-                              data-testid={`checkbox-${q.id}`}
-                            />
-                            <span className="text-gray-700 text-sm">{q.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <button
-                onClick={submitQuiz}
-                className="w-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-shadow text-lg"
-                data-testid="btn-submit-assessment"
-              >
-                Get Your Results
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {quizScore !== null && (
-                <div className={`p-6 rounded-lg ${getRiskLevel(quizScore).bgColor} border-2 border-current`}>
-                  <p className={`font-bold text-xl ${getRiskLevel(quizScore).color} mb-2`}>
-                    Assessment Result: {getRiskLevel(quizScore).label} Risk Level
-                  </p>
-                  <p className={`${getRiskLevel(quizScore).color} font-semibold`}>Total Score: {quizScore} points</p>
-                </div>
-              )}
-              <button
-                onClick={() => {
-                  setShowResults(false);
-                  setQuizAnswers({});
-                  setQuizScore(null);
-                }}
-                className="w-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-2 rounded-lg font-semibold hover:shadow-lg"
-                data-testid="btn-retake-assessment"
-              >
-                Retake Assessment
-              </button>
-            </div>
-          )}
         </div>
-
-        {/* Nutritional Protocols Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {protocols.map((protocol) => (
-            <div 
-              key={protocol.title} 
-              className={`bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer group ${selectedProtocol === protocol.title ? 'ring-2 ring-[#52C878]' : ''}`}
-              onClick={() => setSelectedProtocol(selectedProtocol === protocol.title ? null : protocol.title)}
-            >
-              <div className="flex justify-between items-start">
-                <div className={`bg-gradient-to-r ${protocol.color} p-4 rounded-xl inline-block mb-4 group-hover:scale-110 transition-transform`}>
-                  <protocol.icon className="w-8 h-8 text-white" />
-                </div>
-                {selectedProtocol === protocol.title && (
-                  <span className="bg-[#52C878]/10 text-[#52C878] text-xs font-bold px-2 py-1 rounded">Active View</span>
-                )}
-              </div>
-              <h3 className="text-2xl font-bold text-[#2C3E50] mb-2 group-hover:text-[#52C878] transition-colors">{protocol.title}</h3>
-              <p className="text-gray-600 mb-4">{protocol.desc}</p>
-              
-              <div className="text-[#52C878] font-medium flex items-center gap-2">
-                {selectedProtocol === protocol.title ? 'Hide Details ↑' : 'Learn More ↓'}
-              </div>
-
-              {selectedProtocol === protocol.title && renderProtocolDetails(protocol.title)}
-            </div>
-          ))}
-        </div>
+      </main>
+    </div>
+  );
+}
 
         {/* Info Section */}
         <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] rounded-2xl p-8 text-white shadow-xl">
