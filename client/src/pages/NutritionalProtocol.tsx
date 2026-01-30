@@ -475,6 +475,37 @@ export default function NutritionalProtocol() {
           </button>
           <p className="text-sm text-gray-500 mt-4">Takes approximately 3-5 minutes to complete</p>
         </div>
+
+        <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 border border-gray-100 mt-8">
+          <div className="text-center mb-6">
+            <h4 className="font-bold text-[#2C3E50] text-2xl mb-2">10 Wellness Protocols Available</h4>
+            <p className="text-gray-600">Based on your assessment, you'll receive personalized recommendations from these evidence-based protocols:</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {protocols.map((protocol) => {
+              const details = protocolDetails[protocol];
+              return (
+                <div key={protocol} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-[#52C878]/30 transition-all group">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-gradient-to-br from-[#4A90E2]/10 to-[#52C878]/10 rounded-lg group-hover:from-[#4A90E2]/20 group-hover:to-[#52C878]/20 transition-colors">
+                      <BookOpen className="w-5 h-5 text-[#4A90E2]" />
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="font-bold text-[#2C3E50] text-lg mb-1">{protocol}</h5>
+                      <p className="text-sm text-gray-600 line-clamp-2">{details?.education || "Comprehensive wellness support protocol."}</p>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Info className="w-3 h-3" />
+                          {details?.supplements?.length || 0} supplements
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     );
   };
