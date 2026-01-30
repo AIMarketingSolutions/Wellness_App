@@ -322,6 +322,7 @@ export default function NutritionalProtocol() {
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: boolean }>({});
   const [showResults, setShowResults] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [showIntro, setShowIntro] = useState(true);
 
   const handleQuizAnswer = (questionId: string, value: boolean) => {
     setQuizAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -430,6 +431,49 @@ export default function NutritionalProtocol() {
               );
             })}
           </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderIntro = () => {
+    return (
+      <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 bg-[#52C878]/10 text-[#52C878] px-4 py-2 rounded-full font-bold text-sm uppercase tracking-widest">
+            <Sparkles className="w-4 h-4" />
+            Personalized Assessment
+          </div>
+          <h3 className="text-3xl font-black text-[#2C3E50]">Ready to Begin?</h3>
+          <p className="text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
+            This comprehensive assessment covers 7 key health categories with {bodyHealthQuestions.length} symptom indicators. 
+            Your responses will help us identify the most relevant wellness protocols for your needs.
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-100">
+          <h4 className="font-bold text-[#2C3E50] text-xl mb-4">What to Expect:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-8 h-8 bg-gradient-to-r from-[#4A90E2] to-[#52C878] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {index + 1}
+                </div>
+                <span className="text-gray-700 font-medium">{step.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-center">
+          <button
+            onClick={() => setShowIntro(false)}
+            className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white px-12 py-5 rounded-2xl font-bold text-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+            data-testid="btn-start-assessment"
+          >
+            Start Assessment
+          </button>
+          <p className="text-sm text-gray-500 mt-4">Takes approximately 3-5 minutes to complete</p>
         </div>
       </div>
     );
@@ -587,6 +631,7 @@ export default function NutritionalProtocol() {
             setShowResults(false);
             setQuizAnswers({});
             setCurrentStep(0);
+            setShowIntro(true);
           }}
           className="w-full bg-white border-4 border-[#4A90E2] text-[#4A90E2] py-6 rounded-2xl font-black text-xl hover:bg-blue-50 transition-all shadow-lg"
           data-testid="btn-retake-assessment"
@@ -637,7 +682,7 @@ export default function NutritionalProtocol() {
               </div>
             </div>
 
-            {!showResults ? renderStep() : renderPriorityResults()}
+            {showIntro ? renderIntro() : (!showResults ? renderStep() : renderPriorityResults())}
           </div>
         </div>
 
