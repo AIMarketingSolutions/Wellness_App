@@ -4,7 +4,7 @@ import logoImage from "@assets/n1f_logo_corrected.png";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#6DD891]/5 via-[#4A90E2]/5 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#EEF5F3] flex items-center justify-center p-4">
       <div className="w-full max-w-2xl mx-auto text-center space-y-12">
         {/* Header Section */}
         <div className="space-y-6">
@@ -12,7 +12,7 @@ export default function HomePage() {
             <img 
               src={logoImage} 
               alt="Nutrition One Fitness" 
-              className="w-24 h-24 object-contain"
+              className="w-36 h-36 object-contain"
             />
           </div>
           
