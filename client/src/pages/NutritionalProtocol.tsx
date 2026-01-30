@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, BookOpen, Bug, Heart, Flame, Sparkles, Droplet, Zap, Leaf, Droplets, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { ArrowLeft, BookOpen, Heart, Sparkles, Zap, Info, AlertTriangle } from "lucide-react";
 
 interface Supplement {
   name: string;
@@ -149,7 +149,7 @@ const protocolDetails: { [key: string]: {
     ]
   },
   "Whole Body Detox": {
-    education: "Detoxification is your body’s natural elimination of metabolic waste, environmental toxins, and excess hormones. Supporting liver, kidneys, lymph, gut, and skin pathways optimizes energy and overall wellness.",
+    education: "Detoxification is your body's natural elimination of metabolic waste, environmental toxins, and excess hormones. Supporting liver, kidneys, lymph, gut, and skin pathways optimizes energy and overall wellness.",
     whyItMatters: [
       "Reduces fatigue and brain fog",
       "Improves skin clarity, digestion, and immune function",
@@ -252,7 +252,7 @@ const steps = [
 export default function NutritionalProtocol() {
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: boolean }>({});
   const [showResults, setShowResults] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(-1); // -1 for landing
+  const [currentStep, setCurrentStep] = useState(0);
 
   const handleQuizAnswer = (questionId: string, value: boolean) => {
     setQuizAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -292,121 +292,6 @@ export default function NutritionalProtocol() {
       const priorityOrder = { High: 0, Medium: 1, Low: 2 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
-  };
-
-  const renderLanding = () => (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="bg-gradient-to-br from-[#4A90E2] to-[#52C878] p-6 rounded-3xl shadow-xl">
-            <BookOpen className="w-16 h-12 text-white" />
-          </div>
-        </div>
-        <h1 className="text-4xl font-extrabold text-[#2C3E50]">Wellness Protocol Builder</h1>
-        <p className="text-lg text-gray-600 max-w-xl mx-auto">
-          Complete your symptom assessment and generate a personalized wellness support plan. Comprehensive detoxification and whole-body strategies developed by certified practitioners.
-        </p>
-      </div>
-
-      <div className="bg-white/80 backdrop-blur-md rounded-3xl p-10 shadow-xl border border-white relative overflow-hidden">
-        <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="bg-gradient-to-br from-[#4A90E2] to-[#52C878] p-3 rounded-xl">
-              <Heart className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-[#2C3E50]">Body Health Assessment</h2>
-              <p className="text-gray-500 font-medium">Evaluate your current health status across key wellness indicators.</p>
-            </div>
-          </div>
-          
-          <div className="p-6 bg-blue-50 rounded-2xl border border-blue-100 mb-8">
-            <p className="text-[#2C3E50] font-bold text-center italic">
-              Please select the symptoms you experience on a daily basis.
-            </p>
-          </div>
-
-          <button
-            onClick={() => setCurrentQuestionIndex(0)}
-            className="w-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
-          >
-            Start Assessment
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderQuestion = () => {
-    const currentQuestion = bodyHealthQuestions[currentQuestionIndex];
-    const category = steps.find(s => s.id === currentQuestion.category);
-    const progress = ((currentQuestionIndex + 1) / bodyHealthQuestions.length) * 100;
-
-    return (
-      <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-        <div className="space-y-4">
-          <div className="flex justify-between items-end">
-            <div>
-              <span className="text-xs font-bold text-[#52C878] uppercase tracking-widest">{category?.label}</span>
-              <h4 className="text-2xl font-bold text-[#2C3E50] mt-1">Symptom Check</h4>
-            </div>
-            <span className="text-sm font-bold text-gray-400">Question {currentQuestionIndex + 1} of {bodyHealthQuestions.length}</span>
-          </div>
-          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
-        
-        <div className="bg-white/80 backdrop-blur-md rounded-3xl p-12 shadow-xl border border-white text-center min-h-[350px] flex flex-col justify-center items-center">
-          <p className="text-gray-400 mb-6 text-sm font-bold uppercase tracking-widest">Do you experience this on a daily basis?</p>
-          <h5 className="text-3xl md:text-5xl font-black text-[#2C3E50] mb-12 leading-tight">
-            {currentQuestion.label}
-          </h5>
-          
-          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-            <button
-              onClick={() => {
-                handleQuizAnswer(currentQuestion.id, true);
-                if (currentQuestionIndex < bodyHealthQuestions.length - 1) {
-                  setCurrentQuestionIndex(prev => prev + 1);
-                } else {
-                  setShowResults(true);
-                }
-              }}
-              className="flex-1 bg-[#52C878] text-white py-6 rounded-2xl font-black text-2xl shadow-lg hover:shadow-[#52C878]/30 hover:scale-105 transition-all flex items-center justify-center gap-2"
-            >
-              <CheckCircle2 className="w-6 h-6" /> Yes
-            </button>
-            <button
-              onClick={() => {
-                handleQuizAnswer(currentQuestion.id, false);
-                if (currentQuestionIndex < bodyHealthQuestions.length - 1) {
-                  setCurrentQuestionIndex(prev => prev + 1);
-                } else {
-                  setShowResults(true);
-                }
-              }}
-              className="flex-1 bg-white border-2 border-gray-200 text-gray-400 py-6 rounded-2xl font-black text-2xl hover:border-gray-300 hover:text-gray-600 transition-all"
-            >
-              No
-            </button>
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center px-4">
-          <button
-            onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
-            className="text-sm font-bold flex items-center gap-2 text-[#4A90E2] hover:underline"
-          >
-            <ArrowLeft className="w-4 h-4" /> Previous
-          </button>
-          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Questionnaire Progress</p>
-        </div>
-      </div>
-    );
   };
 
   const renderProtocolDetails = (title: string) => {
@@ -481,6 +366,71 @@ export default function NutritionalProtocol() {
     );
   };
 
+  const renderStep = () => {
+    const step = steps[currentStep];
+    const categoryQuestions = bodyHealthQuestions.filter(q => q.category === step.id);
+    const progress = ((currentStep + 1) / steps.length) * 100;
+
+    return (
+      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-bold text-[#2C3E50] text-2xl">{step.label}</h4>
+          <span className="text-sm font-medium text-gray-500">Step {currentStep + 1} of {steps.length}</span>
+        </div>
+
+        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden mb-6">
+          <div 
+            className="h-full bg-gradient-to-r from-[#4A90E2] to-[#52C878] transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+        
+        <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+          <p className="text-gray-600 mb-6 italic">Please select the symptoms you experience on a daily basis.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {categoryQuestions.map(q => (
+              <label key={q.id} className="flex items-center gap-3 cursor-pointer bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:border-[#52C878] hover:shadow-md transition-all group">
+                <input
+                  type="checkbox"
+                  checked={quizAnswers[q.id] || false}
+                  onChange={(e) => handleQuizAnswer(q.id, e.target.checked)}
+                  className="w-5 h-5 rounded accent-[#52C878] cursor-pointer"
+                  data-testid={`checkbox-${q.id}`}
+                />
+                <span className="text-gray-700 font-medium group-hover:text-[#2C3E50]">{q.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          {currentStep > 0 && (
+            <button
+              onClick={() => setCurrentStep(prev => prev - 1)}
+              className="flex-1 px-6 py-4 rounded-xl font-bold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+              data-testid="btn-previous-step"
+            >
+              Previous
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (currentStep < steps.length - 1) {
+                setCurrentStep(prev => prev + 1);
+              } else {
+                setShowResults(true);
+              }
+            }}
+            className="flex-[2] bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white py-4 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-lg"
+            data-testid={currentStep === steps.length - 1 ? "btn-submit-assessment" : "btn-next-step"}
+          >
+            {currentStep === steps.length - 1 ? "Submit Assessment" : "Next Section"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const renderPriorityResults = () => {
     const priorityData = getPriorityData();
     
@@ -493,7 +443,7 @@ export default function NutritionalProtocol() {
         </div>
 
         <div className="space-y-10">
-          {priorityData.map((data, idx) => (
+          {priorityData.map((data) => (
             <div key={data.category} className="space-y-6">
               <div className={`flex items-center justify-between p-6 rounded-3xl border-l-[12px] shadow-lg ${
                 data.priority === 'High' ? 'bg-red-50 border-red-500' :
@@ -569,9 +519,10 @@ export default function NutritionalProtocol() {
           onClick={() => {
             setShowResults(false);
             setQuizAnswers({});
-            setCurrentQuestionIndex(-1);
+            setCurrentStep(0);
           }}
           className="w-full bg-white border-4 border-[#4A90E2] text-[#4A90E2] py-6 rounded-2xl font-black text-xl hover:bg-blue-50 transition-all shadow-lg"
+          data-testid="btn-retake-assessment"
         >
           Retake Full Assessment
         </button>
@@ -580,17 +531,72 @@ export default function NutritionalProtocol() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#52C878]/10 via-[#4A90E2]/5 to-white selection:bg-[#52C878]/30">
-      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white">
+      <header className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/dashboard" className="flex items-center gap-2 text-gray-600 hover:text-[#4A90E2] transition-colors font-bold uppercase tracking-widest text-xs">
-            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          <Link href="/dashboard" className="flex items-center gap-2 text-white/90 hover:text-white transition-colors group">
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Back to Dashboard</span>
           </Link>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {showResults ? renderPriorityResults() : (currentQuestionIndex === -1 ? renderLanding() : renderQuestion())}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-4">
+            <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] p-4 rounded-2xl shadow-lg">
+              <BookOpen className="w-12 h-12 text-white" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-extrabold text-[#2C3E50] mb-3 tracking-tight">Wellness Protocol Builder</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Complete your symptom assessment and generate a personalized wellness support plan. Comprehensive detoxification and whole-body strategies developed by certified practitioners.
+          </p>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl p-8 md:p-10 shadow-xl border border-white mb-12 overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <Heart className="w-32 h-32 text-[#52C878]" />
+          </div>
+          
+          <div className="relative">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="bg-gradient-to-br from-[#4A90E2] to-[#52C878] p-3 rounded-xl shadow-inner">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-[#2C3E50]">Body Health Assessment</h2>
+                <p className="text-gray-500 font-medium tracking-wide">Evaluate your current health status across key wellness indicators.</p>
+              </div>
+            </div>
+
+            {!showResults ? renderStep() : renderPriorityResults()}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-[#4A90E2] to-[#52C878] rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden group">
+          <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="relative">
+            <h3 className="text-3xl font-extrabold mb-4">Professional Detox & Wellness Guidance</h3>
+            <p className="text-white/90 text-xl mb-8 leading-relaxed max-w-2xl">
+              Our protocols are developed by Registered Nutritional Consulting Practitioners (RNCP) and focus on safe, effective methods to restore vitality and optimize health.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+                <p className="text-4xl font-black mb-1">100%</p>
+                <p className="text-white/80 font-bold tracking-wider uppercase text-xs">Evidence-Based</p>
+              </div>
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+                <p className="text-4xl font-black mb-1">RNCP</p>
+                <p className="text-white/80 font-bold tracking-wider uppercase text-xs">Certified</p>
+              </div>
+              <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+                <p className="text-4xl font-black mb-1">24/7</p>
+                <p className="text-white/80 font-bold tracking-wider uppercase text-xs">Access</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
