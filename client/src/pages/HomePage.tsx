@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Check, Target } from "lucide-react";
-import logoImage from "@assets/n1f_logo_corrected.png";
+import logoImage from "@assets/n1f_logo_mint_bg.png";
 
 export default function HomePage() {
   return (
@@ -16,9 +16,9 @@ export default function HomePage() {
             />
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-bold text-[#2C3E50] leading-tight tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-[#2C3E50] leading-tight tracking-tight">
             Welcome to
-            <span className="block bg-gradient-to-r from-[#6DD891] to-[#4A90E2] bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-[#6DD891] to-[#4A90E2] bg-clip-text text-transparent font-black">
               Nutrition One Fitness Inc.
             </span>
           </h1>
