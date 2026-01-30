@@ -9,141 +9,137 @@ interface Supplement {
 }
 
 const bodyHealthQuestions = [
-  // Digestive Health (10 symptoms)
+  // Digestive Health
   { id: "Bloating", label: "Bloating", category: "digestive", score: 1 },
-  { id: "Excess gas", label: "Excess gas", category: "digestive", score: 1 },
+  { id: "Gas", label: "Gas", category: "digestive", score: 1 },
   { id: "Constipation", label: "Constipation", category: "digestive", score: 1 },
   { id: "Diarrhea", label: "Diarrhea", category: "digestive", score: 1 },
-  { id: "Stomach cramps", label: "Stomach cramps", category: "digestive", score: 1 },
-  { id: "Undigested food in stool", label: "Undigested food visible in stool", category: "digestive", score: 1 },
-  { id: "Acid reflux or heartburn", label: "Acid reflux or heartburn", category: "digestive", score: 1 },
-  { id: "Nausea after eating", label: "Nausea after eating", category: "digestive", score: 1 },
-  { id: "Feeling overly full after small meals", label: "Feeling overly full after small meals", category: "digestive", score: 1 },
-  { id: "Foul-smelling stool", label: "Foul-smelling stool", category: "digestive", score: 1 },
+  { id: "Digestive discomfort", label: "Digestive discomfort", category: "digestive", score: 1 },
+  { id: "Irregular stools", label: "Irregular stools", category: "digestive", score: 1 },
+  { id: "Upper right abdominal discomfort", label: "Upper right abdominal discomfort", category: "digestive", score: 1 },
+  { id: "Nausea after fatty meals", label: "Nausea after fatty meals", category: "digestive", score: 1 },
   
-  // Energy & Cognition (7 symptoms)
+  // Energy & Brain
+  { id: "Fatigue", label: "Fatigue or low energy", category: "energy", score: 1 },
   { id: "Morning fatigue", label: "Morning fatigue", category: "energy", score: 1 },
-  { id: "Afternoon energy crashes", label: "Afternoon energy crashes", category: "energy", score: 1 },
+  { id: "Afternoon crashes", label: "Afternoon energy crashes", category: "energy", score: 1 },
   { id: "Brain fog", label: "Brain fog", category: "energy", score: 1 },
-  { id: "Frequent headaches", label: "Frequent headaches", category: "energy", score: 1 },
-  { id: "Difficulty concentrating", label: "Difficulty concentrating", category: "energy", score: 1 },
-  { id: "Memory issues", label: "Memory issues", category: "energy", score: 1 },
-  { id: "Chronic fatigue", label: "Chronic fatigue", category: "energy", score: 1 },
+  { id: "Headaches", label: "Headaches", category: "energy", score: 1 },
+  { id: "Fatigue after meals", label: "Fatigue after meals", category: "energy", score: 1 },
+  { id: "Fatigue or weakness", label: "Fatigue or weakness", category: "energy", score: 1 },
+  { id: "Fatigue or insomnia", label: "Fatigue or insomnia", category: "energy", score: 1 },
 
-  // Skin & Allergies (8 symptoms)
-  { id: "Rashes or hives", label: "Rashes or hives", category: "skin", score: 1 },
+  // Skin & Appearance
+  { id: "Rashes", label: "Rashes", category: "skin", score: 1 },
   { id: "Eczema", label: "Eczema", category: "skin", score: 1 },
   { id: "Itchy skin", label: "Itchy skin", category: "skin", score: 1 },
-  { id: "Seasonal allergies", label: "Seasonal allergies", category: "skin", score: 1 },
-  { id: "Acne or breakouts", label: "Acne or breakouts", category: "skin", score: 1 },
-  { id: "Dry or flaky skin", label: "Dry or flaky skin", category: "skin", score: 1 },
-  { id: "Dark circles under eyes", label: "Dark circles under eyes", category: "skin", score: 1 },
-  { id: "Unexplained skin irritation", label: "Unexplained skin irritation", category: "skin", score: 1 },
+  { id: "Acne", label: "Acne", category: "skin", score: 1 },
+  { id: "Yellowish skin or eyes", label: "Yellowish skin or eyes", category: "skin", score: 1 },
+  { id: "Pale skin lips or nail beds", label: "Pale skin, lips, or nail beds", category: "skin", score: 1 },
+  { id: "Unexplained body odor", label: "Unexplained body odor", category: "skin", score: 1 },
 
-  // Sleep & Mood (6 symptoms)
-  { id: "Trouble falling asleep", label: "Trouble falling asleep", category: "sleep", score: 1 },
-  { id: "Waking 1–3 AM", label: "Waking between 1–3 AM", category: "sleep", score: 1 },
-  { id: "Anxiety or irritability", label: "Anxiety or irritability", category: "sleep", score: 1 },
-  { id: "Mood swings", label: "Mood swings", category: "sleep", score: 1 },
-  { id: "Depression or low mood", label: "Depression or low mood", category: "sleep", score: 1 },
-  { id: "Night sweats", label: "Night sweats", category: "sleep", score: 1 },
+  // Sleep & Mood
+  { id: "Stress or anxiety", label: "Stress or anxiety", category: "sleep", score: 1 },
+  { id: "Sleep difficulties", label: "Sleep difficulties", category: "sleep", score: 1 },
+  { id: "Mood changes", label: "Mood changes", category: "sleep", score: 1 },
+  { id: "Hot flashes or night sweats", label: "Hot flashes or night sweats", category: "sleep", score: 1 },
+  { id: "Dizziness or lightheadedness", label: "Dizziness or lightheadedness", category: "sleep", score: 1 },
   
-  // Appetite & Weight (6 symptoms)
-  { id: "Sugar cravings", label: "Sugar cravings", category: "appetite", score: 1 },
-  { id: "Difficulty gaining weight", label: "Difficulty gaining weight", category: "appetite", score: 1 },
-  { id: "Difficulty losing weight", label: "Difficulty losing weight", category: "appetite", score: 1 },
-  { id: "Constant hunger", label: "Constant hunger", category: "appetite", score: 1 },
-  { id: "Loss of appetite", label: "Loss of appetite", category: "appetite", score: 1 },
-  { id: "Salt cravings", label: "Salt cravings", category: "appetite", score: 1 },
+  // Appetite & Cravings
+  { id: "Sugar or refined carb cravings", label: "Cravings for sugar or refined carbs", category: "appetite", score: 1 },
+  { id: "Salty or sweet food cravings", label: "Cravings for salty or sweet foods", category: "appetite", score: 1 },
+  { id: "Poor appetite", label: "Poor appetite", category: "appetite", score: 1 },
+  { id: "Food sensitivities", label: "Food sensitivities", category: "appetite", score: 1 },
+  { id: "Unexplained weight gain", label: "Unexplained weight gain", category: "appetite", score: 1 },
 
-  // Pain & Physical Function (7 symptoms)
+  // Pain & Physical Function
   { id: "Joint or muscle pain", label: "Joint or muscle pain", category: "pain", score: 1 },
-  { id: "Muscle weakness", label: "Muscle weakness", category: "pain", score: 1 },
-  { id: "Stiffness in the morning", label: "Stiffness in the morning", category: "pain", score: 1 },
-  { id: "Numbness or tingling", label: "Numbness or tingling in hands/feet", category: "pain", score: 1 },
-  { id: "Frequent muscle cramps", label: "Frequent muscle cramps", category: "pain", score: 1 },
   { id: "Swelling in extremities", label: "Swelling in extremities", category: "pain", score: 1 },
-  { id: "Restless legs", label: "Restless legs", category: "pain", score: 1 },
+  { id: "Cold hands and feet", label: "Cold hands and feet", category: "pain", score: 1 },
+  { id: "Shortness of breath", label: "Shortness of breath", category: "pain", score: 1 },
+  { id: "Frequent or painful urination", label: "Frequent or painful urination", category: "pain", score: 1 },
+  { id: "High blood pressure", label: "High blood pressure", category: "pain", score: 1 },
+  { id: "Vaginal dryness", label: "Vaginal dryness", category: "pain", score: 1 },
 
-  // Exposure History (9 symptoms)
-  { id: "Travel to tropical/low sanitation areas", label: "Travel to tropical/low sanitation areas", category: "exposure", score: 1 },
-  { id: "Raw or undercooked meat/fish", label: "Raw or undercooked meat/fish consumption", category: "exposure", score: 1 },
-  { id: "Exposure to heavy metals", label: "Exposure to heavy metals (dental fillings, paint, etc.)", category: "exposure", score: 1 },
-  { id: "Medications or alcohol", label: "Regular medication or alcohol use", category: "exposure", score: 1 },
-  { id: "Lived near industrial areas", label: "Lived near industrial areas", category: "exposure", score: 1 },
-  { id: "Well water consumption", label: "Well water or unfiltered water consumption", category: "exposure", score: 1 },
-  { id: "Occupational chemical exposure", label: "Occupational chemical exposure", category: "exposure", score: 1 },
-  { id: "Swimming in lakes/rivers", label: "Swimming in lakes, rivers, or natural bodies of water", category: "exposure", score: 1 },
-  { id: "Pet ownership", label: "Pet ownership (dogs, cats, etc.)", category: "exposure", score: 1 },
+  // Exposure & History
+  { id: "Travel to high-risk regions", label: "Travel to high-risk regions", category: "exposure", score: 1 },
+  { id: "Raw or undercooked foods", label: "Raw or undercooked foods consumption", category: "exposure", score: 1 },
+  { id: "Unfiltered water", label: "Unfiltered water consumption", category: "exposure", score: 1 },
+  { id: "Close contact with pets", label: "Close contact with pets", category: "exposure", score: 1 },
+  { id: "Gardening exposure", label: "Gardening or soil exposure", category: "exposure", score: 1 },
+  { id: "Seafood consumption", label: "Regular seafood consumption", category: "exposure", score: 1 },
+  { id: "Dental fillings", label: "Dental fillings (amalgam/silver)", category: "exposure", score: 1 },
+  { id: "Exposure to old paint or batteries", label: "Exposure to old paint or batteries", category: "exposure", score: 1 },
+  { id: "Environmental toxins", label: "Exposure to environmental toxins", category: "exposure", score: 1 },
+  { id: "Alcohol or medication history", label: "Alcohol or medication history", category: "exposure", score: 1 },
+  { id: "History of kidney stones or UTIs", label: "History of kidney stones or UTIs", category: "exposure", score: 1 },
 ];
 
 const symptomMap: { [key: string]: string[] } = {
-  // Digestive Health
-  "Bloating": ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow"],
-  "Excess gas": ["Parasite Symptoms", "Leaky Gut"],
+  // Digestive Health - from document
+  "Bloating": ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow", "Liver Detox & Regeneration"],
+  "Gas": ["Parasite Symptoms", "Leaky Gut"],
   "Constipation": ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow", "Whole Body Detox"],
-  "Diarrhea": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
-  "Stomach cramps": ["Parasite Symptoms", "Leaky Gut"],
-  "Undigested food in stool": ["Parasite Symptoms", "Leaky Gut"],
-  "Acid reflux or heartburn": ["Leaky Gut", "Gallbladder Flush & Bile Flow"],
-  "Nausea after eating": ["Gallbladder Flush & Bile Flow", "Liver Detox & Regeneration"],
-  "Feeling overly full after small meals": ["Gallbladder Flush & Bile Flow", "Leaky Gut"],
-  "Foul-smelling stool": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
+  "Diarrhea": ["Parasite Symptoms", "Leaky Gut"],
+  "Digestive discomfort": ["Liver Detox & Regeneration", "Heavy Metal Detox Support"],
+  "Irregular stools": ["Gallbladder Flush & Bile Flow", "Whole Body Detox"],
+  "Upper right abdominal discomfort": ["Gallbladder Flush & Bile Flow"],
+  "Nausea after fatty meals": ["Gallbladder Flush & Bile Flow"],
   
-  // Energy & Cognition
-  "Morning fatigue": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance", "Anemia"],
-  "Afternoon energy crashes": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance", "Anemia"],
-  "Brain fog": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance", "Heavy Metal Detox Support", "Whole Body Detox"],
-  "Frequent headaches": ["Heavy Metal Detox Support", "Liver Detox & Regeneration", "Kidney Detox"],
-  "Difficulty concentrating": ["Adrenal Stress & Cortisol Balance", "Heavy Metal Detox Support", "Anemia"],
-  "Memory issues": ["Heavy Metal Detox Support", "Adrenal Stress & Cortisol Balance"],
-  "Chronic fatigue": ["Adrenal Stress & Cortisol Balance", "Anemia", "Parasite Symptoms"],
+  // Energy & Brain - from document
+  "Fatigue": ["Parasite Symptoms", "Leaky Gut", "Heavy Metal Detox Support", "Whole Body Detox", "Kidney Detox", "Anemia"],
+  "Morning fatigue": ["Adrenal Stress & Cortisol Balance"],
+  "Afternoon crashes": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance"],
+  "Brain fog": ["Parasite Symptoms", "Leaky Gut", "Heavy Metal Detox Support", "Whole Body Detox"],
+  "Headaches": ["Heavy Metal Detox Support"],
+  "Fatigue after meals": ["Liver Detox & Regeneration"],
+  "Fatigue or weakness": ["Anemia"],
+  "Fatigue or insomnia": ["Menopausal Symptoms"],
   
-  // Skin & Allergies
-  "Rashes or hives": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
-  "Eczema": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
-  "Itchy skin": ["Parasite Symptoms", "Leaky Gut"],
-  "Seasonal allergies": ["Heavy Metal Detox Support", "Whole Body Detox"],
-  "Acne or breakouts": ["Leaky Gut", "Liver Detox & Regeneration", "Whole Body Detox"],
-  "Dry or flaky skin": ["Leaky Gut", "Gallbladder Flush & Bile Flow"],
-  "Dark circles under eyes": ["Adrenal Stress & Cortisol Balance", "Kidney Detox"],
-  "Unexplained skin irritation": ["Leaky Gut", "Whole Body Detox"],
+  // Skin & Appearance - from document
+  "Rashes": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
+  "Eczema": ["Parasite Symptoms", "Leaky Gut"],
+  "Itchy skin": ["Parasite Symptoms"],
+  "Acne": ["Leaky Gut", "Whole Body Detox"],
+  "Yellowish skin or eyes": ["Liver Detox & Regeneration", "Gallbladder Flush & Bile Flow"],
+  "Pale skin lips or nail beds": ["Anemia"],
+  "Unexplained body odor": ["Whole Body Detox"],
   
-  // Sleep & Mood
-  "Trouble falling asleep": ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
-  "Waking 1–3 AM": ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
-  "Anxiety or irritability": ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
-  "Mood swings": ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
-  "Depression or low mood": ["Adrenal Stress & Cortisol Balance", "Leaky Gut"],
-  "Night sweats": ["Menopausal Symptoms", "Adrenal Stress & Cortisol Balance"],
+  // Sleep & Mood - from document
+  "Stress or anxiety": ["Adrenal Stress & Cortisol Balance"],
+  "Sleep difficulties": ["Adrenal Stress & Cortisol Balance"],
+  "Mood changes": ["Menopausal Symptoms", "Leaky Gut"],
+  "Hot flashes or night sweats": ["Menopausal Symptoms"],
+  "Dizziness or lightheadedness": ["Anemia"],
   
-  // Appetite & Weight
-  "Sugar cravings": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance"],
-  "Difficulty gaining weight": ["Parasite Symptoms", "Anemia", "Leaky Gut"],
-  "Difficulty losing weight": ["Adrenal Stress & Cortisol Balance", "Liver Detox & Regeneration"],
-  "Constant hunger": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance"],
-  "Loss of appetite": ["Liver Detox & Regeneration", "Kidney Detox"],
-  "Salt cravings": ["Adrenal Stress & Cortisol Balance"],
+  // Appetite & Cravings - from document
+  "Sugar or refined carb cravings": ["Parasite Symptoms"],
+  "Salty or sweet food cravings": ["Adrenal Stress & Cortisol Balance"],
+  "Poor appetite": ["Liver Detox & Regeneration"],
+  "Food sensitivities": ["Leaky Gut"],
+  "Unexplained weight gain": ["Menopausal Symptoms"],
   
-  // Pain & Physical Function
-  "Joint or muscle pain": ["Heavy Metal Detox Support", "Whole Body Detox", "Kidney Detox"],
-  "Muscle weakness": ["Adrenal Stress & Cortisol Balance", "Anemia"],
-  "Stiffness in the morning": ["Heavy Metal Detox Support", "Kidney Detox"],
-  "Numbness or tingling": ["Heavy Metal Detox Support", "Anemia"],
-  "Frequent muscle cramps": ["Kidney Detox", "Adrenal Stress & Cortisol Balance"],
-  "Swelling in extremities": ["Kidney Detox", "Liver Detox & Regeneration"],
-  "Restless legs": ["Anemia", "Heavy Metal Detox Support"],
+  // Pain & Physical Function - from document
+  "Joint or muscle pain": ["Heavy Metal Detox Support"],
+  "Swelling in extremities": ["Kidney Detox"],
+  "Cold hands and feet": ["Anemia"],
+  "Shortness of breath": ["Anemia"],
+  "Frequent or painful urination": ["Kidney Detox"],
+  "High blood pressure": ["Kidney Detox"],
+  "Vaginal dryness": ["Menopausal Symptoms"],
   
-  // Exposure History
-  "Travel to tropical/low sanitation areas": ["Parasite Symptoms"],
-  "Raw or undercooked meat/fish": ["Parasite Symptoms"],
-  "Exposure to heavy metals": ["Heavy Metal Detox Support"],
-  "Medications or alcohol": ["Liver Detox & Regeneration"],
-  "Lived near industrial areas": ["Heavy Metal Detox Support", "Whole Body Detox"],
-  "Well water consumption": ["Heavy Metal Detox Support", "Parasite Symptoms"],
-  "Occupational chemical exposure": ["Liver Detox & Regeneration", "Heavy Metal Detox Support"],
-  "Swimming in lakes/rivers": ["Parasite Symptoms"],
-  "Pet ownership": ["Parasite Symptoms"]
+  // Exposure & History - from document
+  "Travel to high-risk regions": ["Parasite Symptoms"],
+  "Raw or undercooked foods": ["Parasite Symptoms"],
+  "Unfiltered water": ["Parasite Symptoms"],
+  "Close contact with pets": ["Parasite Symptoms"],
+  "Gardening exposure": ["Parasite Symptoms"],
+  "Seafood consumption": ["Heavy Metal Detox Support"],
+  "Dental fillings": ["Heavy Metal Detox Support"],
+  "Exposure to old paint or batteries": ["Heavy Metal Detox Support"],
+  "Environmental toxins": ["Whole Body Detox"],
+  "Alcohol or medication history": ["Liver Detox & Regeneration"],
+  "History of kidney stones or UTIs": ["Kidney Detox"]
 };
 
 const protocolDetails: { [key: string]: { 
