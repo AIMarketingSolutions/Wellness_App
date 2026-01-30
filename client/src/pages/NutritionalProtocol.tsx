@@ -323,6 +323,7 @@ export default function NutritionalProtocol() {
   const [showResults, setShowResults] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
+  const [expandedProtocols, setExpandedProtocols] = useState<{ [key: string]: boolean }>({});
 
   const handleQuizAnswer = (questionId: string, value: boolean) => {
     setQuizAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -465,7 +466,8 @@ export default function NutritionalProtocol() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {protocols.map((protocol) => {
               const details = protocolDetails[protocol];
-              const [isExpanded, setIsExpanded] = useState(false);
+              const isExpanded = expandedProtocols[protocol] || false;
+              const toggleExpanded = () => setExpandedProtocols(prev => ({ ...prev, [protocol]: !prev[protocol] }));
 
               return (
                 <div key={protocol} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-[#52C878]/30 transition-all group">
@@ -484,7 +486,7 @@ export default function NutritionalProtocol() {
                           <div>
                             <p className="text-xs font-bold text-[#4A90E2] uppercase tracking-wider mb-2">Why It Matters</p>
                             <ul className="space-y-1">
-                              {details.whyItMatters.slice(0, 3).map((item, i) => (
+                              {details.whyItMatters.map((item, i) => (
                                 <li key={i} className="text-xs text-gray-600 flex items-start gap-2">
                                   <div className="w-1.5 h-1.5 rounded-full bg-[#52C878] mt-1 shrink-0"></div>
                                   {item}
@@ -493,20 +495,29 @@ export default function NutritionalProtocol() {
                             </ul>
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-[#52C878] uppercase tracking-wider mb-2">Supplement Timing</p>
-                            <div className="flex flex-wrap gap-2">
+                            <p className="text-xs font-bold text-[#52C878] uppercase tracking-wider mb-3">Supplement & Schedule</p>
+                            <div className="space-y-3">
                               {["with_meal", "empty_stomach", "before_meal"].map(timing => {
-                                const count = details.supplements.filter(s => s.timing === timing).length;
-                                if (count === 0) return null;
-                                const labels: any = { 
-                                  with_meal: "With Meals", 
-                                  empty_stomach: "Empty Stomach", 
-                                  before_meal: "Pre-Meal" 
+                                const timingSupps = details.supplements.filter(s => s.timing === timing);
+                                if (timingSupps.length === 0) return null;
+                                const timingConfig: { [key: string]: { label: string; bg: string; border: string } } = {
+                                  with_meal: { label: "With Meals", bg: "bg-orange-50", border: "border-l-orange-400" },
+                                  empty_stomach: { label: "Empty Stomach", bg: "bg-blue-50", border: "border-l-blue-400" },
+                                  before_meal: { label: "30 Min Before Meals", bg: "bg-purple-50", border: "border-l-purple-400" }
                                 };
+                                const config = timingConfig[timing];
                                 return (
-                                  <span key={timing} className="px-2 py-1 bg-gray-50 border border-gray-100 rounded text-[10px] font-medium text-gray-500">
-                                    {labels[timing]}: {count}
-                                  </span>
+                                  <div key={timing} className={`${config.bg} rounded-lg p-3 border-l-4 ${config.border}`}>
+                                    <p className="text-[10px] font-bold text-gray-700 uppercase tracking-wider mb-2">{config.label}</p>
+                                    <div className="space-y-1">
+                                      {timingSupps.map((supp, idx) => (
+                                        <div key={idx} className="flex justify-between items-center text-xs">
+                                          <span className="text-gray-700 font-medium">{supp.name}</span>
+                                          <span className="text-[#52C878] font-bold text-[10px]">{supp.dosing}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
                                 );
                               })}
                             </div>
@@ -514,15 +525,9 @@ export default function NutritionalProtocol() {
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <Info className="w-3 h-3" />
-                            {details?.supplements?.length || 0} supplements
-                          </span>
-                        </div>
+                      <div className="flex items-center justify-end mt-3">
                         <button 
-                          onClick={() => setIsExpanded(!isExpanded)}
+                          onClick={toggleExpanded}
                           className="text-xs font-bold text-[#4A90E2] hover:text-[#52C878] transition-colors flex items-center gap-1"
                         >
                           {isExpanded ? "Show less" : "Learn more"}
