@@ -13,22 +13,13 @@ export default function HomePage() {
               src={logoImage} 
               alt="Nutrition One Fitness" 
               className="w-24 h-24 object-contain"
-              style={{
-                filter: 'hue-rotate(100deg) saturate(1.1) brightness(1.1)'
-              }}
             />
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold text-[#2C3E50] leading-tight tracking-tight">
             Welcome to
-            <span className="block">
-              <span className="text-[#52C878]">N</span>
-              <span className="text-[#2C3E50]">utrition</span>
-              {" "}
-              <span className="text-[#4A90E2]">1</span>
-              {" "}
-              <span className="text-[#52C878]">F</span>
-              <span className="text-[#2C3E50]">itness Inc.</span>
+            <span className="block bg-gradient-to-r from-[#6DD891] to-[#4A90E2] bg-clip-text text-transparent">
+              Nutrition One Fitness Inc.
             </span>
           </h1>
           
