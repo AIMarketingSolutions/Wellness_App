@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Check, Target } from "lucide-react";
-import logoImage from "@assets/nutrition_one_fitness_logo.png";
+import logoImage from "@assets/n1f_logo_corrected.png";
 
 export default function HomePage() {
   return (
