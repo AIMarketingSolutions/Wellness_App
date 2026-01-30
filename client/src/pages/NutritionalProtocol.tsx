@@ -444,7 +444,6 @@ export default function NutritionalProtocol() {
             <Sparkles className="w-4 h-4" />
             Personalized Assessment
           </div>
-          <h3 className="text-3xl font-black text-[#2C3E50]">Ready to Begin?</h3>
         </div>
 
         <div className="text-center">
