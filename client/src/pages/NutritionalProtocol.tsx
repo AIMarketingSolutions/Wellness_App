@@ -465,6 +465,8 @@ export default function NutritionalProtocol() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {protocols.map((protocol) => {
               const details = protocolDetails[protocol];
+              const [isExpanded, setIsExpanded] = useState(false);
+
               return (
                 <div key={protocol} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md hover:border-[#52C878]/30 transition-all group">
                   <div className="flex items-start gap-3">
@@ -473,12 +475,59 @@ export default function NutritionalProtocol() {
                     </div>
                     <div className="flex-1">
                       <h5 className="font-bold text-[#2C3E50] text-lg mb-1">{protocol}</h5>
-                      <p className="text-sm text-gray-600 line-clamp-2">{details?.education || "Comprehensive wellness support protocol."}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Info className="w-3 h-3" />
-                          {details?.supplements?.length || 0} supplements
-                        </span>
+                      <p className={`text-sm text-gray-600 ${isExpanded ? "" : "line-clamp-2"}`}>
+                        {details?.education || "Comprehensive wellness support protocol."}
+                      </p>
+                      
+                      {isExpanded && details && (
+                        <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div>
+                            <p className="text-xs font-bold text-[#4A90E2] uppercase tracking-wider mb-2">Why It Matters</p>
+                            <ul className="space-y-1">
+                              {details.whyItMatters.slice(0, 3).map((item, i) => (
+                                <li key={i} className="text-xs text-gray-600 flex items-start gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-[#52C878] mt-1 shrink-0"></div>
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-[#52C878] uppercase tracking-wider mb-2">Supplement Timing</p>
+                            <div className="flex flex-wrap gap-2">
+                              {["with_meal", "empty_stomach", "before_meal"].map(timing => {
+                                const count = details.supplements.filter(s => s.timing === timing).length;
+                                if (count === 0) return null;
+                                const labels: any = { 
+                                  with_meal: "With Meals", 
+                                  empty_stomach: "Empty Stomach", 
+                                  before_meal: "Pre-Meal" 
+                                };
+                                return (
+                                  <span key={timing} className="px-2 py-1 bg-gray-50 border border-gray-100 rounded text-[10px] font-medium text-gray-500">
+                                    {labels[timing]}: {count}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Info className="w-3 h-3" />
+                            {details?.supplements?.length || 0} supplements
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => setIsExpanded(!isExpanded)}
+                          className="text-xs font-bold text-[#4A90E2] hover:text-[#52C878] transition-colors flex items-center gap-1"
+                        >
+                          {isExpanded ? "Show less" : "Learn more"}
+                          <Zap className={`w-3 h-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                        </button>
                       </div>
                     </div>
                   </div>
