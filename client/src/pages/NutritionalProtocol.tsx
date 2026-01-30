@@ -10,70 +10,70 @@ interface Supplement {
 
 const bodyHealthQuestions = [
   // Digestive Health
-  { id: "bloating", label: "Bloating", category: "digestive", score: 1 },
-  { id: "gas", label: "Excess gas", category: "digestive", score: 1 },
-  { id: "constipation", label: "Constipation", category: "digestive", score: 1 },
-  { id: "diarrhea", label: "Diarrhea", category: "digestive", score: 1 },
-  { id: "itchy_anus", label: "Itchy anus, especially at night", category: "digestive", score: 2 },
-  { id: "nausea_fatty", label: "Nausea after fatty meals", category: "digestive", score: 2 },
-  { id: "abdominal_discomfort", label: "Upper right abdominal discomfort", category: "digestive", score: 2 },
-  { id: "stomach_cramps", label: "Stomach cramps or abdominal pain", category: "digestive", score: 1 },
-  { id: "mucus_stool", label: "Mucus in stool", category: "digestive", score: 2 },
-  { id: "undigested_food", label: "Undigested food visible in stool", category: "digestive", score: 1 },
+  { id: "Bloating", label: "Bloating", category: "digestive", score: 1 },
+  { id: "Excess gas", label: "Excess gas", category: "digestive", score: 1 },
+  { id: "Constipation", label: "Constipation", category: "digestive", score: 1 },
+  { id: "Diarrhea", label: "Diarrhea", category: "digestive", score: 1 },
+  { id: "Stomach cramps", label: "Stomach cramps", category: "digestive", score: 1 },
+  { id: "Undigested food in stool", label: "Undigested food visible in stool", category: "digestive", score: 1 },
   
   // Energy & Cognition
-  { id: "morning_fatigue", label: "Morning fatigue", category: "energy", score: 1 },
-  { id: "afternoon_crash", label: "Afternoon energy crashes", category: "energy", score: 1 },
-  { id: "brain_fog", label: "Brain fog", category: "energy", score: 2 },
-  { id: "headaches", label: "Frequent headaches", category: "energy", score: 1 },
-  { id: "fatigue_meals", label: "Fatigue after meals", category: "energy", score: 1 },
-  { id: "dizziness", label: "Dizziness or lightheadedness", category: "energy", score: 1 },
-  { id: "shortness_breath", label: "Shortness of breath", category: "energy", score: 1 },
+  { id: "Morning fatigue", label: "Morning fatigue", category: "energy", score: 1 },
+  { id: "Afternoon energy crashes", label: "Afternoon energy crashes", category: "energy", score: 1 },
+  { id: "Brain fog", label: "Brain fog", category: "energy", score: 1 },
+  { id: "Frequent headaches", label: "Frequent headaches", category: "energy", score: 1 },
 
   // Skin & Allergies
-  { id: "itchy_skin", label: "Itchy skin", category: "skin", score: 1 },
-  { id: "rashes", label: "Rashes", category: "skin", score: 1 },
-  { id: "eczema", label: "Eczema", category: "skin", score: 1 },
-  { id: "acne", label: "Acne", category: "skin", score: 1 },
-  { id: "food_sensitivities", label: "Food sensitivities", category: "skin", score: 2 },
-  { id: "yellow_skin", label: "Yellowish skin or eyes", category: "skin", score: 3 },
-  { id: "pale_skin", label: "Pale skin, lips, or nail beds", category: "skin", score: 2 },
-  { id: "body_odor", label: "Unexplained body odor", category: "skin", score: 1 },
+  { id: "Rashes or hives", label: "Rashes or hives", category: "skin", score: 1 },
+  { id: "Eczema", label: "Eczema", category: "skin", score: 1 },
+  { id: "Itchy skin", label: "Itchy skin", category: "skin", score: 1 },
+  { id: "Seasonal allergies", label: "Seasonal allergies", category: "skin", score: 1 },
 
   // Sleep & Mood
-  { id: "stress_anxiety", label: "Stress or anxiety", category: "sleep", score: 1 },
-  { id: "sleep_difficulties", label: "Sleep difficulties / Insomnia", category: "sleep", score: 1 },
-  { id: "mood_changes", label: "Mood changes or irritability", category: "sleep", score: 1 },
-  { id: "hot_flashes", label: "Hot flashes or night sweats", category: "sleep", score: 2 },
+  { id: "Trouble falling asleep", label: "Trouble falling asleep", category: "sleep", score: 1 },
+  { id: "Waking 1–3 AM", label: "Waking 1–3 AM", category: "sleep", score: 1 },
+  { id: "Anxiety or irritability", label: "Anxiety or irritability", category: "sleep", score: 1 },
   
   // Appetite & Weight
-  { id: "sugar_cravings", label: "Cravings for sugar or refined carbs", category: "appetite", score: 1 },
-  { id: "salty_cravings", label: "Cravings for salty foods", category: "appetite", score: 1 },
-  { id: "hungry_after_meals", label: "Feeling hungry soon after meals", category: "appetite", score: 1 },
-  { id: "poor_appetite", label: "Poor appetite", category: "appetite", score: 1 },
-  { id: "weight_gain", label: "Unexplained weight gain", category: "appetite", score: 1 },
-  { id: "weight_loss", label: "Unexplained weight loss", category: "appetite", score: 1 },
+  { id: "Sugar cravings", label: "Sugar cravings", category: "appetite", score: 1 },
+  { id: "Difficulty gaining weight", label: "Difficulty gaining weight", category: "appetite", score: 1 },
 
   // Pain & Physical Function
-  { id: "inflammation", label: "Inflammation", category: "pain", score: 1 },
-  { id: "joint_muscle_pain", label: "Joint or muscle pain", category: "pain", score: 1 },
-  { id: "swelling", label: "Swelling in extremities", category: "pain", score: 1 },
-  { id: "cold_hands_feet", label: "Cold hands and feet", category: "pain", score: 1 },
-  { id: "urination_issues", label: "Frequent or painful urination", category: "pain", score: 2 },
-  { id: "high_blood_pressure", label: "High blood pressure", category: "pain", score: 1 },
-  { id: "vaginal_dryness", label: "Vaginal dryness", category: "pain", score: 2 },
+  { id: "Joint or muscle pain", label: "Joint or muscle pain", category: "pain", score: 1 },
 
   // Exposure History
-  { id: "travel_history", label: "Travel to high-risk regions", category: "exposure", score: 1 },
-  { id: "raw_foods", label: "Frequent raw/undercooked foods", category: "exposure", score: 1 },
-  { id: "unfiltered_water", label: "Drinking unfiltered/untreated water", category: "exposure", score: 1 },
-  { id: "pets_contact", label: "Close contact with pets", category: "exposure", score: 1 },
-  { id: "gardening", label: "Regular gardening/soil exposure", category: "exposure", score: 1 },
-  { id: "metal_exposure", label: "Exposure to seafood, dental fillings, old paint, batteries", category: "exposure", score: 1 },
-  { id: "toxin_exposure", label: "Exposure to environmental toxins", category: "exposure", score: 1 },
-  { id: "medication_history", label: "History of heavy alcohol or medication use", category: "exposure", score: 1 },
-  { id: "kidney_history", label: "History of kidney stones or UTIs", category: "exposure", score: 1 },
+  { id: "Travel to tropical/low sanitation areas", label: "Travel to tropical/low sanitation areas", category: "exposure", score: 1 },
+  { id: "Raw or undercooked meat/fish", label: "Raw or undercooked meat/fish", category: "exposure", score: 1 },
+  { id: "Exposure to heavy metals", label: "Exposure to heavy metals", category: "exposure", score: 1 },
+  { id: "Medications or alcohol", label: "Medications or alcohol", category: "exposure", score: 1 },
 ];
+
+const symptomMap: { [key: string]: string[] } = {
+  "Bloating": ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow"],
+  "Excess gas": ["Parasite Symptoms", "Leaky Gut"],
+  "Constipation": ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow", "Whole Body Detox"],
+  "Diarrhea": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
+  "Stomach cramps": ["Parasite Symptoms", "Leaky Gut"],
+  "Undigested food in stool": ["Parasite Symptoms", "Leaky Gut"],
+  "Morning fatigue": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance", "Anemia"],
+  "Afternoon energy crashes": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance", "Anemia"],
+  "Brain fog": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance", "Heavy Metal Detox Support", "Whole Body Detox"],
+  "Frequent headaches": ["Heavy Metal Detox Support", "Liver Detox & Regeneration", "Kidney Detox"],
+  "Rashes or hives": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
+  "Eczema": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
+  "Itchy skin": ["Parasite Symptoms", "Leaky Gut"],
+  "Seasonal allergies": ["Heavy Metal Detox Support", "Whole Body Detox"],
+  "Trouble falling asleep": ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
+  "Waking 1–3 AM": ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
+  "Anxiety or irritability": ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
+  "Sugar cravings": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance"],
+  "Difficulty gaining weight": ["Parasite Symptoms", "Anemia", "Leaky Gut"],
+  "Joint or muscle pain": ["Heavy Metal Detox Support", "Whole Body Detox", "Kidney Detox"],
+  "Travel to tropical/low sanitation areas": ["Parasite Symptoms"],
+  "Raw or undercooked meat/fish": ["Parasite Symptoms"],
+  "Exposure to heavy metals": ["Heavy Metal Detox Support"],
+  "Medications or alcohol": ["Liver Detox & Regeneration"]
+};
 
 const protocolDetails: { [key: string]: { 
   education: string; 
@@ -175,7 +175,7 @@ const protocolDetails: { [key: string]: {
       { name: "Dandelion Root", timing: "with_meal", dosing: "500–1000 mg" },
       { name: "Artichoke Extract", timing: "with_meal", dosing: "500 mg" },
       { name: "NAC", timing: "with_meal", dosing: "600 mg" },
-      { name: "Probiotics", timing: "empty_stomach", dosing: "20–50 billion CFU" },
+      { name: "Probiotics", timing: "empty_stomach", dosing: "200–50 billion CFU" },
       { name: "Magnesium Glycinate", timing: "before_meal", dosing: "200–400 mg" }
     ]
   },
@@ -249,6 +249,8 @@ const steps = [
   { id: "exposure", label: "Exposure History" }
 ];
 
+const protocols = ["Parasite Symptoms", "Leaky Gut", "Adrenal Stress & Cortisol Balance", "Heavy Metal Detox Support", "Whole Body Detox", "Liver Detox & Regeneration", "Kidney Detox", "Gallbladder Flush & Bile Flow", "Menopausal Symptoms", "Anemia"];
+
 export default function NutritionalProtocol() {
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: boolean }>({});
   const [showResults, setShowResults] = useState(false);
@@ -259,39 +261,36 @@ export default function NutritionalProtocol() {
   };
 
   const getPriorityData = () => {
-    const results = steps.map(step => {
-      const catQuestions = bodyHealthQuestions.filter(q => q.category === step.id);
-      const score = catQuestions.reduce((acc, q) => acc + (quizAnswers[q.id] ? q.score : 0), 0);
-      const maxScore = catQuestions.reduce((acc, q) => acc + q.score, 0);
-      const ratio = score / (maxScore || 1);
-      
-      let priority: "High" | "Medium" | "Low" = "Low";
-      if (ratio > 0.4) priority = "High";
-      else if (ratio > 0.1) priority = "Medium";
+    const protocolScores: { [key: string]: number } = {};
+    protocols.forEach(p => protocolScores[p] = 0);
 
-      const protocolMap: { [key: string]: string[] } = {
-        digestive: ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow"],
-        energy: ["Adrenal Stress & Cortisol Balance", "Anemia"],
-        skin: ["Leaky Gut", "Whole Body Detox"],
-        sleep: ["Adrenal Stress & Cortisol Balance", "Menopausal Symptoms"],
-        appetite: ["Liver Detox & Regeneration", "Whole Body Detox"],
-        pain: ["Heavy Metal Detox Support", "Whole Body Detox"],
-        exposure: ["Heavy Metal Detox Support", "Parasite Symptoms", "Kidney Detox"]
-      };
-
-      return {
-        category: step.id,
-        label: step.label,
-        score,
-        priority,
-        protocols: protocolMap[step.id] || []
-      };
+    Object.entries(quizAnswers).forEach(([symptom, answered]) => {
+      if (answered && symptomMap[symptom]) {
+        symptomMap[symptom].forEach(protocol => {
+          if (protocolScores.hasOwnProperty(protocol)) {
+            protocolScores[protocol]++;
+          }
+        });
+      }
     });
 
-    return results.sort((a, b) => {
-      const priorityOrder = { High: 0, Medium: 1, Low: 2 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
-    });
+    const sortedProtocols = Object.entries(protocolScores)
+      .sort(([, a], [, b]) => b - a);
+
+    const highestScore = sortedProtocols[0][1];
+
+    const getGrade = (score: number) => {
+      if (score === 0) return "Low";
+      if (score === highestScore) return "High";
+      if (score >= highestScore / 2) return "Medium";
+      return "Low";
+    };
+
+    return sortedProtocols.map(([protocol, score]) => ({
+      protocol,
+      score,
+      priority: getGrade(score) as "High" | "Medium" | "Low"
+    })).filter(p => p.score > 0 || p.priority === "High"); // Keep high priority or actual scores
   };
 
   const renderProtocolDetails = (title: string) => {
@@ -444,7 +443,7 @@ export default function NutritionalProtocol() {
 
         <div className="space-y-10">
           {priorityData.map((data) => (
-            <div key={data.category} className="space-y-6">
+            <div key={data.protocol} className="space-y-6">
               <div className={`flex items-center justify-between p-6 rounded-3xl border-l-[12px] shadow-lg ${
                 data.priority === 'High' ? 'bg-red-50 border-red-500' :
                 data.priority === 'Medium' ? 'bg-orange-50 border-orange-500' :
@@ -461,55 +460,53 @@ export default function NutritionalProtocol() {
                     </span>
                     {data.priority === 'High' && <AlertTriangle className="w-4 h-4 text-red-500" />}
                   </div>
-                  <h4 className="text-2xl font-black text-[#2C3E50]">{data.label}</h4>
+                  <h4 className="text-2xl font-black text-[#2C3E50]">{data.protocol}</h4>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Priority Score</p>
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Protocol Score</p>
                   <p className="text-3xl font-black text-[#2C3E50]">{data.score}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 gap-8">
-                {data.protocols.map(protocolName => (
-                  <div key={protocolName} className="bg-white/90 backdrop-blur-sm rounded-[2rem] p-10 shadow-xl border border-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
-                      <Zap className="w-32 h-32 text-[#4A90E2]" />
+                <div className="bg-white/90 backdrop-blur-sm rounded-[2rem] p-10 shadow-xl border border-white relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
+                    <Zap className="w-32 h-32 text-[#4A90E2]" />
+                  </div>
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="p-4 bg-gradient-to-br from-[#4A90E2] to-[#52C878] rounded-2xl shadow-lg">
+                        <Zap className="w-8 h-8 text-white" />
+                      </div>
+                      <h5 className="text-3xl font-black text-[#2C3E50]">{data.protocol}</h5>
                     </div>
                     
-                    <div className="relative z-10">
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="p-4 bg-gradient-to-br from-[#4A90E2] to-[#52C878] rounded-2xl shadow-lg">
-                          <Zap className="w-8 h-8 text-white" />
-                        </div>
-                        <h5 className="text-3xl font-black text-[#2C3E50]">{protocolName}</h5>
-                      </div>
-                      
-                      {renderProtocolDetails(protocolName)}
+                    {renderProtocolDetails(data.protocol)}
 
-                      <div className="mt-10 p-8 bg-gradient-to-br from-blue-50 to-white rounded-[2rem] border border-blue-100 shadow-inner">
-                        <h6 className="font-black text-[#2C3E50] mb-4 flex items-center gap-3 text-xl">
-                          <Sparkles className="w-7 h-7 text-[#4A90E2]" />
-                          Next-Step Guidance
-                        </h6>
-                        <div className="space-y-4 text-gray-700 text-lg leading-relaxed">
-                          <p>
-                            {data.priority === 'High' ? (
-                              <><strong>Focus First:</strong> This area requires immediate attention. Start with the "Empty Stomach" supplements today and ensure you are drinking at least 2-3 liters of filtered water daily to support elimination.</>
-                            ) : data.priority === 'Medium' ? (
-                              <><strong>Supporting Focus:</strong> Begin incorporating these supplements after 7-10 days of your High Priority protocol to prevent detox overwhelm.</>
-                            ) : (
-                              <><strong>Maintenance:</strong> These indicators are currently stable. Focus on your higher priority areas first and re-evaluate this section in 30 days.</>
-                            )}
-                          </p>
-                          <div className="flex items-start gap-3 p-4 bg-white/50 rounded-xl border border-white italic font-medium text-gray-500 text-sm">
-                            <Info className="w-5 h-5 shrink-0 text-[#4A90E2]" />
-                            Always consult with your healthcare practitioner before starting any new supplement regimen for personalized dosing and monitoring.
-                          </div>
+                    <div className="mt-10 p-8 bg-gradient-to-br from-blue-50 to-white rounded-[2rem] border border-blue-100 shadow-inner">
+                      <h6 className="font-black text-[#2C3E50] mb-4 flex items-center gap-3 text-xl">
+                        <Sparkles className="w-7 h-7 text-[#4A90E2]" />
+                        Next-Step Guidance
+                      </h6>
+                      <div className="space-y-4 text-gray-700 text-lg leading-relaxed">
+                        <p>
+                          {data.priority === 'High' ? (
+                            <><strong>Focus First:</strong> This area requires immediate attention. Start with the "Empty Stomach" supplements today and ensure you are drinking at least 2-3 liters of filtered water daily to support elimination.</>
+                          ) : data.priority === 'Medium' ? (
+                            <><strong>Supporting Focus:</strong> Begin incorporating these supplements after 7-10 days of your High Priority protocol to prevent detox overwhelm.</>
+                          ) : (
+                            <><strong>Maintenance:</strong> These indicators are currently stable. Focus on your higher priority areas first and re-evaluate this section in 30 days.</>
+                          )}
+                        </p>
+                        <div className="flex items-start gap-3 p-4 bg-white/50 rounded-xl border border-white italic font-medium text-gray-500 text-sm">
+                          <Info className="w-5 h-5 shrink-0 text-[#4A90E2]" />
+                          Always consult with your healthcare practitioner before starting any new supplement regimen for personalized dosing and monitoring.
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           ))}
