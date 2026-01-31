@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Check, Target } from "lucide-react";
-import logoImage from "@assets/n1f_logo_mint_bg.png";
+import logoImage from "@assets/n1f_logo_clean.png";
 
 export default function HomePage() {
   return (
