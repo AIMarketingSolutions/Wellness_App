@@ -13,6 +13,7 @@ import Fitness from "@/pages/Fitness";
 import Supplement from "@/pages/Supplement";
 import NutritionalProtocol from "@/pages/NutritionalProtocol";
 import AdminSeed from "@/pages/AdminSeed";
+import AdminClients from "@/pages/AdminClients";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, isLoading } = useAuth();
@@ -67,6 +68,9 @@ function AppRoutes() {
       </Route>
       <Route path="/admin-seed">
         {() => <ProtectedRoute component={AdminSeed} />}
+      </Route>
+      <Route path="/admin-clients">
+        {() => <ProtectedRoute component={AdminClients} />}
       </Route>
       
       {/* Default redirect for unknown routes */}

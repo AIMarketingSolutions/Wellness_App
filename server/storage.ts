@@ -35,7 +35,8 @@ import type {
   GroceryList,
   InsertGroceryList,
   GroceryListItem,
-  InsertGroceryListItem
+  InsertGroceryListItem,
+  ApprovedClient
 } from "@shared/schema";
 
 export interface IStorage {
@@ -126,6 +127,13 @@ export interface IStorage {
   seedFoodItems(foodItems: Omit<InsertFoodItem, 'id'>[]): Promise<void>;
   seedExerciseTypes(exerciseTypes: Omit<InsertExerciseType, 'id'>[]): Promise<void>;
   seedSupplements(supplements: Omit<InsertSupplement, 'id'>[]): Promise<void>;
+
+  // Approved Clients methods
+  getApprovedClient(email: string): Promise<ApprovedClient | undefined>;
+  getAllApprovedClients(): Promise<ApprovedClient[]>;
+  addApprovedClient(email: string): Promise<ApprovedClient>;
+  removeApprovedClient(email: string): Promise<void>;
+  markApprovedClientUsed(email: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -411,6 +419,43 @@ export class DatabaseStorage implements IStorage {
 
   async seedSupplements(supplements: Omit<InsertSupplement, 'id'>[]): Promise<void> {
     await db.insert(schema.supplements).values(supplements).onConflictDoNothing();
+  }
+
+  // Approved Clients methods
+  async getApprovedClient(email: string): Promise<ApprovedClient | undefined> {
+    const [client] = await db
+      .select()
+      .from(schema.approvedClients)
+      .where(eq(schema.approvedClients.email, email.toLowerCase().trim()));
+    return client || undefined;
+  }
+
+  async getAllApprovedClients(): Promise<ApprovedClient[]> {
+    return await db
+      .select()
+      .from(schema.approvedClients)
+      .orderBy(desc(schema.approvedClients.addedAt));
+  }
+
+  async addApprovedClient(email: string): Promise<ApprovedClient> {
+    const [client] = await db
+      .insert(schema.approvedClients)
+      .values({ email: email.toLowerCase().trim() })
+      .returning();
+    return client;
+  }
+
+  async removeApprovedClient(email: string): Promise<void> {
+    await db
+      .delete(schema.approvedClients)
+      .where(eq(schema.approvedClients.email, email.toLowerCase().trim()));
+  }
+
+  async markApprovedClientUsed(email: string): Promise<void> {
+    await db
+      .update(schema.approvedClients)
+      .set({ usedAt: new Date() })
+      .where(eq(schema.approvedClients.email, email.toLowerCase().trim()));
   }
 }
 

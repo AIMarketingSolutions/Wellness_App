@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Loader2, CheckCircle, AlertCircle, Database, ShieldAlert } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle, Database, ShieldAlert, Users } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { Link } from "wouter";
 
 export default function AdminSeed() {
   const [isSeeding, setIsSeeding] = useState(false);
@@ -157,6 +158,17 @@ export default function AdminSeed() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <Link
+            href="/admin-clients"
+            data-testid="link-admin-clients"
+            className="flex items-center justify-center gap-2 w-full px-6 py-3 border-2 border-[#4A90E2] text-[#4A90E2] hover:bg-[#4A90E2] hover:text-white font-semibold rounded-xl transition-all duration-200"
+          >
+            <Users className="h-5 w-5" />
+            Manage Approved Clients
+          </Link>
         </div>
       </div>
     </div>

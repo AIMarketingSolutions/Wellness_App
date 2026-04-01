@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { Dumbbell, ArrowLeft } from "lucide-react";
+import { Dumbbell, ArrowLeft, ShieldCheck } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 export default function SignupPage() {
@@ -47,10 +47,20 @@ export default function SignupPage() {
             </p>
           </div>
 
+          {/* Invitation-only notice */}
+          <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <ShieldCheck className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-blue-700">
+              Signup is by invitation only. Contact{" "}
+              <span className="font-semibold">Nutrition One Fitness</span> to request access.
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                <ShieldCheck className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-700 font-medium">{error}</p>
               </div>
             )}
 

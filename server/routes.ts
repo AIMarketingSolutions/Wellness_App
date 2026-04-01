@@ -10,6 +10,14 @@ router.post("/api/auth/signup", async (req, res) => {
   try {
     const { email, password, fullName } = req.body;
 
+    // Check if email is on the approved list
+    const approved = await storage.getApprovedClient(email);
+    if (!approved) {
+      return res.status(403).json({ 
+        error: "Your email is not on the approved client list. Please contact Nutrition One Fitness to request access." 
+      });
+    }
+
     const existingUser = await storage.getUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
@@ -20,6 +28,9 @@ router.post("/api/auth/signup", async (req, res) => {
 
     // Create user profile
     await storage.createUserProfile({ userId: user.id });
+
+    // Mark this approved email as used
+    await storage.markApprovedClientUsed(email);
 
     req.session.userId = user.id;
     
@@ -718,6 +729,43 @@ router.post("/api/admin/seed-database", requireAdmin, async (req, res) => {
     });
   } catch (error: any) {
     console.error("Seed error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin: Approved Clients routes
+router.get("/api/admin/approved-clients", requireAdmin, async (req, res) => {
+  try {
+    const clients = await storage.getAllApprovedClients();
+    res.json(clients);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/api/admin/approved-clients", requireAdmin, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    const existing = await storage.getApprovedClient(email);
+    if (existing) {
+      return res.status(400).json({ error: "This email is already on the approved list" });
+    }
+    const client = await storage.addApprovedClient(email);
+    res.json(client);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete("/api/admin/approved-clients/:email", requireAdmin, async (req, res) => {
+  try {
+    const email = decodeURIComponent(req.params.email);
+    await storage.removeApprovedClient(email);
+    res.json({ success: true });
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });

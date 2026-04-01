@@ -4,6 +4,17 @@ Nutrition One Fitness Inc. is a comprehensive wellness application that provides
 
 # Recent Changes
 
+## April 1, 2026 - Approved Clients Only Signup
+- **approved_clients table**: Added new database table (`shared/schema.ts`) to store pre-approved email addresses with fields: id (UUID), email (unique, lowercased), addedAt (timestamp), usedAt (nullable timestamp set when account is created)
+- **Signup gating**: Modified `POST /api/auth/signup` to check the approved list before allowing registration; unapproved emails receive a clear 403 error message
+- **Admin API routes**: Added three protected admin-only endpoints:
+  - `GET /api/admin/approved-clients` — list all approved emails
+  - `POST /api/admin/approved-clients` — add an email
+  - `DELETE /api/admin/approved-clients/:email` — remove an email
+- **AdminClients page**: New page at `/admin-clients` for the admin to view all approved emails (with pending/active status), add new ones, and remove them
+- **AdminSeed link**: Added "Manage Approved Clients" button to the existing admin seed page linking to `/admin-clients`
+- **Signup page**: Added invitation-only notice banner and improved error styling when signup is rejected
+
 ## January 16, 2026 - Waist-to-Height Ratio (WHtR) Feature
 - **WHtR in Client Intake Profile**: Added Section 7 to the profile assessment page (`client/src/pages/ProfileAssessment.tsx`) with:
   - Educational information about WHtR as a cardiometabolic risk indicator

@@ -291,6 +291,14 @@ export const recipeIngredients = pgTable("recipe_ingredients", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// Approved Clients Table (for invite-only signup)
+export const approvedClients = pgTable("approved_clients", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  addedAt: timestamp("added_at", { withTimezone: true }).defaultNow().notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -375,3 +383,7 @@ export const insertRecipeSchema = createInsertSchema(recipes).omit({ id: true, c
 export type RecipeIngredient = typeof recipeIngredients.$inferSelect;
 export type InsertRecipeIngredient = z.infer<typeof insertRecipeIngredientSchema>;
 export const insertRecipeIngredientSchema = createInsertSchema(recipeIngredients).omit({ id: true, createdAt: true });
+
+export type ApprovedClient = typeof approvedClients.$inferSelect;
+export type InsertApprovedClient = z.infer<typeof insertApprovedClientSchema>;
+export const insertApprovedClientSchema = createInsertSchema(approvedClients).omit({ id: true, addedAt: true, usedAt: true });
