@@ -27,7 +27,7 @@ export default function AdminClients() {
       setNewEmail("");
       setFormError("");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       setFormError(err.message || "Failed to add email");
     },
   });
@@ -55,9 +55,10 @@ export default function AdminClients() {
     addMutation.mutate(trimmed);
   };
 
+  const errorMessage = error instanceof Error ? error.message : "";
   const isAccessDenied =
-    (error as any)?.message?.includes("Forbidden") ||
-    (error as any)?.message?.includes("Admin access required");
+    errorMessage.includes("Forbidden") ||
+    errorMessage.includes("Admin access required");
 
   const pending = clients.filter((c) => !c.usedAt);
   const used = clients.filter((c) => c.usedAt);
