@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Link, useLocation } from "wouter";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
@@ -19,9 +20,9 @@ export default function LoginPage() {
     try {
       await signIn(email, password);
       setLocation("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
-      setError(err.message || "Invalid email or password");
+      setError(err instanceof Error ? err.message : "Invalid email or password");
       setLoading(false);
     }
   };
@@ -34,74 +35,85 @@ export default function LoginPage() {
       </Link>
 
       <div className="w-full max-w-md">
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 space-y-8">
-              <div className="flex flex-col items-center space-y-4">
-                <h2 className="text-3xl font-bold text-[#2C3E50]">Sign In</h2>
-                <p className="text-gray-600 text-center">
-                  Continue your wellness journey
-                </p>
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 space-y-8">
+          <div className="flex flex-col items-center space-y-4">
+            <h2 className="text-3xl font-bold text-[#2C3E50]">Sign In</h2>
+            <p className="text-gray-600 text-center">
+              Continue your wellness journey
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-sm text-red-700">{error}</p>
               </div>
+            )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {error && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                    <p className="text-sm text-red-700">{error}</p>
-                  </div>
-                )}
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                data-testid="input-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#6DD891]/20 focus:border-[#6DD891] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
+                placeholder="Enter your email address"
+                disabled={loading}
+                required
+              />
+            </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    data-testid="input-email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#6DD891]/20 focus:border-[#6DD891] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
-                    placeholder="Enter your email address"
-                    disabled={loading}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="password" className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    data-testid="input-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#6DD891]/20 focus:border-[#6DD891] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
-                    placeholder="Enter your password"
-                    disabled={loading}
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  data-testid="button-login"
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-[#2C3E50] mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  data-testid="input-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-4 pr-12 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#6DD891]/20 focus:border-[#6DD891] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
+                  placeholder="Enter your password"
                   disabled={loading}
-                  className="w-full py-4 bg-gradient-to-r from-[#6DD891] to-[#4A90E2] text-white font-bold rounded-2xl hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  required
+                />
+                <button
+                  type="button"
+                  data-testid="button-toggle-password"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  tabIndex={-1}
                 >
-                  {loading ? "Signing in..." : "Login"}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
-              </form>
-
-              <div className="text-center">
-                <p className="text-gray-600">
-                  Don't have an account?{" "}
-                  <Link href="/signup" className="text-[#6DD891] font-semibold hover:text-[#4A90E2] transition-colors">
-                    Sign up here
-                  </Link>
-                </p>
               </div>
             </div>
+
+            <button
+              type="submit"
+              data-testid="button-login"
+              disabled={loading}
+              className="w-full py-4 bg-gradient-to-r from-[#6DD891] to-[#4A90E2] text-white font-bold rounded-2xl hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {loading ? "Signing in..." : "Login"}
+            </button>
+          </form>
+
+          <div className="text-center">
+            <p className="text-gray-600">
+              Don't have an account?{" "}
+              <Link href="/signup" className="text-[#6DD891] font-semibold hover:text-[#4A90E2] transition-colors">
+                Sign up here
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { Dumbbell, ArrowLeft, ShieldCheck } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { ArrowLeft, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Link } from "wouter";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [goals, setGoals] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
-  const [, setLocation] = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,123 +20,140 @@ export default function SignupPage() {
 
     try {
       await signUp(email, password, fullName);
-      // Small delay to ensure session is established
       await new Promise(resolve => setTimeout(resolve, 100));
       window.location.href = "/dashboard";
-    } catch (err: any) {
-      setError(err.message || "An error occurred during signup");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred during signup");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#52C878]/5 via-[#4A90E2]/5 to-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Link href="/" className="mb-8 flex items-center gap-2 text-gray-600 hover:text-[#52C878] transition-colors duration-200 group">
-          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-          <span className="font-medium">Back to Home</span>
+    <div className="min-h-screen bg-[#111827] flex items-center justify-center p-4">
+      <div className="w-full max-w-lg">
+
+        <Link
+          href="/"
+          className="mb-8 inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-200 group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
+          <span className="text-sm font-medium">Back to Home</span>
         </Link>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl p-8 space-y-8">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="bg-gradient-to-r from-[#52C878] to-[#4A90E2] p-4 rounded-full">
-              <Dumbbell className="w-10 h-10 text-white" />
+        <div className="mt-6 space-y-2">
+          <h1 className="text-4xl font-extrabold text-white">Apply for Access</h1>
+          <p className="text-gray-400 text-base leading-relaxed">
+            Submit your details and we'll get in touch once your application
+            is approved by Nutrition One Fitness.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+          {error && (
+            <div className="flex items-start gap-3 bg-red-900/40 border border-red-700 rounded-xl p-4">
+              <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-300 font-medium">{error}</p>
             </div>
-            <h1 className="text-3xl font-bold text-[#2C3E50]">Create Your Account</h1>
-            <p className="text-gray-600 text-center">
-              Start your wellness journey today
-            </p>
+          )}
+
+          <div className="space-y-2">
+            <label htmlFor="fullName" className="block text-sm font-semibold text-gray-200">
+              Full name
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              data-testid="input-fullname"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className="w-full px-4 py-4 bg-transparent border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-all"
+              placeholder="Jane Smith"
+              disabled={loading}
+              required
+            />
           </div>
 
-          {/* Invitation-only notice */}
-          <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <ShieldCheck className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-blue-700">
-              Signup is by invitation only. Contact{" "}
-              <span className="font-semibold">Nutrition One Fitness</span> to request access.
-            </p>
+          <div className="space-y-2">
+            <label htmlFor="email" className="block text-sm font-semibold text-gray-200">
+              Email address
+            </label>
+            <input
+              type="email"
+              id="email"
+              data-testid="input-email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-4 bg-transparent border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-all"
+              placeholder="jane@example.com"
+              disabled={loading}
+              required
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                <ShieldCheck className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700 font-medium">{error}</p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <label htmlFor="fullName" className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                Full Name
-              </label>
+          <div className="space-y-2">
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-200">
+              Password
+            </label>
+            <div className="relative">
               <input
-                type="text"
-                id="fullName"
-                data-testid="input-fullname"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#52C878]/20 focus:border-[#52C878] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
-                placeholder="Enter your full name"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                data-testid="input-email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#52C878]/20 focus:border-[#52C878] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
-                placeholder="Enter your email address"
-                disabled={loading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-semibold text-[#2C3E50] mb-2">
-                Password
-              </label>
-              <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 data-testid="input-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#52C878]/20 focus:border-[#52C878] transition-all duration-200 text-gray-800 placeholder-gray-400 bg-white/50 backdrop-blur-sm"
+                className="w-full px-4 py-4 pr-12 bg-transparent border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-all"
                 placeholder="Create a secure password"
                 disabled={loading}
                 required
               />
-            </div>
-
-            <div className="pt-4">
               <button
-                type="submit"
-                data-testid="button-submit"
-                disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-[#52C878] to-[#4A90E2] hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:transform-none transition-all duration-300 ease-out focus:outline-none focus:ring-4 focus:ring-[#52C878]/30"
+                type="button"
+                data-testid="button-toggle-password"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                tabIndex={-1}
               >
-                {loading ? "Creating Account..." : "Sign Up"}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-          </form>
-
-          <div className="text-center pt-4 border-t border-gray-100">
-            <p className="text-sm text-gray-600">
-              Already have an account?{" "}
-              <Link href="/login" className="text-[#52C878] hover:text-[#4A90E2] font-semibold transition-colors duration-200">
-                Login here
-              </Link>
-            </p>
           </div>
-        </div>
+
+          <div className="space-y-2">
+            <label htmlFor="goals" className="block text-sm font-semibold text-gray-200">
+              Tell us about your health goals{" "}
+              <span className="text-gray-500 font-normal">(optional)</span>
+            </label>
+            <textarea
+              id="goals"
+              data-testid="input-goals"
+              value={goals}
+              onChange={(e) => setGoals(e.target.value)}
+              rows={4}
+              className="w-full px-4 py-4 bg-transparent border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-all resize-none"
+              placeholder="What are you hoping to achieve with Nutrition One Fitness?"
+              disabled={loading}
+            />
+          </div>
+
+          <button
+            type="submit"
+            data-testid="button-submit"
+            disabled={loading}
+            className="w-full py-4 bg-gradient-to-r from-[#FF6B5B] to-[#FF8C69] hover:from-[#FF5A47] hover:to-[#FF7A55] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-lg rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none transition-all duration-200"
+          >
+            {loading ? "Submitting..." : "Submit Application"}
+          </button>
+        </form>
+
+        <p className="mt-8 text-center text-sm text-gray-500">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="text-gray-300 hover:text-white font-semibold transition-colors duration-200"
+          >
+            Login here
+          </Link>
+        </p>
       </div>
     </div>
   );
