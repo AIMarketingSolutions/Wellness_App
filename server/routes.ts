@@ -770,26 +770,4 @@ router.delete("/api/admin/approved-clients/:email", requireAdmin, async (req, re
   }
 });
 
-router.post("/api/admin/reset-admin-password", requireAdmin, async (req, res) => {
-  try {
-    const { newPassword } = req.body;
-    if (!newPassword || typeof newPassword !== "string" || newPassword.length < 8) {
-      return res.status(400).json({ error: "newPassword must be at least 8 characters" });
-    }
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (!adminEmail) {
-      return res.status(500).json({ error: "ADMIN_EMAIL not configured" });
-    }
-    const hashed = await hashPassword(newPassword);
-    const user = await storage.getUserByEmail(adminEmail);
-    if (!user) {
-      return res.status(404).json({ error: "Admin user not found" });
-    }
-    await storage.updateUserPassword(user.id, hashed);
-    res.json({ success: true, message: "Admin password updated" });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 export default router;
