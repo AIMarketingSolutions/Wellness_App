@@ -1079,7 +1079,7 @@ export default function MealPlanner() {
                           <td className="py-2 px-4 text-center font-bold text-[#2C3E50]">{summary.totalCarbs}g</td>
                           <td className="py-2 px-4 text-center font-bold text-[#2C3E50]">{summary.totalFat}g</td>
                         </tr>
-                      </>
+                      </React.Fragment>
                     );
                   })}
 
