@@ -405,7 +405,8 @@ export default function MealPlanner() {
     }
   };
 
-  // Full-day macro goal (sum across all visible meals)
+  // Full-day macro goal: sum per-meal allocations for each visible tab
+  // (uses the same distribution logic as mealTargets to stay consistent)
   const dailyGoal = useMemo(() => {
     if (!profile) return { calories: 0, proteinG: 0, carbsG: 0, fatG: 0 };
 
@@ -434,11 +435,31 @@ export default function MealPlanner() {
     const minCalories = gender === "male" ? 1500 : 1200;
     const dct = Math.max(tee - deficit, minCalories) + exerciseCalories;
 
-    const proteinG = (dct * (proteinPercent / 100)) / 4;
-    const carbsG = (dct * (carbPercent / 100)) / 4;
-    const fatG = (dct * (fatPercent / 100)) / 9;
+    // Compute per-meal calorie allocations for each visible tab (same logic as mealTargets)
+    const planType = profile.mealPlanType || 'three_meals';
+    const getMealCal = (mealType: MealType): number => {
+      if (planType === 'three_meals') {
+        return (mealType === 'breakfast' || mealType === 'lunch' || mealType === 'dinner') ? dct * (100 / 3 / 100) : 0;
+      } else if (planType === 'three_meals_one_snack') {
+        if (mealType === 'breakfast' || mealType === 'lunch' || mealType === 'dinner') return dct * 0.3;
+        if (mealType === 'snack') return dct * 0.1;
+      } else if (planType === 'three_meals_two_snacks') {
+        if (mealType === 'breakfast' || mealType === 'lunch' || mealType === 'dinner') return dct * (80 / 3 / 100);
+        if (mealType === 'snack' || mealType === 'snack2') return dct * 0.1;
+      }
+      return 0;
+    };
 
-    return { calories: Math.round(dct), proteinG: Math.round(proteinG), carbsG: Math.round(carbsG), fatG: Math.round(fatG) };
+    const visibleTabTypes: MealType[] = ['breakfast', 'lunch', 'dinner'];
+    if (planType !== 'three_meals') visibleTabTypes.push('snack');
+    if (planType === 'three_meals_two_snacks') visibleTabTypes.push('snack2');
+
+    const totalCal = visibleTabTypes.reduce((sum, t) => sum + getMealCal(t), 0);
+    const proteinG = (totalCal * (proteinPercent / 100)) / 4;
+    const carbsG = (totalCal * (carbPercent / 100)) / 4;
+    const fatG = (totalCal * (fatPercent / 100)) / 9;
+
+    return { calories: Math.round(totalCal), proteinG: Math.round(proteinG), carbsG: Math.round(carbsG), fatG: Math.round(fatG) };
   }, [profile, exerciseCalories]);
 
   // Meal tabs
@@ -892,10 +913,14 @@ export default function MealPlanner() {
                     );
                   })}
 
-                  {/* Totals Row */}
+                  {/* Totals, Goal, Remaining rows — only include visible tabs */}
                   {(() => {
-                    const totals = Object.values(mealSummaries).reduce(
-                      (acc, m) => ({ cal: acc.cal + (m?.totalCalories || 0), pro: acc.pro + (m?.totalProtein || 0), carb: acc.carb + (m?.totalCarbs || 0), fat: acc.fat + (m?.totalFat || 0) }),
+                    const visibleTypes = mealTabs.filter(tab => tab.show).map(tab => tab.type);
+                    const totals = visibleTypes.reduce(
+                      (acc, t) => {
+                        const m = mealSummaries[t];
+                        return { cal: acc.cal + (m?.totalCalories || 0), pro: acc.pro + (m?.totalProtein || 0), carb: acc.carb + (m?.totalCarbs || 0), fat: acc.fat + (m?.totalFat || 0) };
+                      },
                       { cal: 0, pro: 0, carb: 0, fat: 0 }
                     );
                     const remaining = { cal: dailyGoal.calories - totals.cal, pro: dailyGoal.proteinG - totals.pro, carb: dailyGoal.carbsG - totals.carb, fat: dailyGoal.fatG - totals.fat };
@@ -918,10 +943,10 @@ export default function MealPlanner() {
                         </tr>
                         <tr className="bg-white/80 rounded-b-lg">
                           <td className="py-3 px-4 font-semibold text-[#2C3E50]">Remaining</td>
-                          <td className={`py-3 px-4 text-center ${remColor(remaining.cal)}`} data-testid="text-summary-remaining-calories">{remaining.cal > 0 ? remaining.cal : remaining.cal}</td>
-                          <td className={`py-3 px-4 text-center ${remColor(remaining.pro)}`} data-testid="text-summary-remaining-protein">{remaining.pro > 0 ? `${remaining.pro}g` : `${remaining.pro}g`}</td>
-                          <td className={`py-3 px-4 text-center ${remColor(remaining.carb)}`} data-testid="text-summary-remaining-carbs">{remaining.carb > 0 ? `${remaining.carb}g` : `${remaining.carb}g`}</td>
-                          <td className={`py-3 px-4 text-center ${remColor(remaining.fat)}`} data-testid="text-summary-remaining-fat">{remaining.fat > 0 ? `${remaining.fat}g` : `${remaining.fat}g`}</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.cal)}`} data-testid="text-summary-remaining-calories">{remaining.cal}</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.pro)}`} data-testid="text-summary-remaining-protein">{remaining.pro}g</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.carb)}`} data-testid="text-summary-remaining-carbs">{remaining.carb}g</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.fat)}`} data-testid="text-summary-remaining-fat">{remaining.fat}g</td>
                         </tr>
                       </>
                     );
