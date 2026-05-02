@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { ArrowLeft, Calculator, Check, Droplet, Plus, Minus } from "lucide-react";
+import { ArrowLeft, BarChart2, Calculator, Check, Droplet, Plus, Minus } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { UserProfile, WaterIntake } from "@shared/schema";
@@ -63,6 +63,7 @@ export default function MealPlanner() {
   const [selectedProteinIds, setSelectedProteinIds] = useState<string[]>([]);
   const [selectedFatIds, setSelectedFatIds] = useState<string[]>([]);
   const [calculation, setCalculation] = useState<MealCalculation | null>(null);
+  const [mealSummaries, setMealSummaries] = useState<Partial<Record<MealType, MealCalculation>>>({});
 
   // Fetch user profile
   const { data: profile } = useQuery<UserProfile>({
@@ -389,7 +390,8 @@ export default function MealPlanner() {
       setCalculation(result);
       
       console.log('Calculation complete!');
-      
+      setMealSummaries(prev => ({ ...prev, [activeMeal]: result }));
+
       // Scroll to results after a brief delay to ensure render
       setTimeout(() => {
         const resultsElement = document.getElementById('calculation-results');
@@ -402,6 +404,42 @@ export default function MealPlanner() {
       alert('An error occurred during calculation: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
+
+  // Full-day macro goal (sum across all visible meals)
+  const dailyGoal = useMemo(() => {
+    if (!profile) return { calories: 0, proteinG: 0, carbsG: 0, fatG: 0 };
+
+    let proteinPercent = 30, carbPercent = 30, fatPercent = 40;
+    if (profile.metabolicProfile === "fast_oxidizer") { proteinPercent = 25; carbPercent = 35; fatPercent = 40; }
+    else if (profile.metabolicProfile === "slow_oxidizer") { proteinPercent = 35; carbPercent = 25; fatPercent = 40; }
+    else if (profile.metabolicProfile === "medium_oxidizer") { proteinPercent = 30; carbPercent = 30; fatPercent = 40; }
+    else if (profile.customProteinPercentage && profile.customCarbPercentage && profile.customFatPercentage) {
+      proteinPercent = parseFloat(profile.customProteinPercentage);
+      carbPercent = parseFloat(profile.customCarbPercentage);
+      fatPercent = parseFloat(profile.customFatPercentage);
+    }
+
+    const age = profile.age || 0;
+    const weight = parseFloat(profile.weightKg || "0");
+    const height = parseFloat(profile.heightCm || "0");
+    const gender = profile.gender || "male";
+    let bmr = gender === "male"
+      ? 66.5 + (13.75 * weight) + (5.003 * height) - (6.755 * age)
+      : 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+
+    const activityMultipliers: Record<string, number> = { sedentary: 1.2, lightly_active: 1.375, moderately_active: 1.55, very_active: 1.725, extremely_active: 1.9 };
+    const tee = bmr * (activityMultipliers[profile.activityLevel || "moderately_active"] || 1.55);
+    const deficits: Record<string, number> = { maintain: 0, lose_0_5: 250, lose_1: 500, lose_1_5: 750, lose_2: 1000 };
+    const deficit = deficits[profile.weightLossGoal || "maintain"] || 0;
+    const minCalories = gender === "male" ? 1500 : 1200;
+    const dct = Math.max(tee - deficit, minCalories) + exerciseCalories;
+
+    const proteinG = (dct * (proteinPercent / 100)) / 4;
+    const carbsG = (dct * (carbPercent / 100)) / 4;
+    const fatG = (dct * (fatPercent / 100)) / 9;
+
+    return { calories: Math.round(dct), proteinG: Math.round(proteinG), carbsG: Math.round(carbsG), fatG: Math.round(fatG) };
+  }, [profile, exerciseCalories]);
 
   // Meal tabs
   const mealPlanType = profile?.mealPlanType || 'three_meals';
@@ -810,6 +848,93 @@ export default function MealPlanner() {
             Calculate Recommended Portions
           </button>
         </div>
+
+        {/* Daily Meal Summary Chart */}
+        {Object.keys(mealSummaries).length > 0 && (
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <BarChart2 className="w-6 h-6 text-[#4A90E2]" />
+                <h2 className="text-2xl font-bold text-[#2C3E50]">Daily Meal Summary</h2>
+              </div>
+              <button
+                onClick={() => setMealSummaries({})}
+                className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
+                data-testid="button-clear-summary"
+              >
+                Clear Summary
+              </button>
+            </div>
+
+            <div className="overflow-x-auto" data-testid="table-daily-summary">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gradient-to-r from-[#2C3E50] to-[#4A90E2] text-white">
+                    <th className="text-left py-3 px-4 rounded-tl-lg font-semibold">Meal</th>
+                    <th className="text-center py-3 px-4 font-semibold">Calories<br /><span className="text-xs font-normal opacity-80">kcal</span></th>
+                    <th className="text-center py-3 px-4 font-semibold">Protein<br /><span className="text-xs font-normal opacity-80">g</span></th>
+                    <th className="text-center py-3 px-4 font-semibold">Carbs<br /><span className="text-xs font-normal opacity-80">g</span></th>
+                    <th className="text-center py-3 px-4 rounded-tr-lg font-semibold">Fat<br /><span className="text-xs font-normal opacity-80">g</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mealTabs.filter(tab => tab.show).map((tab, idx) => {
+                    const summary = mealSummaries[tab.type];
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr key={tab.type} className={isEven ? 'bg-white/50' : 'bg-gray-50/50'}>
+                        <td className="py-3 px-4 font-semibold text-[#2C3E50]">{tab.label}</td>
+                        <td className="py-3 px-4 text-center text-gray-700">{summary ? summary.totalCalories : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-3 px-4 text-center text-gray-700">{summary ? `${summary.totalProtein}g` : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-3 px-4 text-center text-gray-700">{summary ? `${summary.totalCarbs}g` : <span className="text-gray-300">—</span>}</td>
+                        <td className="py-3 px-4 text-center text-gray-700">{summary ? `${summary.totalFat}g` : <span className="text-gray-300">—</span>}</td>
+                      </tr>
+                    );
+                  })}
+
+                  {/* Totals Row */}
+                  {(() => {
+                    const totals = Object.values(mealSummaries).reduce(
+                      (acc, m) => ({ cal: acc.cal + (m?.totalCalories || 0), pro: acc.pro + (m?.totalProtein || 0), carb: acc.carb + (m?.totalCarbs || 0), fat: acc.fat + (m?.totalFat || 0) }),
+                      { cal: 0, pro: 0, carb: 0, fat: 0 }
+                    );
+                    const remaining = { cal: dailyGoal.calories - totals.cal, pro: dailyGoal.proteinG - totals.pro, carb: dailyGoal.carbsG - totals.carb, fat: dailyGoal.fatG - totals.fat };
+                    const remColor = (v: number) => v >= 0 ? 'text-[#52C878] font-bold' : 'text-red-500 font-bold';
+                    return (
+                      <>
+                        <tr className="border-t-2 border-gray-200 bg-[#2C3E50]/5">
+                          <td className="py-3 px-4 font-bold text-[#2C3E50]">Totals</td>
+                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-calories">{totals.cal}</td>
+                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-protein">{totals.pro}g</td>
+                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-carbs">{totals.carb}g</td>
+                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-fat">{totals.fat}g</td>
+                        </tr>
+                        <tr className="bg-[#4A90E2]/5">
+                          <td className="py-3 px-4 font-semibold text-[#4A90E2]">Your Daily Goal</td>
+                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-calories">{dailyGoal.calories}</td>
+                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-protein">{dailyGoal.proteinG}g</td>
+                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-carbs">{dailyGoal.carbsG}g</td>
+                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-fat">{dailyGoal.fatG}g</td>
+                        </tr>
+                        <tr className="bg-white/80 rounded-b-lg">
+                          <td className="py-3 px-4 font-semibold text-[#2C3E50]">Remaining</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.cal)}`} data-testid="text-summary-remaining-calories">{remaining.cal > 0 ? remaining.cal : remaining.cal}</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.pro)}`} data-testid="text-summary-remaining-protein">{remaining.pro > 0 ? `${remaining.pro}g` : `${remaining.pro}g`}</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.carb)}`} data-testid="text-summary-remaining-carbs">{remaining.carb > 0 ? `${remaining.carb}g` : `${remaining.carb}g`}</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.fat)}`} data-testid="text-summary-remaining-fat">{remaining.fat > 0 ? `${remaining.fat}g` : `${remaining.fat}g`}</td>
+                        </tr>
+                      </>
+                    );
+                  })()}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-3 text-center">
+              Summary updates each time you calculate a meal. Switch between meal tabs and calculate each one to build your full day.
+            </p>
+          </div>
+        )}
 
         {/* Calculation Results */}
         {calculation && (
