@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
 import { ArrowLeft, BarChart2, Calculator, Check, Droplet, Plus, Minus } from "lucide-react";
@@ -57,13 +57,72 @@ interface DailyExercise {
 const GRAMS_PER_OUNCE = 28.3495;
 
 export default function MealPlanner() {
-  useAuth();
+  const { user } = useAuth();
   const [activeMeal, setActiveMeal] = useState<MealType>('breakfast');
   const [selectedCarbIds, setSelectedCarbIds] = useState<string[]>([]);
   const [selectedProteinIds, setSelectedProteinIds] = useState<string[]>([]);
   const [selectedFatIds, setSelectedFatIds] = useState<string[]>([]);
   const [calculation, setCalculation] = useState<MealCalculation | null>(null);
+
+  const getLocalDateString = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const getMealSummaryKey = (userId: string, dateStr: string) =>
+    `mealSummaries_${userId}_${dateStr}`;
+
+  const loadSummariesForDate = (userId: string, dateStr: string): Partial<Record<MealType, MealCalculation>> => {
+    try {
+      const stored = localStorage.getItem(getMealSummaryKey(userId, dateStr));
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const [currentDay, setCurrentDay] = useState<string>(() => getLocalDateString());
   const [mealSummaries, setMealSummaries] = useState<Partial<Record<MealType, MealCalculation>>>({});
+
+  // Load persisted summaries once user ID is known (auth query resolves async)
+  useEffect(() => {
+    if (!user?.id) return;
+    setMealSummaries(loadSummariesForDate(user.id, currentDay));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  // Check every minute for day rollover; reset state for the new day when it occurs
+  useEffect(() => {
+    if (!user?.id) return;
+    const checkDayRollover = () => {
+      const today = getLocalDateString();
+      if (today !== currentDay) {
+        setCurrentDay(today);
+        setMealSummaries(loadSummariesForDate(user.id!, today));
+        setCalculation(null);
+        setSelectedCarbIds([]);
+        setSelectedProteinIds([]);
+        setSelectedFatIds([]);
+        setActiveMeal('breakfast');
+      }
+    };
+    const interval = setInterval(checkDayRollover, 60_000);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, currentDay]);
+
+  // Persist summaries to localStorage whenever they change
+  useEffect(() => {
+    if (!user?.id) return;
+    try {
+      localStorage.setItem(getMealSummaryKey(user.id, currentDay), JSON.stringify(mealSummaries));
+    } catch {
+      // ignore storage errors
+    }
+  }, [mealSummaries, currentDay, user?.id]);
 
   // Fetch user profile
   const { data: profile } = useQuery<UserProfile>({
