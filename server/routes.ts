@@ -760,6 +760,26 @@ router.post("/api/admin/approved-clients", requireAdmin, async (req, res) => {
   }
 });
 
+router.post("/api/admin/approved-clients/bulk", requireAdmin, async (req, res) => {
+  try {
+    const { emails } = req.body;
+    if (!Array.isArray(emails) || emails.length === 0) {
+      return res.status(400).json({ error: "emails array is required" });
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const validEmails = emails
+      .map((e: any) => (typeof e === "string" ? e.trim().toLowerCase() : ""))
+      .filter((e) => emailRegex.test(e));
+    if (validEmails.length === 0) {
+      return res.status(400).json({ error: "No valid email addresses found" });
+    }
+    const result = await storage.bulkAddApprovedClients(validEmails);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.delete("/api/admin/approved-clients/:email", requireAdmin, async (req, res) => {
   try {
     const email = decodeURIComponent(req.params.email);

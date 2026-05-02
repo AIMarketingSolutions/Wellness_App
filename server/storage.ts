@@ -133,6 +133,7 @@ export interface IStorage {
   getApprovedClient(email: string): Promise<ApprovedClient | undefined>;
   getAllApprovedClients(): Promise<ApprovedClient[]>;
   addApprovedClient(email: string): Promise<ApprovedClient>;
+  bulkAddApprovedClients(emails: string[]): Promise<{ added: number; skipped: number }>;
   removeApprovedClient(email: string): Promise<void>;
   markApprovedClientUsed(email: string): Promise<void>;
 }
@@ -448,6 +449,23 @@ export class DatabaseStorage implements IStorage {
       .values({ email: email.toLowerCase().trim() })
       .returning();
     return client;
+  }
+
+  async bulkAddApprovedClients(emails: string[]): Promise<{ added: number; skipped: number }> {
+    const normalized = [...new Set(emails.map((e) => e.toLowerCase().trim()))];
+    const existing = await db
+      .select({ email: schema.approvedClients.email })
+      .from(schema.approvedClients);
+    const existingSet = new Set(existing.map((r) => r.email));
+    const toInsert = normalized.filter((e) => !existingSet.has(e));
+    const skipped = normalized.length - toInsert.length;
+    if (toInsert.length > 0) {
+      await db
+        .insert(schema.approvedClients)
+        .values(toInsert.map((email) => ({ email })))
+        .onConflictDoNothing();
+    }
+    return { added: toInsert.length, skipped };
   }
 
   async removeApprovedClient(email: string): Promise<void> {

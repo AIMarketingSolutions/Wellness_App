@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Users, Plus, Trash2, CheckCircle, Clock, AlertCircle, ShieldAlert, Link as LinkIcon } from "lucide-react";
+import { Users, Plus, Trash2, CheckCircle, Clock, AlertCircle, ShieldAlert, Link as LinkIcon, Upload, FileText, X } from "lucide-react";
 import { Link } from "wouter";
 
 type ApprovedClient = {
@@ -11,9 +11,30 @@ type ApprovedClient = {
   usedAt: string | null;
 };
 
+type BulkResult = {
+  added: number;
+  skipped: number;
+};
+
+function parseEmailsFromText(text: string): string[] {
+  return text
+    .split(/[\n,;]+/)
+    .map((line) => line.trim().toLowerCase())
+    .filter((line) => line.length > 0);
+}
+
 export default function AdminClients() {
   const [newEmail, setNewEmail] = useState("");
   const [formError, setFormError] = useState("");
+
+  const [bulkText, setBulkText] = useState("");
+  const [parsedEmails, setParsedEmails] = useState<string[]>([]);
+  const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
+  const [bulkError, setBulkError] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const { data: clients = [], isLoading, error } = useQuery<ApprovedClient[]>({
     queryKey: ["/api/admin/approved-clients"],
@@ -40,6 +61,25 @@ export default function AdminClients() {
     },
   });
 
+  const bulkMutation = useMutation({
+    mutationFn: (emails: string[]) =>
+      apiRequest("/api/admin/approved-clients/bulk", {
+        method: "POST",
+        body: JSON.stringify({ emails }),
+      }),
+    onSuccess: (data: BulkResult) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/approved-clients"] });
+      setBulkResult(data);
+      setBulkText("");
+      setParsedEmails([]);
+      setShowPreview(false);
+      setBulkError("");
+    },
+    onError: (err: Error) => {
+      setBulkError(err.message || "Bulk upload failed");
+    },
+  });
+
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
@@ -48,11 +88,53 @@ export default function AdminClients() {
       setFormError("Please enter an email address");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    if (!emailRegex.test(trimmed)) {
       setFormError("Please enter a valid email address");
       return;
     }
     addMutation.mutate(trimmed);
+  };
+
+  const handleBulkTextChange = (value: string) => {
+    setBulkText(value);
+    setBulkResult(null);
+    setBulkError("");
+    const emails = parseEmailsFromText(value).filter((e) => emailRegex.test(e));
+    setParsedEmails(emails);
+    setShowPreview(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string;
+      handleBulkTextChange(text);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handlePreview = () => {
+    setBulkError("");
+    if (parsedEmails.length === 0) {
+      setBulkError("No valid email addresses found. Each line should contain one email address.");
+      return;
+    }
+    setShowPreview(true);
+  };
+
+  const handleBulkSubmit = () => {
+    bulkMutation.mutate(parsedEmails);
+  };
+
+  const handleClearBulk = () => {
+    setBulkText("");
+    setParsedEmails([]);
+    setShowPreview(false);
+    setBulkResult(null);
+    setBulkError("");
   };
 
   const errorMessage = error instanceof Error ? error.message : "";
@@ -147,6 +229,148 @@ export default function AdminClients() {
             )}
           </div>
         </div>
+
+        {/* Bulk Upload */}
+        {!isAccessDenied && (
+          <div className="backdrop-blur-sm bg-white/90 border border-[#6DD891]/20 rounded-2xl shadow-lg">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-r from-[#6DD891]/20 to-[#4A90E2]/20 p-2 rounded-lg">
+                  <Upload className="h-5 w-5 text-[#4A90E2]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-[#2C3E50]">Bulk Upload</h2>
+                  <p className="text-sm text-gray-500">Approve multiple clients at once</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Success result banner */}
+              {bulkResult && (
+                <div className="rounded-xl p-4 border border-green-200 bg-green-50 flex items-start gap-3" data-testid="bulk-result">
+                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-green-900">Upload complete</p>
+                    <p className="text-sm text-green-800 mt-0.5" data-testid="text-bulk-summary">
+                      {bulkResult.added} added
+                      {bulkResult.skipped > 0 ? `, ${bulkResult.skipped} skipped (already approved)` : ""}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setBulkResult(null)}
+                    className="ml-auto text-green-600 hover:text-green-800"
+                    data-testid="button-dismiss-result"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Textarea */}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-[#2C3E50]">
+                  Paste emails (one per line, or comma/semicolon separated)
+                </label>
+                <textarea
+                  value={bulkText}
+                  onChange={(e) => handleBulkTextChange(e.target.value)}
+                  placeholder={"alice@example.com\nbob@example.com\ncarol@example.com"}
+                  rows={5}
+                  data-testid="textarea-bulk-emails"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-[#52C878]/20 focus:border-[#52C878] transition-all text-gray-800 placeholder-gray-400 bg-white/50 font-mono text-sm resize-y"
+                />
+                {parsedEmails.length > 0 && (
+                  <p className="text-xs text-gray-500" data-testid="text-parsed-count">
+                    {parsedEmails.length} valid email{parsedEmails.length !== 1 ? "s" : ""} detected
+                  </p>
+                )}
+              </div>
+
+              {/* File upload */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  data-testid="button-upload-csv"
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:border-[#52C878] hover:text-[#52C878] transition-all"
+                >
+                  <FileText className="h-4 w-4" />
+                  Upload CSV file
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  data-testid="input-csv-file"
+                />
+                {bulkText && (
+                  <button
+                    type="button"
+                    onClick={handleClearBulk}
+                    data-testid="button-clear-bulk"
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Error */}
+              {bulkError && (
+                <div className="flex items-center gap-2 text-red-700 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2" data-testid="bulk-error">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  {bulkError}
+                </div>
+              )}
+
+              {/* Preview */}
+              {showPreview && parsedEmails.length > 0 && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 space-y-3" data-testid="bulk-preview">
+                  <p className="text-sm font-semibold text-blue-900">
+                    Preview — {parsedEmails.length} valid email{parsedEmails.length !== 1 ? "s" : ""} ready to submit (duplicates will be skipped automatically):
+                  </p>
+                  <ul className="max-h-48 overflow-y-auto space-y-1">
+                    {parsedEmails.map((email, idx) => (
+                      <li key={idx} className="text-sm font-mono text-blue-800" data-testid={`preview-email-${idx}`}>
+                        {email}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                {!showPreview ? (
+                  <button
+                    type="button"
+                    onClick={handlePreview}
+                    disabled={parsedEmails.length === 0}
+                    data-testid="button-preview-bulk"
+                    className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Preview ({parsedEmails.length})
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleBulkSubmit}
+                    disabled={bulkMutation.isPending}
+                    data-testid="button-submit-bulk"
+                    className="px-5 py-2.5 bg-gradient-to-r from-[#52C878] to-[#4A90E2] hover:from-[#52C878]/90 hover:to-[#4A90E2]/90 text-white font-semibold rounded-xl shadow hover:shadow-md transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {bulkMutation.isPending ? "Uploading..." : `Approve ${parsedEmails.length} emails`}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Client list */}
         {!isAccessDenied && (
