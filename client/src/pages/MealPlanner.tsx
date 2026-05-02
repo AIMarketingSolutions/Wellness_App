@@ -870,100 +870,9 @@ export default function MealPlanner() {
           </button>
         </div>
 
-        {/* Daily Meal Summary Chart */}
-        {Object.keys(mealSummaries).length > 0 && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <BarChart2 className="w-6 h-6 text-[#4A90E2]" />
-                <h2 className="text-2xl font-bold text-[#2C3E50]">Daily Meal Summary</h2>
-              </div>
-              <button
-                onClick={() => setMealSummaries({})}
-                className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
-                data-testid="button-clear-summary"
-              >
-                Clear Summary
-              </button>
-            </div>
-
-            <div className="overflow-x-auto" data-testid="table-daily-summary">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gradient-to-r from-[#2C3E50] to-[#4A90E2] text-white">
-                    <th className="text-left py-3 px-4 rounded-tl-lg font-semibold">Meal</th>
-                    <th className="text-center py-3 px-4 font-semibold">Calories<br /><span className="text-xs font-normal opacity-80">kcal</span></th>
-                    <th className="text-center py-3 px-4 font-semibold">Protein<br /><span className="text-xs font-normal opacity-80">g</span></th>
-                    <th className="text-center py-3 px-4 font-semibold">Carbs<br /><span className="text-xs font-normal opacity-80">g</span></th>
-                    <th className="text-center py-3 px-4 rounded-tr-lg font-semibold">Fat<br /><span className="text-xs font-normal opacity-80">g</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mealTabs.filter(tab => tab.show).map((tab, idx) => {
-                    const summary = mealSummaries[tab.type];
-                    const isEven = idx % 2 === 0;
-                    return (
-                      <tr key={tab.type} className={isEven ? 'bg-white/50' : 'bg-gray-50/50'}>
-                        <td className="py-3 px-4 font-semibold text-[#2C3E50]">{tab.label}</td>
-                        <td className="py-3 px-4 text-center text-gray-700">{summary ? summary.totalCalories : <span className="text-gray-300">—</span>}</td>
-                        <td className="py-3 px-4 text-center text-gray-700">{summary ? `${summary.totalProtein}g` : <span className="text-gray-300">—</span>}</td>
-                        <td className="py-3 px-4 text-center text-gray-700">{summary ? `${summary.totalCarbs}g` : <span className="text-gray-300">—</span>}</td>
-                        <td className="py-3 px-4 text-center text-gray-700">{summary ? `${summary.totalFat}g` : <span className="text-gray-300">—</span>}</td>
-                      </tr>
-                    );
-                  })}
-
-                  {/* Totals, Goal, Remaining rows — only include visible tabs */}
-                  {(() => {
-                    const visibleTypes = mealTabs.filter(tab => tab.show).map(tab => tab.type);
-                    const totals = visibleTypes.reduce(
-                      (acc, t) => {
-                        const m = mealSummaries[t];
-                        return { cal: acc.cal + (m?.totalCalories || 0), pro: acc.pro + (m?.totalProtein || 0), carb: acc.carb + (m?.totalCarbs || 0), fat: acc.fat + (m?.totalFat || 0) };
-                      },
-                      { cal: 0, pro: 0, carb: 0, fat: 0 }
-                    );
-                    const remaining = { cal: dailyGoal.calories - totals.cal, pro: dailyGoal.proteinG - totals.pro, carb: dailyGoal.carbsG - totals.carb, fat: dailyGoal.fatG - totals.fat };
-                    const remColor = (v: number) => v >= 0 ? 'text-[#52C878] font-bold' : 'text-red-500 font-bold';
-                    return (
-                      <>
-                        <tr className="border-t-2 border-gray-200 bg-[#2C3E50]/5">
-                          <td className="py-3 px-4 font-bold text-[#2C3E50]">Totals</td>
-                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-calories">{totals.cal}</td>
-                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-protein">{totals.pro}g</td>
-                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-carbs">{totals.carb}g</td>
-                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-fat">{totals.fat}g</td>
-                        </tr>
-                        <tr className="bg-[#4A90E2]/5">
-                          <td className="py-3 px-4 font-semibold text-[#4A90E2]">Your Daily Goal</td>
-                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-calories">{dailyGoal.calories}</td>
-                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-protein">{dailyGoal.proteinG}g</td>
-                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-carbs">{dailyGoal.carbsG}g</td>
-                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-fat">{dailyGoal.fatG}g</td>
-                        </tr>
-                        <tr className="bg-white/80 rounded-b-lg">
-                          <td className="py-3 px-4 font-semibold text-[#2C3E50]">Remaining</td>
-                          <td className={`py-3 px-4 text-center ${remColor(remaining.cal)}`} data-testid="text-summary-remaining-calories">{remaining.cal}</td>
-                          <td className={`py-3 px-4 text-center ${remColor(remaining.pro)}`} data-testid="text-summary-remaining-protein">{remaining.pro}g</td>
-                          <td className={`py-3 px-4 text-center ${remColor(remaining.carb)}`} data-testid="text-summary-remaining-carbs">{remaining.carb}g</td>
-                          <td className={`py-3 px-4 text-center ${remColor(remaining.fat)}`} data-testid="text-summary-remaining-fat">{remaining.fat}g</td>
-                        </tr>
-                      </>
-                    );
-                  })()}
-                </tbody>
-              </table>
-            </div>
-
-            <p className="text-xs text-gray-500 mt-3 text-center">
-              Summary updates each time you calculate a meal. Switch between meal tabs and calculate each one to build your full day.
-            </p>
-          </div>
-        )}
-
         {/* Calculation Results */}
         {calculation && (
-          <div id="calculation-results" className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8">
+          <div id="calculation-results" className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-6">
             <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Recommended Portions (in Ounces)</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -1040,6 +949,129 @@ export default function MealPlanner() {
             </div>
           </div>
         )}
+
+        {/* Daily Meal Summary Chart */}
+        {Object.keys(mealSummaries).length > 0 && (
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <BarChart2 className="w-6 h-6 text-[#4A90E2]" />
+                <h2 className="text-2xl font-bold text-[#2C3E50]">Daily Meal Summary</h2>
+              </div>
+              <button
+                onClick={() => setMealSummaries({})}
+                className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
+                data-testid="button-clear-summary"
+              >
+                Clear Summary
+              </button>
+            </div>
+
+            <div className="overflow-x-auto" data-testid="table-daily-summary">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gradient-to-r from-[#2C3E50] to-[#4A90E2] text-white">
+                    <th className="text-left py-3 px-4 rounded-tl-lg font-semibold">Meal</th>
+                    <th className="text-center py-3 px-4 font-semibold">Calories<br /><span className="text-xs font-normal opacity-80">kcal</span></th>
+                    <th className="text-center py-3 px-4 font-semibold">Protein<br /><span className="text-xs font-normal opacity-80">g</span></th>
+                    <th className="text-center py-3 px-4 font-semibold">Carbs<br /><span className="text-xs font-normal opacity-80">g</span></th>
+                    <th className="text-center py-3 px-4 rounded-tr-lg font-semibold">Fat<br /><span className="text-xs font-normal opacity-80">g</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mealTabs.filter(tab => tab.show).map((tab, idx) => {
+                    const summary = mealSummaries[tab.type];
+                    if (!summary) {
+                      return (
+                        <tr key={tab.type} className={idx % 2 === 0 ? 'bg-white/50' : 'bg-gray-50/50'}>
+                          <td className="py-3 px-4 font-semibold text-[#2C3E50]">{tab.label}</td>
+                          <td className="py-3 px-4 text-center"><span className="text-gray-300">—</span></td>
+                          <td className="py-3 px-4 text-center"><span className="text-gray-300">—</span></td>
+                          <td className="py-3 px-4 text-center"><span className="text-gray-300">—</span></td>
+                          <td className="py-3 px-4 text-center"><span className="text-gray-300">—</span></td>
+                        </tr>
+                      );
+                    }
+                    const allFoods = [...summary.carbFoods, ...summary.proteinFoods, ...summary.fatFoods];
+                    return (
+                      <>
+                        <tr key={`${tab.type}-header`} className="bg-gradient-to-r from-[#2C3E50]/10 to-[#4A90E2]/10 border-t border-gray-200">
+                          <td colSpan={5} className="py-2 px-4 font-bold text-[#2C3E50] text-sm uppercase tracking-wide">{tab.label}</td>
+                        </tr>
+                        {allFoods.map((cf, foodIdx) => {
+                          const foodCal = Math.round(cf.contributedProteinG * 4 + cf.contributedCarbsG * 4 + cf.contributedFatG * 9);
+                          return (
+                            <tr key={`${tab.type}-food-${foodIdx}`} className={foodIdx % 2 === 0 ? 'bg-white/40' : 'bg-gray-50/40'}>
+                              <td className="py-2 px-4 pl-8 text-gray-700">
+                                {cf.food.name}
+                                <span className="text-xs text-gray-400 ml-2">— {cf.recommendedOz.toFixed(2)} oz</span>
+                              </td>
+                              <td className="py-2 px-4 text-center text-gray-600">{foodCal}</td>
+                              <td className="py-2 px-4 text-center text-gray-600">{cf.contributedProteinG.toFixed(1)}g</td>
+                              <td className="py-2 px-4 text-center text-gray-600">{cf.contributedCarbsG.toFixed(1)}g</td>
+                              <td className="py-2 px-4 text-center text-gray-600">{cf.contributedFatG.toFixed(1)}g</td>
+                            </tr>
+                          );
+                        })}
+                        <tr key={`${tab.type}-subtotal`} className="bg-[#52C878]/10 border-t border-[#52C878]/20">
+                          <td className="py-2 px-4 pl-8 font-bold text-[#2C3E50] text-sm">{tab.label} Total</td>
+                          <td className="py-2 px-4 text-center font-bold text-[#2C3E50]">{summary.totalCalories}</td>
+                          <td className="py-2 px-4 text-center font-bold text-[#2C3E50]">{summary.totalProtein}g</td>
+                          <td className="py-2 px-4 text-center font-bold text-[#2C3E50]">{summary.totalCarbs}g</td>
+                          <td className="py-2 px-4 text-center font-bold text-[#2C3E50]">{summary.totalFat}g</td>
+                        </tr>
+                      </>
+                    );
+                  })}
+
+                  {/* Totals, Goal, Remaining rows — only include visible tabs */}
+                  {(() => {
+                    const visibleTypes = mealTabs.filter(tab => tab.show).map(tab => tab.type);
+                    const totals = visibleTypes.reduce(
+                      (acc, t) => {
+                        const m = mealSummaries[t];
+                        return { cal: acc.cal + (m?.totalCalories || 0), pro: acc.pro + (m?.totalProtein || 0), carb: acc.carb + (m?.totalCarbs || 0), fat: acc.fat + (m?.totalFat || 0) };
+                      },
+                      { cal: 0, pro: 0, carb: 0, fat: 0 }
+                    );
+                    const remaining = { cal: dailyGoal.calories - totals.cal, pro: dailyGoal.proteinG - totals.pro, carb: dailyGoal.carbsG - totals.carb, fat: dailyGoal.fatG - totals.fat };
+                    const remColor = (v: number) => v >= 0 ? 'text-[#52C878] font-bold' : 'text-red-500 font-bold';
+                    return (
+                      <>
+                        <tr className="border-t-2 border-gray-200 bg-[#2C3E50]/5">
+                          <td className="py-3 px-4 font-bold text-[#2C3E50]">Totals</td>
+                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-calories">{totals.cal}</td>
+                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-protein">{totals.pro}g</td>
+                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-carbs">{totals.carb}g</td>
+                          <td className="py-3 px-4 text-center font-bold text-[#2C3E50]" data-testid="text-summary-totals-fat">{totals.fat}g</td>
+                        </tr>
+                        <tr className="bg-[#4A90E2]/5">
+                          <td className="py-3 px-4 font-semibold text-[#4A90E2]">Your Daily Goal</td>
+                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-calories">{dailyGoal.calories}</td>
+                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-protein">{dailyGoal.proteinG}g</td>
+                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-carbs">{dailyGoal.carbsG}g</td>
+                          <td className="py-3 px-4 text-center text-[#4A90E2] font-semibold" data-testid="text-summary-goal-fat">{dailyGoal.fatG}g</td>
+                        </tr>
+                        <tr className="bg-white/80 rounded-b-lg">
+                          <td className="py-3 px-4 font-semibold text-[#2C3E50]">Remaining</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.cal)}`} data-testid="text-summary-remaining-calories">{remaining.cal}</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.pro)}`} data-testid="text-summary-remaining-protein">{remaining.pro}g</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.carb)}`} data-testid="text-summary-remaining-carbs">{remaining.carb}g</td>
+                          <td className={`py-3 px-4 text-center ${remColor(remaining.fat)}`} data-testid="text-summary-remaining-fat">{remaining.fat}g</td>
+                        </tr>
+                      </>
+                    );
+                  })()}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-3 text-center">
+              Summary updates each time you calculate a meal. Switch between meal tabs and calculate each one to build your full day.
+            </p>
+          </div>
+        )}
+
       </div>
     </div>
   );

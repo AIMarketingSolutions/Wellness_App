@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { ArrowLeft, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, AlertCircle, ShieldAlert } from "lucide-react";
 import { Link } from "wouter";
 
 export default function SignupPage() {
@@ -48,12 +48,30 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+        <div className="mt-6 flex items-start gap-3 bg-white/5 border border-gray-700 rounded-xl px-4 py-3" data-testid="banner-invitation-only">
+          <ShieldAlert className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-gray-400">
+            Signup is by invitation only.{" "}
+            <span className="text-gray-300 font-medium">Contact Nutrition One Fitness to request access.</span>
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
           {error && (
-            <div className="flex items-start gap-3 bg-red-900/40 border border-red-700 rounded-xl p-4">
-              <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-300 font-medium">{error}</p>
-            </div>
+            error.toLowerCase().includes("not on the approved") ? (
+              <div className="flex items-start gap-3 bg-amber-900/30 border border-amber-600 rounded-xl p-4" data-testid="error-not-approved">
+                <ShieldAlert className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-300">Access Not Approved</p>
+                  <p className="text-sm text-amber-200/80 mt-0.5">{error}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-3 bg-red-900/40 border border-red-700 rounded-xl p-4" data-testid="error-general">
+                <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-300 font-medium">{error}</p>
+              </div>
+            )
           )}
 
           <div className="space-y-2">
