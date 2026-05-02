@@ -994,8 +994,8 @@ export default function MealPlanner() {
                     }
                     const allFoods = [...summary.carbFoods, ...summary.proteinFoods, ...summary.fatFoods];
                     return (
-                      <>
-                        <tr key={`${tab.type}-header`} className="bg-gradient-to-r from-[#2C3E50]/10 to-[#4A90E2]/10 border-t border-gray-200">
+                      <React.Fragment key={tab.type}>
+                        <tr className="bg-gradient-to-r from-[#2C3E50]/10 to-[#4A90E2]/10 border-t border-gray-200">
                           <td colSpan={5} className="py-2 px-4 font-bold text-[#2C3E50] text-sm uppercase tracking-wide">{tab.label}</td>
                         </tr>
                         {allFoods.map((cf, foodIdx) => {
