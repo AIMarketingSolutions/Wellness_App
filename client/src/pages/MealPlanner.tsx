@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Fragment } from "react";
 import { useAuth } from "@/lib/auth";
 import { Link } from "wouter";
-import { ArrowLeft, BarChart2, Calculator, Check, Droplet, Plus, Minus } from "lucide-react";
+import { ArrowLeft, BarChart2, Calculator, Check, Droplet, Plus, Minus, Printer } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { UserProfile, WaterIntake } from "@shared/schema";
@@ -1011,19 +1011,29 @@ export default function MealPlanner() {
 
         {/* Daily Meal Summary Chart */}
         {Object.keys(mealSummaries).length > 0 && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-6">
+          <div id="daily-meal-summary-print" className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <BarChart2 className="w-6 h-6 text-[#4A90E2]" />
                 <h2 className="text-2xl font-bold text-[#2C3E50]">Daily Meal Summary</h2>
               </div>
-              <button
-                onClick={() => setMealSummaries({})}
-                className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
-                data-testid="button-clear-summary"
-              >
-                Clear Summary
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => window.print()}
+                  className="px-3 py-1.5 text-sm bg-[#4A90E2] hover:bg-[#4A90E2]/90 text-white rounded-lg transition-colors inline-flex items-center gap-1.5"
+                  data-testid="button-print-summary"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print / Export PDF
+                </button>
+                <button
+                  onClick={() => setMealSummaries({})}
+                  className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors"
+                  data-testid="button-clear-summary"
+                >
+                  Clear Summary
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto" data-testid="table-daily-summary">
@@ -1053,7 +1063,7 @@ export default function MealPlanner() {
                     }
                     const allFoods = [...summary.carbFoods, ...summary.proteinFoods, ...summary.fatFoods];
                     return (
-                      <React.Fragment key={tab.type}>
+                      <Fragment key={tab.type}>
                         <tr className="bg-gradient-to-r from-[#2C3E50]/10 to-[#4A90E2]/10 border-t border-gray-200">
                           <td colSpan={5} className="py-2 px-4 font-bold text-[#2C3E50] text-sm uppercase tracking-wide">{tab.label}</td>
                         </tr>
@@ -1079,7 +1089,7 @@ export default function MealPlanner() {
                           <td className="py-2 px-4 text-center font-bold text-[#2C3E50]">{summary.totalCarbs}g</td>
                           <td className="py-2 px-4 text-center font-bold text-[#2C3E50]">{summary.totalFat}g</td>
                         </tr>
-                      </React.Fragment>
+                      </Fragment>
                     );
                   })}
 
