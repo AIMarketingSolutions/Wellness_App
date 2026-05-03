@@ -9,137 +9,137 @@ interface Supplement {
 }
 
 const bodyHealthQuestions = [
-  // Digestive Health
-  { id: "Bloating", label: "Bloating", category: "digestive", score: 1 },
-  { id: "Gas", label: "Gas", category: "digestive", score: 1 },
-  { id: "Constipation", label: "Constipation", category: "digestive", score: 1 },
-  { id: "Diarrhea", label: "Diarrhea", category: "digestive", score: 1 },
-  { id: "Digestive discomfort", label: "Digestive discomfort", category: "digestive", score: 1 },
-  { id: "Irregular stools", label: "Irregular stools", category: "digestive", score: 1 },
-  { id: "Upper right abdominal discomfort", label: "Upper right abdominal discomfort", category: "digestive", score: 1 },
-  { id: "Nausea after fatty meals", label: "Nausea after fatty meals", category: "digestive", score: 1 },
-  
-  // Energy & Brain
-  { id: "Fatigue", label: "Fatigue or low energy", category: "energy", score: 1 },
-  { id: "Morning fatigue", label: "Morning fatigue", category: "energy", score: 1 },
-  { id: "Afternoon crashes", label: "Afternoon energy crashes", category: "energy", score: 1 },
-  { id: "Brain fog", label: "Brain fog", category: "energy", score: 1 },
-  { id: "Headaches", label: "Headaches", category: "energy", score: 1 },
-  { id: "Fatigue after meals", label: "Fatigue after meals", category: "energy", score: 1 },
-  { id: "Fatigue or weakness", label: "Fatigue or weakness", category: "energy", score: 1 },
-  { id: "Fatigue or insomnia", label: "Fatigue or insomnia", category: "energy", score: 1 },
+  // Parasite Protocol (Focus: Infection Patterns)
+  { id: "parasite_q1", label: "Do you experience anal itching, especially at night?", category: "parasite", score: 1 },
+  { id: "parasite_q2", label: "Have you noticed undigested food in stool?", category: "parasite", score: 1 },
+  { id: "parasite_q3", label: "Do you have sudden intense sugar cravings unrelated to hunger?", category: "parasite", score: 1 },
+  { id: "parasite_q4", label: "Do you grind your teeth at night (bruxism)?", category: "parasite", score: 1 },
+  { id: "parasite_q5", label: "Have you traveled internationally or consumed untreated water recently?", category: "parasite", score: 1 },
 
-  // Skin & Appearance
-  { id: "Rashes", label: "Rashes", category: "skin", score: 1 },
-  { id: "Eczema", label: "Eczema", category: "skin", score: 1 },
-  { id: "Itchy skin", label: "Itchy skin", category: "skin", score: 1 },
-  { id: "Acne", label: "Acne", category: "skin", score: 1 },
-  { id: "Yellowish skin or eyes", label: "Yellowish skin or eyes", category: "skin", score: 1 },
-  { id: "Pale skin lips or nail beds", label: "Pale skin, lips, or nail beds", category: "skin", score: 1 },
-  { id: "Unexplained body odor", label: "Unexplained body odor", category: "skin", score: 1 },
+  // Leaky Gut Protocol (Focus: Barrier Dysfunction)
+  { id: "leakygut_q1", label: "Do you experience multiple food sensitivities that developed over time?", category: "leakygut", score: 1 },
+  { id: "leakygut_q2", label: "Do symptoms worsen within 1–2 hours after eating?", category: "leakygut", score: 1 },
+  { id: "leakygut_q3", label: "Do you have autoimmune-related symptoms (joint pain, inflammation)?", category: "leakygut", score: 1 },
+  { id: "leakygut_q4", label: "Do you experience brain fog after meals specifically?", category: "leakygut", score: 1 },
+  { id: "leakygut_q5", label: "Do you react poorly to gluten or dairy?", category: "leakygut", score: 1 },
 
-  // Sleep & Mood
-  { id: "Stress or anxiety", label: "Stress or anxiety", category: "sleep", score: 1 },
-  { id: "Sleep difficulties", label: "Sleep difficulties", category: "sleep", score: 1 },
-  { id: "Mood changes", label: "Mood changes", category: "sleep", score: 1 },
-  { id: "Hot flashes or night sweats", label: "Hot flashes or night sweats", category: "sleep", score: 1 },
-  { id: "Dizziness or lightheadedness", label: "Dizziness or lightheadedness", category: "sleep", score: 1 },
-  
-  // Appetite & Cravings
-  { id: "Sugar or refined carb cravings", label: "Cravings for sugar or refined carbs", category: "appetite", score: 1 },
-  { id: "Salty or sweet food cravings", label: "Cravings for salty or sweet foods", category: "appetite", score: 1 },
-  { id: "Poor appetite", label: "Poor appetite", category: "appetite", score: 1 },
-  { id: "Food sensitivities", label: "Food sensitivities", category: "appetite", score: 1 },
-  { id: "Unexplained weight gain", label: "Unexplained weight gain", category: "appetite", score: 1 },
+  // Adrenal Stress Protocol (Focus: Cortisol Rhythm)
+  { id: "adrenal_q1", label: "Do you feel wired but tired at night?", category: "adrenal", score: 1 },
+  { id: "adrenal_q2", label: "Do you struggle to wake up even after full sleep?", category: "adrenal", score: 1 },
+  { id: "adrenal_q3", label: "Do you rely on caffeine to function?", category: "adrenal", score: 1 },
+  { id: "adrenal_q4", label: "Do you feel a second wind late at night?", category: "adrenal", score: 1 },
+  { id: "adrenal_q5", label: "Do you experience stress-triggered energy crashes?", category: "adrenal", score: 1 },
 
-  // Pain & Physical Function
-  { id: "Joint or muscle pain", label: "Joint or muscle pain", category: "pain", score: 1 },
-  { id: "Swelling in extremities", label: "Swelling in extremities", category: "pain", score: 1 },
-  { id: "Cold hands and feet", label: "Cold hands and feet", category: "pain", score: 1 },
-  { id: "Shortness of breath", label: "Shortness of breath", category: "pain", score: 1 },
-  { id: "Frequent or painful urination", label: "Frequent or painful urination", category: "pain", score: 1 },
-  { id: "High blood pressure", label: "High blood pressure", category: "pain", score: 1 },
-  { id: "Vaginal dryness", label: "Vaginal dryness", category: "pain", score: 1 },
+  // Heavy Metal Toxicity Protocol (Focus: Neurotoxicity)
+  { id: "heavymetal_q1", label: "Do you have a metallic taste in your mouth?", category: "heavymetal", score: 1 },
+  { id: "heavymetal_q2", label: "Do you experience tremors or poor coordination?", category: "heavymetal", score: 1 },
+  { id: "heavymetal_q3", label: "Do you have sensitivity to smells or chemicals?", category: "heavymetal", score: 1 },
+  { id: "heavymetal_q4", label: "Do you have a history of amalgam fillings or occupational exposure?", category: "heavymetal", score: 1 },
+  { id: "heavymetal_q5", label: "Do you experience persistent headaches unrelieved by hydration?", category: "heavymetal", score: 1 },
 
-  // Exposure & History
-  { id: "Travel to high-risk regions", label: "Travel to high-risk regions", category: "exposure", score: 1 },
-  { id: "Raw or undercooked foods", label: "Raw or undercooked foods consumption", category: "exposure", score: 1 },
-  { id: "Unfiltered water", label: "Unfiltered water consumption", category: "exposure", score: 1 },
-  { id: "Close contact with pets", label: "Close contact with pets", category: "exposure", score: 1 },
-  { id: "Gardening exposure", label: "Gardening or soil exposure", category: "exposure", score: 1 },
-  { id: "Seafood consumption", label: "Regular seafood consumption", category: "exposure", score: 1 },
-  { id: "Dental fillings", label: "Dental fillings (amalgam/silver)", category: "exposure", score: 1 },
-  { id: "Exposure to old paint or batteries", label: "Exposure to old paint or batteries", category: "exposure", score: 1 },
-  { id: "Environmental toxins", label: "Exposure to environmental toxins", category: "exposure", score: 1 },
-  { id: "Alcohol or medication history", label: "Alcohol or medication history", category: "exposure", score: 1 },
-  { id: "History of kidney stones or UTIs", label: "History of kidney stones or UTIs", category: "exposure", score: 1 },
+  // Whole Body Detox Protocol (Focus: Elimination Pathways)
+  { id: "wholebodydetox_q1", label: "Do you sweat very little even during exercise?", category: "wholebodydetox", score: 1 },
+  { id: "wholebodydetox_q2", label: "Do you have strong body odor despite hygiene?", category: "wholebodydetox", score: 1 },
+  { id: "wholebodydetox_q3", label: "Do you experience frequent headaches during fasting or dieting?", category: "wholebodydetox", score: 1 },
+  { id: "wholebodydetox_q4", label: "Do you have a coated tongue (white/yellow film)?", category: "wholebodydetox", score: 1 },
+  { id: "wholebodydetox_q5", label: "Do you feel worse when starting 'clean eating' or detox programs?", category: "wholebodydetox", score: 1 },
+
+  // Liver Protocol (Focus: Metabolic Processing)
+  { id: "liver_q1", label: "Do you feel nauseous after eating fatty foods?", category: "liver", score: 1 },
+  { id: "liver_q2", label: "Do you experience right-side rib discomfort?", category: "liver", score: 1 },
+  { id: "liver_q3", label: "Do you have dark urine or pale stools?", category: "liver", score: 1 },
+  { id: "liver_q4", label: "Do you feel sluggish after meals high in protein or fat?", category: "liver", score: 1 },
+  { id: "liver_q5", label: "Do you have a history of medication or alcohol use affecting the liver?", category: "liver", score: 1 },
+
+  // Kidney Protocol (Focus: Fluid & Filtration)
+  { id: "kidney_q1", label: "Do you experience puffiness under the eyes (especially in the morning)?", category: "kidney", score: 1 },
+  { id: "kidney_q2", label: "Do you have foamy urine?", category: "kidney", score: 1 },
+  { id: "kidney_q3", label: "Do you wake up multiple times at night to urinate?", category: "kidney", score: 1 },
+  { id: "kidney_q4", label: "Do you feel a lower back dull ache in the kidney area?", category: "kidney", score: 1 },
+  { id: "kidney_q5", label: "Do you have a history of electrolyte imbalance or dehydration?", category: "kidney", score: 1 },
+
+  // Gallbladder Protocol (Focus: Bile Flow)
+  { id: "gallbladder_q1", label: "Do you feel full quickly when eating fatty meals?", category: "gallbladder", score: 1 },
+  { id: "gallbladder_q2", label: "Do you experience pain between shoulder blades after eating?", category: "gallbladder", score: 1 },
+  { id: "gallbladder_q3", label: "Do you have floating or greasy stools?", category: "gallbladder", score: 1 },
+  { id: "gallbladder_q4", label: "Do you avoid fatty foods because they make you feel worse?", category: "gallbladder", score: 1 },
+  { id: "gallbladder_q5", label: "Do you experience burping or nausea after fats specifically?", category: "gallbladder", score: 1 },
+
+  // Menopause Protocol (Focus: Hormonal Fluctuation)
+  { id: "menopause_q1", label: "Are your symptoms cyclical or hormone-triggered?", category: "menopause", score: 1 },
+  { id: "menopause_q2", label: "Do you experience sudden heat surges not linked to environment?", category: "menopause", score: 1 },
+  { id: "menopause_q3", label: "Do you have sleep disruption between 2–4 AM?", category: "menopause", score: 1 },
+  { id: "menopause_q4", label: "Do you notice changes in body fat distribution (midsection)?", category: "menopause", score: 1 },
+  { id: "menopause_q5", label: "Do you experience reduced stress tolerance compared to before?", category: "menopause", score: 1 },
+
+  // Anemia Protocol (Focus: Oxygen Transport)
+  { id: "anemia_q1", label: "Do you experience shortness of breath with mild exertion?", category: "anemia", score: 1 },
+  { id: "anemia_q2", label: "Do you have cravings for non-food items (ice, dirt – pica)?", category: "anemia", score: 1 },
+  { id: "anemia_q3", label: "Do you have brittle nails or hair thinning?", category: "anemia", score: 1 },
+  { id: "anemia_q4", label: "Do you experience rapid heartbeat when standing up?", category: "anemia", score: 1 },
+  { id: "anemia_q5", label: "Do you feel cold even in warm environments?", category: "anemia", score: 1 },
 ];
 
 const symptomMap: { [key: string]: string[] } = {
-  // Digestive Health - from document
-  "Bloating": ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow", "Liver Detox & Regeneration"],
-  "Gas": ["Parasite Symptoms", "Leaky Gut"],
-  "Constipation": ["Parasite Symptoms", "Leaky Gut", "Gallbladder Flush & Bile Flow", "Whole Body Detox"],
-  "Diarrhea": ["Parasite Symptoms", "Leaky Gut"],
-  "Digestive discomfort": ["Liver Detox & Regeneration", "Heavy Metal Detox Support"],
-  "Irregular stools": ["Gallbladder Flush & Bile Flow", "Whole Body Detox"],
-  "Upper right abdominal discomfort": ["Gallbladder Flush & Bile Flow"],
-  "Nausea after fatty meals": ["Gallbladder Flush & Bile Flow"],
-  
-  // Energy & Brain - from document
-  "Fatigue": ["Parasite Symptoms", "Leaky Gut", "Heavy Metal Detox Support", "Whole Body Detox", "Kidney Detox", "Anemia"],
-  "Morning fatigue": ["Adrenal Stress & Cortisol Balance"],
-  "Afternoon crashes": ["Parasite Symptoms", "Adrenal Stress & Cortisol Balance"],
-  "Brain fog": ["Parasite Symptoms", "Leaky Gut", "Heavy Metal Detox Support", "Whole Body Detox"],
-  "Headaches": ["Heavy Metal Detox Support"],
-  "Fatigue after meals": ["Liver Detox & Regeneration"],
-  "Fatigue or weakness": ["Anemia"],
-  "Fatigue or insomnia": ["Menopausal Symptoms"],
-  
-  // Skin & Appearance - from document
-  "Rashes": ["Parasite Symptoms", "Leaky Gut", "Whole Body Detox"],
-  "Eczema": ["Parasite Symptoms", "Leaky Gut"],
-  "Itchy skin": ["Parasite Symptoms"],
-  "Acne": ["Leaky Gut", "Whole Body Detox"],
-  "Yellowish skin or eyes": ["Liver Detox & Regeneration", "Gallbladder Flush & Bile Flow"],
-  "Pale skin lips or nail beds": ["Anemia"],
-  "Unexplained body odor": ["Whole Body Detox"],
-  
-  // Sleep & Mood - from document
-  "Stress or anxiety": ["Adrenal Stress & Cortisol Balance"],
-  "Sleep difficulties": ["Adrenal Stress & Cortisol Balance"],
-  "Mood changes": ["Menopausal Symptoms", "Leaky Gut"],
-  "Hot flashes or night sweats": ["Menopausal Symptoms"],
-  "Dizziness or lightheadedness": ["Anemia"],
-  
-  // Appetite & Cravings - from document
-  "Sugar or refined carb cravings": ["Parasite Symptoms"],
-  "Salty or sweet food cravings": ["Adrenal Stress & Cortisol Balance"],
-  "Poor appetite": ["Liver Detox & Regeneration"],
-  "Food sensitivities": ["Leaky Gut"],
-  "Unexplained weight gain": ["Menopausal Symptoms"],
-  
-  // Pain & Physical Function - from document
-  "Joint or muscle pain": ["Heavy Metal Detox Support"],
-  "Swelling in extremities": ["Kidney Detox"],
-  "Cold hands and feet": ["Anemia"],
-  "Shortness of breath": ["Anemia"],
-  "Frequent or painful urination": ["Kidney Detox"],
-  "High blood pressure": ["Kidney Detox"],
-  "Vaginal dryness": ["Menopausal Symptoms"],
-  
-  // Exposure & History - from document
-  "Travel to high-risk regions": ["Parasite Symptoms"],
-  "Raw or undercooked foods": ["Parasite Symptoms"],
-  "Unfiltered water": ["Parasite Symptoms"],
-  "Close contact with pets": ["Parasite Symptoms"],
-  "Gardening exposure": ["Parasite Symptoms"],
-  "Seafood consumption": ["Heavy Metal Detox Support"],
-  "Dental fillings": ["Heavy Metal Detox Support"],
-  "Exposure to old paint or batteries": ["Heavy Metal Detox Support"],
-  "Environmental toxins": ["Whole Body Detox"],
-  "Alcohol or medication history": ["Liver Detox & Regeneration"],
-  "History of kidney stones or UTIs": ["Kidney Detox"]
+  "parasite_q1": ["Parasite Symptoms"],
+  "parasite_q2": ["Parasite Symptoms"],
+  "parasite_q3": ["Parasite Symptoms"],
+  "parasite_q4": ["Parasite Symptoms"],
+  "parasite_q5": ["Parasite Symptoms"],
+
+  "leakygut_q1": ["Leaky Gut"],
+  "leakygut_q2": ["Leaky Gut"],
+  "leakygut_q3": ["Leaky Gut"],
+  "leakygut_q4": ["Leaky Gut"],
+  "leakygut_q5": ["Leaky Gut"],
+
+  "adrenal_q1": ["Adrenal Stress & Cortisol Balance"],
+  "adrenal_q2": ["Adrenal Stress & Cortisol Balance"],
+  "adrenal_q3": ["Adrenal Stress & Cortisol Balance"],
+  "adrenal_q4": ["Adrenal Stress & Cortisol Balance"],
+  "adrenal_q5": ["Adrenal Stress & Cortisol Balance"],
+
+  "heavymetal_q1": ["Heavy Metal Detox Support"],
+  "heavymetal_q2": ["Heavy Metal Detox Support"],
+  "heavymetal_q3": ["Heavy Metal Detox Support"],
+  "heavymetal_q4": ["Heavy Metal Detox Support"],
+  "heavymetal_q5": ["Heavy Metal Detox Support"],
+
+  "wholebodydetox_q1": ["Whole Body Detox"],
+  "wholebodydetox_q2": ["Whole Body Detox"],
+  "wholebodydetox_q3": ["Whole Body Detox"],
+  "wholebodydetox_q4": ["Whole Body Detox"],
+  "wholebodydetox_q5": ["Whole Body Detox"],
+
+  "liver_q1": ["Liver Detox & Regeneration"],
+  "liver_q2": ["Liver Detox & Regeneration"],
+  "liver_q3": ["Liver Detox & Regeneration"],
+  "liver_q4": ["Liver Detox & Regeneration"],
+  "liver_q5": ["Liver Detox & Regeneration"],
+
+  "kidney_q1": ["Kidney Detox"],
+  "kidney_q2": ["Kidney Detox"],
+  "kidney_q3": ["Kidney Detox"],
+  "kidney_q4": ["Kidney Detox"],
+  "kidney_q5": ["Kidney Detox"],
+
+  "gallbladder_q1": ["Gallbladder Flush & Bile Flow"],
+  "gallbladder_q2": ["Gallbladder Flush & Bile Flow"],
+  "gallbladder_q3": ["Gallbladder Flush & Bile Flow"],
+  "gallbladder_q4": ["Gallbladder Flush & Bile Flow"],
+  "gallbladder_q5": ["Gallbladder Flush & Bile Flow"],
+
+  "menopause_q1": ["Menopausal Symptoms"],
+  "menopause_q2": ["Menopausal Symptoms"],
+  "menopause_q3": ["Menopausal Symptoms"],
+  "menopause_q4": ["Menopausal Symptoms"],
+  "menopause_q5": ["Menopausal Symptoms"],
+
+  "anemia_q1": ["Anemia"],
+  "anemia_q2": ["Anemia"],
+  "anemia_q3": ["Anemia"],
+  "anemia_q4": ["Anemia"],
+  "anemia_q5": ["Anemia"],
 };
 
 const protocolDetails: { [key: string]: { 
@@ -307,13 +307,16 @@ const protocolDetails: { [key: string]: {
 };
 
 const steps = [
-  { id: "digestive", label: "Digestive Health" },
-  { id: "energy", label: "Energy & Cognition" },
-  { id: "skin", label: "Skin & Allergies" },
-  { id: "sleep", label: "Sleep & Mood" },
-  { id: "appetite", label: "Appetite & Weight" },
-  { id: "pain", label: "Pain & Physical Function" },
-  { id: "exposure", label: "Exposure History" }
+  { id: "parasite", label: "Parasite Protocol" },
+  { id: "leakygut", label: "Leaky Gut Protocol" },
+  { id: "adrenal", label: "Adrenal Stress Protocol" },
+  { id: "heavymetal", label: "Heavy Metal Toxicity Protocol" },
+  { id: "wholebodydetox", label: "Whole Body Detox Protocol" },
+  { id: "liver", label: "Liver Protocol" },
+  { id: "kidney", label: "Kidney Protocol" },
+  { id: "gallbladder", label: "Gallbladder Protocol" },
+  { id: "menopause", label: "Menopause Protocol" },
+  { id: "anemia", label: "Anemia Protocol" },
 ];
 
 const protocols = ["Parasite Symptoms", "Leaky Gut", "Adrenal Stress & Cortisol Balance", "Heavy Metal Detox Support", "Whole Body Detox", "Liver Detox & Regeneration", "Kidney Detox", "Gallbladder Flush & Bile Flow", "Menopausal Symptoms", "Anemia"];
