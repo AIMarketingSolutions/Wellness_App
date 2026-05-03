@@ -307,16 +307,16 @@ const protocolDetails: { [key: string]: {
 };
 
 const steps = [
-  { id: "parasite", label: "Parasite Protocol" },
-  { id: "leakygut", label: "Leaky Gut Protocol" },
-  { id: "adrenal", label: "Adrenal Stress Protocol" },
-  { id: "heavymetal", label: "Heavy Metal Toxicity Protocol" },
-  { id: "wholebodydetox", label: "Whole Body Detox Protocol" },
-  { id: "liver", label: "Liver Protocol" },
-  { id: "kidney", label: "Kidney Protocol" },
-  { id: "gallbladder", label: "Gallbladder Protocol" },
-  { id: "menopause", label: "Menopause Protocol" },
-  { id: "anemia", label: "Anemia Protocol" },
+  { id: "parasite", label: "Protocol #1" },
+  { id: "leakygut", label: "Protocol #2" },
+  { id: "adrenal", label: "Protocol #3" },
+  { id: "heavymetal", label: "Protocol #4" },
+  { id: "wholebodydetox", label: "Protocol #5" },
+  { id: "liver", label: "Protocol #6" },
+  { id: "kidney", label: "Protocol #7" },
+  { id: "gallbladder", label: "Protocol #8" },
+  { id: "menopause", label: "Protocol #9" },
+  { id: "anemia", label: "Protocol #10" },
 ];
 
 const protocols = ["Parasite Symptoms", "Leaky Gut", "Adrenal Stress & Cortisol Balance", "Heavy Metal Detox Support", "Whole Body Detox", "Liver Detox & Regeneration", "Kidney Detox", "Gallbladder Flush & Bile Flow", "Menopausal Symptoms", "Anemia"];
