@@ -9,6 +9,7 @@
     "start": "NODE_ENV=production tsx --tsconfig tsconfig.server.json server/index.ts",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test:preview-host": "node scripts/smoke-preview-host.mjs",
     "db:push": "drizzle-kit push",
     "seed": "tsx --tsconfig tsconfig.server.json server/seed.ts"
   },

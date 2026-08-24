@@ -12,11 +12,25 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 5000;
+const rawPort = process.env.PORT;
+if (rawPort && !/^\d+$/.test(rawPort)) {
+  throw new Error("PORT must be an integer between 1 and 65535.");
+}
+const PORT = rawPort ? Number(rawPort) : 5000;
+if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+  throw new Error("PORT must be an integer between 1 and 65535.");
+}
+const previewSmokeToken = process.env.PREVIEW_SMOKE_TOKEN;
 const isProduction = process.env.NODE_ENV === "production";
 
 app.use(express.json());
 app.use(cookieParser());
+app.use((req, res, next) => {
+  if (previewSmokeToken) {
+    res.setHeader("X-Preview-Smoke-Token", previewSmokeToken);
+  }
+  next();
+});
 
 const PgSession = connectPgSimple(session);
 
