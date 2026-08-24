@@ -1,0 +1,1 @@
+- [GitHub sync credentials](github-sync-credentials.md) — Replit GitHub OAuth API access and local Git HTTPS credentials are independent; validate push authentication separately.
